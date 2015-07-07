@@ -28,6 +28,7 @@
 
 #include <rtnet_socket.h>
 #include <ipv4/protocol.h>
+#include <ipv4/igmp.h>
 
 struct rtinet_protocol *rt_inet_protocols[MAX_RT_INET_PROTOCOLS];
 
@@ -62,6 +63,7 @@ EXPORT_SYMBOL_GPL(rt_inet_del_protocol);
  */
 int rt_inet_socket(struct rtdm_fd *fd, int protocol)
 {
+        struct rtsocket *sock = rtdm_fd_to_private(fd);
 	struct rtinet_protocol *prot;
 
 	if (protocol == 0)
@@ -74,6 +76,8 @@ int rt_inet_socket(struct rtdm_fd *fd, int protocol)
 			break;
 		}
 
+	sock->prot.inet.mc_list = NULL;
+	sock->prot.inet.mc_if_addr = INADDR_ANY;
 	prot = rt_inet_protocols[rt_inet_hashkey(protocol)];
 
 	/* create the socket (call the socket creator) */
@@ -86,3 +90,16 @@ int rt_inet_socket(struct rtdm_fd *fd, int protocol)
 	}
 }
 EXPORT_SYMBOL_GPL(rt_inet_socket);
+
+int rt_inet_socket_cleanup(struct rtdm_fd *fd)
+{
+#ifdef CONFIG_XENO_DRIVERS_NET_RTIPV4_IGMP
+    struct rtsocket *sock = rtdm_fd_to_private(fd);
+    rt_ip_mc_drop_socket(sock);
+#endif
+
+    rt_socket_cleanup(fd);
+
+    return 0;
+}
+EXPORT_SYMBOL(rt_inet_socket_cleanup);

@@ -1441,7 +1441,7 @@ static void rt_tcp_close(struct rtdm_fd *fd)
 
 	rt_tcp_socket_destruct(ts);
 
-	rt_socket_cleanup(fd);
+	rt_inet_socket_cleanup(fd);
 }
 
 /***

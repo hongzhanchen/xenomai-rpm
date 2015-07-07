@@ -62,6 +62,13 @@ config XENO_DRIVERS_NET_RTIPV4_ROUTER
 
     See Documentation/README.routing for further information.
 
+config XENO_DRIVERS_NET_RTIPV4_IGMP
+    bool "IGMP/multicast support"
+    depends on XENO_DRIVERS_NET_RTIPV4
+    default n
+    ---help---
+    Enables IGMP support of the RTnet Real-Time IPv4 protocol (multicast).
+
 config XENO_DRIVERS_NET_RTIPV4_DEBUG
     bool "RTipv4 Debugging"
     depends on XENO_DRIVERS_NET_RTIPV4

@@ -50,5 +50,6 @@ extern struct rtinet_protocol *rt_inet_protocols[];
 extern void rt_inet_add_protocol(struct rtinet_protocol *prot);
 extern void rt_inet_del_protocol(struct rtinet_protocol *prot);
 extern int rt_inet_socket(struct rtdm_fd *fd, int protocol);
+extern int rt_inet_socket_cleanup(struct rtdm_fd *fd);
 
 #endif /* __RTNET_PROTOCOL_H_ */

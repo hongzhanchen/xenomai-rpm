@@ -30,9 +30,18 @@
 #include <ipv4/ip_fragment.h>
 #include <ipv4/ip_input.h>
 #include <ipv4/route.h>
+#include <ipv4/igmp.h>
 
 static DEFINE_RTDM_LOCK(rt_ip_id_lock);
 static u16 rt_ip_id_count = 0;
+
+static inline u8 get_ttl(struct dest_route *rt)
+{
+	if (rtnet_in_multicast(ntohl(rt->ip)))
+		return 1;
+
+	return 255;
+}
 
 /***
  *  Slow path for fragmented packets
@@ -108,7 +117,7 @@ int rt_ip_build_xmit_slow(struct rtsocket *sk,
 		iph->tot_len = htons(fraglen);
 		iph->id = htons(msg_rt_ip_id);
 		iph->frag_off = htons(frag_off);
-		iph->ttl = 255;
+		iph->ttl = get_ttl(rt);
 		iph->protocol = sk->protocol;
 		iph->saddr = rtdev->local_ip;
 		iph->daddr = rt->ip;
@@ -210,7 +219,7 @@ int rt_ip_build_xmit(struct rtsocket *sk,
 	iph->tot_len = htons(length);
 	iph->id = htons(msg_rt_ip_id);
 	iph->frag_off = htons(IP_DF);
-	iph->ttl = 255;
+	iph->ttl = get_ttl(rt);
 	iph->protocol = sk->protocol;
 	iph->saddr = rtdev->local_ip;
 	iph->daddr = rt->ip;

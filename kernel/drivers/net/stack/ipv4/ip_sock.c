@@ -27,9 +27,10 @@
 #include <linux/in.h>
 
 #include <rtnet_socket.h>
+#include <ipv4/igmp.h>
 
 int rt_ip_setsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
-		     int optname, const void __user *optval, socklen_t optlen)
+		     int optname, const void __user *u_optval, socklen_t optlen)
 {
 	int err = 0;
 	unsigned int _tos, *tos;
@@ -37,18 +38,77 @@ int rt_ip_setsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
 	if (level != SOL_IP)
 		return -ENOPROTOOPT;
 
-	if (optlen < sizeof(unsigned int))
-		return -EINVAL;
-
 	switch (optname) {
 	case IP_TOS:
-		tos = rtnet_get_arg(fd, &_tos, optval, sizeof(_tos));
+		if (optlen < sizeof(unsigned int))
+			return -EINVAL;
+		tos = rtnet_get_arg(fd, &_tos, u_optval, sizeof(_tos));
 		if (IS_ERR(tos))
 			return PTR_ERR(tos);
 		else
 			s->prot.inet.tos = *tos;
 		break;
 
+#ifdef CONFIG_XENO_DRIVERS_NET_RTIPV4_IGMP
+	case IP_ADD_MEMBERSHIP: {
+		const struct ip_mreq *mreq;
+		struct ip_mreq _mreq;
+
+		if (optlen < sizeof(*mreq))
+			return -EINVAL;
+
+		if (!rtdm_in_rt_context())
+			return -ENOSYS;
+
+		mreq = rtnet_get_arg(fd, &_mreq, u_optval, sizeof(_mreq));
+		if (IS_ERR(mreq))
+			return PTR_ERR(mreq);
+
+		err = rt_ip_mc_join_group(s, mreq);
+		break;
+	}
+
+	case IP_DROP_MEMBERSHIP: {
+		const struct ip_mreq *mreq;
+		struct ip_mreq _mreq;
+
+		if (optlen < sizeof(*mreq))
+			return -EINVAL;
+
+		if (!rtdm_in_rt_context())
+			return -ENOSYS;
+
+		mreq = rtnet_get_arg(fd, &_mreq, u_optval, sizeof(_mreq));
+		if (IS_ERR(mreq))
+			return PTR_ERR(mreq);
+
+		err = rt_ip_mc_leave_group(s, mreq);
+		break;
+	}
+
+	case IP_MULTICAST_IF: {
+		if (optlen < sizeof(struct in_addr))
+			return -EINVAL;
+
+		if (optlen >= sizeof(struct ip_mreq)) {
+			const struct ip_mreq *mreq;
+			struct ip_mreq _mreq;
+			mreq = rtnet_get_arg(fd, &_mreq, u_optval, sizeof(_mreq));
+			if (IS_ERR(mreq))
+				return PTR_ERR(mreq);
+			s->prot.inet.mc_if_addr = mreq->imr_interface.s_addr;
+		} else {
+			const struct in_addr *in_addr;
+			struct in_addr _in_addr;
+			in_addr = rtnet_get_arg(fd, &_in_addr, u_optval, sizeof(_in_addr));
+			if (IS_ERR(in_addr))
+				return PTR_ERR(in_addr);
+			s->prot.inet.mc_if_addr = in_addr->s_addr;
+		}
+
+		break;
+	}
+#endif
 	default:
 		err = -ENOPROTOOPT;
 		break;

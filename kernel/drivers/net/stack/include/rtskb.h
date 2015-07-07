@@ -177,6 +177,7 @@ struct rtskb {
 		struct icmphdr *icmph;
 		struct iphdr *ipihdr;
 		unsigned char *raw;
+		struct igmphdr *igmph;
 	} h;
 
 	/* network layer */

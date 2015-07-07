@@ -34,6 +34,7 @@
 #include <ipv4/ip_output.h>
 #include <ipv4/protocol.h>
 #include <ipv4/route.h>
+#include <ipv4/igmp.h>
 
 MODULE_LICENSE("GPL");
 
@@ -283,6 +284,7 @@ static int __init rt_ipv4_proto_init(void)
 		rt_inet_protocols[i] = NULL;
 
 	rt_icmp_init();
+	rt_igmp_init();
 
 #ifdef CONFIG_XENO_OPT_VFILE
 	result = xnvfile_init_dir("ipv4", &ipv4_proc_root, &rtnet_proc_root);
@@ -308,6 +310,7 @@ err2:
 err1:
 #endif /* CONFIG_XENO_OPT_VFILE */
 
+	rt_igmp_release();
 	rt_icmp_release();
 	rt_arp_release();
 	rt_ip_release();
@@ -326,6 +329,8 @@ static void __exit rt_ipv4_proto_release(void)
 #ifdef CONFIG_XENO_OPT_VFILE
 	xnvfile_destroy_dir(&ipv4_proc_root);
 #endif
+
+	rt_igmp_release();
 
 	/* Transport-Layer */
 	rt_icmp_release();

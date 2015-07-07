@@ -64,6 +64,14 @@ enum rtnet_link_state {
 #define RTNET_LINK_STATE_PRESENT (1 << __RTNET_LINK_STATE_PRESENT)
 #define RTNET_LINK_STATE_NOCARRIER (1 << __RTNET_LINK_STATE_NOCARRIER)
 
+struct rtdev_mc_list {
+    struct rtdev_mc_list    *next;
+    __u8                    dmi_addr[MAX_ADDR_LEN];
+    unsigned char           dmi_addrlen;
+    int                     dmi_users;
+    int                     dmi_gusers;
+};
+
 /***
  *  rtnet_device
  */
@@ -114,6 +122,8 @@ struct rtnet_device {
 
 	int promiscuity;
 	int allmulti;
+	struct rtdev_mc_list *mc_list;
+	int mc_count;
 
 	__u32 local_ip; /* IP address in network order  */
 	__u32 broadcast_ip; /* broadcast IP in network order */
@@ -142,6 +152,7 @@ struct rtnet_device {
 	int (*rebuild_header)(struct rtskb *);
 	int (*hard_start_xmit)(struct rtskb *skb, struct rtnet_device *dev);
 	int (*hw_reset)(struct rtnet_device *rtdev);
+	void (*set_multicast_list) (struct rtnet_device *rtdev);
 
 	/* Transmission hook, managed by the stack core, RTcap, and RTmac
      *
@@ -243,6 +254,12 @@ int rtdev_map_rtskb(struct rtskb *skb);
 void rtdev_unmap_rtskb(struct rtskb *skb);
 
 struct rtskb *rtnetdev_alloc_rtskb(struct rtnet_device *dev, unsigned int size);
+
+struct rtnet_device *rt_ip_dev_find(u32 addr);
+void rt_dev_mc_upload(struct rtnet_device *dev);
+int rt_dev_mc_delete(struct rtnet_device *dev, void *addr, int alen, int all);
+int rt_dev_mc_add(struct rtnet_device *dev, void *addr, int alen, int newonly);
+void rt_dev_set_allmulti(struct rtnet_device *dev, int inc);
 
 #define rtnetdev_priv(dev) ((dev)->priv)
 

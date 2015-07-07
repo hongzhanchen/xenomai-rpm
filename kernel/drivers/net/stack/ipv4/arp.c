@@ -21,6 +21,8 @@
  *
  */
 
+#include <net/ip.h>
+#include <linux/if_arp.h>
 #include <rtdev.h>
 #include <stack_mgr.h>
 #include <ipv4/arp.h>
@@ -194,6 +196,30 @@ static struct rtpacket_type arp_packet_type = {
 	type: __constant_htons(ETH_P_ARP),
 	handler: &rt_arp_rcv
 };
+
+/* Multicast mapping */
+
+#ifdef CONFIG_XENO_DRIVERS_NET_RTIPV4_IGMP
+
+int rt_arp_mc_map(u32 addr, u8 *haddr, struct rtnet_device *dev, int dir)
+{
+    switch (dev->type) {
+    case ARPHRD_ETHER:
+    case ARPHRD_FDDI:
+    case ARPHRD_IEEE802:
+        ip_eth_mc_map(addr, haddr);
+        return 0;
+    default:
+        if (dir) {
+            memcpy(haddr, dev->broadcast, dev->addr_len);
+            return 0;
+        }
+    }
+    return -EINVAL;
+}
+EXPORT_SYMBOL_GPL(rt_arp_mc_map);
+
+#endif
 
 /***
  *  rt_arp_init

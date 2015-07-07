@@ -43,6 +43,8 @@
 #include <ipv4/protocol.h>
 #include <ipv4/route.h>
 #include <ipv4/udp.h>
+#include <ipv4/arp.h>
+#include <ipv4/igmp.h>
 
 /***
  *  This structure is used to register a UDP socket for reception. All
@@ -349,7 +351,7 @@ void rt_udp_close(struct rtdm_fd *fd)
 	while ((del = rtskb_dequeue(&sock->incoming)) != NULL)
 		kfree_rtskb(del);
 
-	rt_socket_cleanup(fd);
+	rt_inet_socket_cleanup(fd);
 }
 
 int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request, void __user *arg)
@@ -572,6 +574,36 @@ static int rt_udp_getfrag(const void *p, unsigned char *to, unsigned int offset,
 	return 0;
 }
 
+static int route_multicast(struct dest_route *rt,
+			   struct rtsocket *sock,
+			   u32 daddr, u32 *saddr)
+{
+	char buf[MAX_ADDR_LEN];
+
+	if (!rtnet_in_multicast(ntohl(daddr)))
+		return -ENOTSUPP;
+
+	if (sock->prot.inet.mc_if_addr != INADDR_ANY)
+	    *saddr = sock->prot.inet.mc_if_addr;
+	else if (*saddr == INADDR_ANY)
+		return -EHOSTUNREACH;
+
+	rt->rtdev = rt_ip_dev_find(*saddr);
+	if (rt->rtdev == NULL)
+		return -EHOSTUNREACH;
+
+	if (rt_arp_mc_map(daddr, buf, rt->rtdev, 0)) {
+		rtdev_dereference(rt->rtdev);
+		rtdm_printk("can't map multicast adress %08x \n", daddr);
+		return -EHOSTUNREACH;
+	}
+
+	memcpy(rt->dev_addr, buf, sizeof(buf));
+	rt->ip = daddr;
+
+	return 0;
+}
+
 /***
  *  rt_udp_sendmsg
  */
@@ -662,6 +694,8 @@ ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
 	}
 
 	/* get output route */
+	err = route_multicast(&rt, sock, daddr, &saddr);
+	if (err == -ENOTSUPP)
 	err = rt_ip_route_output(&rt, daddr, saddr);
 	if (err)
 		goto out;
@@ -680,7 +714,8 @@ ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
 	err = rt_ip_build_xmit(sock, rt_udp_getfrag, &ufh, ulen, &rt,
 			       msg_flags);
 
-	/* Drop the reference obtained in rt_ip_route_output() */
+	/* Drop the reference obtained in either rt_ip_route_output()
+	   or route_multicast() */
 	rtdev_dereference(rt.rtdev);
 out:
 	rtdm_drop_iovec(iov, iov_fast);
@@ -725,7 +760,7 @@ struct rtsocket *rt_udp_dest_socket(struct rtskb *skb)
 			csum_tcpudp_nofold(saddr, daddr, ulen, IPPROTO_UDP, 0);
 
 	/* patch broadcast daddr */
-	if (daddr == rtdev->broadcast_ip)
+	if (daddr == rtdev->broadcast_ip || rtnet_in_multicast(ntohl(daddr)))
 		daddr = rtdev->local_ip;
 
 	/* find the destination socket */

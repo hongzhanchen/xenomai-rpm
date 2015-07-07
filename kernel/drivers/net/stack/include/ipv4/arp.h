@@ -48,4 +48,7 @@ static inline void rt_arp_solicit(struct rtnet_device *rtdev, u32 target)
 void __init rt_arp_init(void);
 void rt_arp_release(void);
 
+int rt_arp_mc_map(u32 addr, u8 *haddr,
+		  struct rtnet_device *dev, int dir);
+
 #endif /* __RTNET_ARP_H_ */

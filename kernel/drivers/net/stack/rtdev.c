@@ -913,6 +913,208 @@ int rtdev_xmit_proxy(struct rtskb *rtskb)
 }
 #endif /* CONFIG_XENO_DRIVERS_NET_ADDON_PROXY */
 
+#ifdef CONFIG_XENO_DRIVERS_NET_RTIPV4_IGMP
+
+/* Find rtnet device by its local_ip adress */
+static inline struct rtnet_device * __rt_ip_dev_find(u32 addr){
+    int i;
+    struct rtnet_device *rtdev;
+
+    for (i = 0; i < MAX_RT_DEVICES; i++) {
+        rtdev = rtnet_devices[i];
+        if ((rtdev != NULL) && (rtdev->local_ip == addr)) {
+            return rtdev;
+        }
+    }
+    return NULL;
+}
+
+/***
+ *  rtdev_get_by_hwaddr - find and lock a rtnetdevice by its local ip adress
+ *  @addr:         Local  IP Adress
+  */
+struct rtnet_device *rt_ip_dev_find(u32 addr)
+{
+    struct rtnet_device * rtdev;
+    unsigned long flags;
+
+
+    rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, flags);
+    rtdev = __rt_ip_dev_find(addr);
+    if (rtdev != NULL)
+        atomic_inc(&rtdev->refcount);
+    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, flags);
+
+    return rtdev;
+}
+EXPORT_SYMBOL(rt_ip_dev_find);
+
+/*
+ *  Update the multicast list into the physical NIC controller.
+ */
+static void __rt_dev_mc_upload(struct rtnet_device *dev)
+{
+    /* Don't do anything till we up the interface
+     * [dev_open will call this function so the list will
+     * stay sane]
+     */
+
+    if (!(dev->flags&IFF_UP))
+        return;
+
+    /*
+     *  Devices with no set multicast or which have been
+     *  detached don't get set.
+     */
+
+    if (dev->set_multicast_list == NULL){
+        printk(KERN_INFO "RTnet: %s does not support multicast\n",
+	       dev->name);
+        return;
+    }
+    dev->set_multicast_list(dev);
+}
+
+void rt_dev_mc_upload(struct rtnet_device *dev)
+{
+    unsigned long flags;
+    rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
+    __rt_dev_mc_upload(dev);
+    rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+}
+
+/*
+ *  Delete a device level multicast
+ */
+
+int rt_dev_mc_delete(struct rtnet_device *dev, void *addr, int alen, int glbl)
+{
+    int err = 0;
+    struct rtdev_mc_list *dmi, **dmip;
+    unsigned long flags;
+
+    rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
+
+    for (dmip = &dev->mc_list; (dmi = *dmip) != NULL; dmip = &dmi->next) {
+        /*
+         *  Find the entry we want to delete. The device could
+         *  have variable length entries so check these too.
+         */
+        if (memcmp(dmi->dmi_addr, addr, dmi->dmi_addrlen) == 0 &&
+            alen == dmi->dmi_addrlen) {
+            if (glbl) {
+                int old_glbl = dmi->dmi_gusers;
+                dmi->dmi_gusers = 0;
+                if (old_glbl == 0)
+                    break;
+            }
+            if (--dmi->dmi_users)
+                goto done;
+
+            /*
+             *  Last user. So delete the entry.
+             */
+            *dmip = dmi->next;
+            dev->mc_count--;
+
+            /*
+             *  We have altered the list, so the card
+             *  loaded filter is now wrong. Fix it
+             */
+            __rt_dev_mc_upload(dev);
+
+            rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+
+            rtdm_free(dmi);
+            return 0;
+        }
+    }
+    err = -ENOENT;
+done:
+    rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+    return err;
+}
+EXPORT_SYMBOL(rt_dev_mc_delete);
+
+/*
+ *  Add a device level multicast
+ */
+
+
+int rt_dev_mc_add(struct rtnet_device *dev, void *addr, int alen, int glbl)
+{
+    int err = 0;
+    struct rtdev_mc_list *dmi, *dmi1;
+    unsigned long flags;
+
+    dmi1 = rtdm_malloc(sizeof(*dmi1));
+
+    rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
+    for (dmi = dev->mc_list; dmi != NULL; dmi = dmi->next) {
+        if (memcmp(dmi->dmi_addr, addr, dmi->dmi_addrlen) == 0 &&
+            dmi->dmi_addrlen == alen) {
+            if (glbl) {
+                int old_glbl = dmi->dmi_gusers;
+                dmi->dmi_gusers = 1;
+                if (old_glbl)
+                    goto done;
+            }
+            dmi->dmi_users++;
+            goto done;
+        }
+    }
+
+    if ((dmi = dmi1) == NULL) {
+        rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+        return -ENOMEM;
+    }
+    memcpy(dmi->dmi_addr, addr, alen);
+    dmi->dmi_addrlen = alen;
+    dmi->next = dev->mc_list;
+    dmi->dmi_users = 1;
+    dmi->dmi_gusers = glbl ? 1 : 0;
+    dev->mc_list = dmi;
+    dev->mc_count++;
+
+    __rt_dev_mc_upload(dev);
+
+    rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+    return 0;
+
+done:
+    rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+    if (dmi1)
+        rtdm_free(dmi1);
+    return err;
+}
+EXPORT_SYMBOL(rt_dev_mc_add);
+
+/*
+ *  Discard multicast list when a device is downed
+ */
+
+void rt_dev_mc_discard(struct rtnet_device *dev)
+{
+    unsigned long flags;
+
+    rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
+
+    while (dev->mc_list != NULL) {
+        struct rtdev_mc_list *tmp = dev->mc_list;
+        dev->mc_list = tmp->next;
+        if (tmp->dmi_users > tmp->dmi_gusers)
+            printk("dev_mc_discard: multicast leakage! dmi_users=%d\n", tmp->dmi_users);
+        rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+        rtdm_free(tmp);
+        rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
+    }
+    dev->mc_count = 0;
+
+    rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
+}
+
+#endif	/* CONFIG_XENO_DRIVERS_NET_RTIPV4_IGMP */
+
 unsigned int rt_hard_mtu(struct rtnet_device *rtdev, unsigned int priority)
 {
 	return rtdev->mtu;

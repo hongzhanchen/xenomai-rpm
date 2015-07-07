@@ -35,6 +35,8 @@
 #include <rtdm/driver.h>
 #include <stack_mgr.h>
 
+struct rtip_mc_socklist;
+
 struct rtsocket {
 	unsigned short protocol;
 
@@ -67,6 +69,8 @@ struct rtsocket {
 			int reg_index; /* index in port registry */
 			u8 tos;
 			u8 state;
+			struct rtip_mc_socklist *mc_list;
+			u32 mc_if_addr;
 		} inet;
 
 		/* packet socket specific */
