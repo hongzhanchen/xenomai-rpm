@@ -1009,6 +1009,7 @@ AC_CONFIG_FILES([ \
 	demo/posix/cobalt/Makefile \
 	demo/alchemy/Makefile \
 	demo/alchemy/cobalt/Makefile \
+	demo/net/Makefile \
 	include/Makefile \
 	include/cobalt/uapi/Makefile \
 	include/cobalt/uapi/asm-generic/Makefile \

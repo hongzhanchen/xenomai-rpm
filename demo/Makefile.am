@@ -1,2 +1,2 @@
 
-SUBDIRS = posix alchemy
+SUBDIRS = posix alchemy net
