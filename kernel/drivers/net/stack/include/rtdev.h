@@ -153,6 +153,13 @@ struct rtnet_device {
 	int (*hard_start_xmit)(struct rtskb *skb, struct rtnet_device *dev);
 	int (*hw_reset)(struct rtnet_device *rtdev);
 	void (*set_multicast_list) (struct rtnet_device *rtdev);
+	void (*vlan_rx_add_vid)(struct rtnet_device *dev,
+				unsigned short vid);
+	void (*vlan_rx_kill_vid)(struct rtnet_device *dev,
+				unsigned short vid);
+#ifdef CONFIG_XENO_DRIVERS_NET_VLAN
+	struct list_head	vlan_link;
+#endif
 
 	/* Transmission hook, managed by the stack core, RTcap, and RTmac
      *
@@ -187,6 +194,18 @@ struct rtdev_event_hook {
 extern struct list_head event_hook_list;
 extern struct mutex rtnet_devices_nrt_lock;
 extern struct rtnet_device *rtnet_devices[];
+
+#ifdef CONFIG_XENO_DRIVERS_NET_VLAN
+extern struct rtnet_device *
+__rtdev_real_dev(struct rtnet_device *dev) __attribute__((pure));
+#else
+static inline struct rtnet_device *__rtdev_real_dev(struct rtnet_device *dev)
+{
+	return dev;
+}
+#endif
+#define rtdev_mc_list(dev) __rtdev_real_dev(dev)->mc_list
+#define rtdev_mc_count(dev) __rtdev_real_dev(dev)->mc_count
 
 int __rt_init_etherdev(struct rtnet_device *rtdev, unsigned int dev_pool_size,
 		       struct module *module);

@@ -36,6 +36,8 @@
 #include <rtnet_internal.h>
 #include <rtnet_iovec.h>
 #include <rtnet_socket.h>
+#include <rtvlan.h>
+#include <rtnet_port.h>
 #include <ipv4/protocol.h>
 
 #define SKB_POOL_CLOSED 0
@@ -231,7 +233,8 @@ int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 	int ret = 0, size = 0, i;
 	short flags;
 
-	if (request == SIOCGIFCONF) {
+	switch (request) {
+	case SIOCGIFCONF: {
 		u_ifc = arg;
 		ifc = rtnet_get_arg(fd, &_ifc, u_ifc, sizeof(_ifc));
 		if (IS_ERR(ifc))
@@ -273,6 +276,11 @@ int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 		return rtnet_put_arg(fd, &u_ifc->ifc_len, &size, sizeof(size));
 	}
 
+	case SIOCSIFVLAN:
+	  return rtvlan_ioctl_handler(arg);
+	}
+
+
 	u_ifr = arg;
 	ifr = rtnet_get_arg(fd, &_ifr, u_ifr, sizeof(_ifr));
 	if (IS_ERR(ifr))
@@ -298,10 +306,9 @@ int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 
 	case SIOCGIFFLAGS:
 		flags = rtdev->flags;
-		if ((ifr->ifr_flags & IFF_UP) &&
-		    (rtdev->link_state &
-		     (RTNET_LINK_STATE_PRESENT | RTNET_LINK_STATE_NOCARRIER)) ==
-			    RTNET_LINK_STATE_PRESENT)
+		if ((ifr->ifr_flags & IFF_UP)
+		    && rtnetif_carrier_ok(rtdev)
+		    && rtnetif_device_present(rtdev))
 			flags |= IFF_RUNNING;
 		ret = rtnet_put_arg(fd, &u_ifr->ifr_flags, &flags,
 				    sizeof(u_ifr->ifr_flags));

@@ -57,7 +57,25 @@ static struct tap_device_t {
 
 void rtcap_rx_hook(struct rtskb *rtskb)
 {
+	int                     ifindex;
+	int                     active;
 	bool			trigger = false;
+
+	if (rtskb->cap_flags & RTSKB_CAP_SHARED)
+		return;
+
+	ifindex = rtskb->rtdev->ifindex;
+	active  = tap_device[ifindex].present & (TAP_DEV | RTMAC_TAP_DEV);
+
+	if ((active & TAP_DEV)
+		&& !(tap_device[ifindex].tap_dev->flags & IFF_UP))
+		active &= ~TAP_DEV;
+	if ((active & RTMAC_TAP_DEV)
+		&& !(tap_device[ifindex].rtmac_tap_dev->flags & IFF_UP))
+		active &= ~RTMAC_TAP_DEV;
+
+	if (active == 0)
+		return;
 
 	if ((rtskb->cap_comp_skb = rtskb_pool_dequeue(&cap_pool)) == 0) {
 		tap_device[rtskb->rtdev->ifindex].tap_dev_stats.rx_dropped++;
@@ -73,6 +91,7 @@ void rtcap_rx_hook(struct rtskb *rtskb)
 	rtskb->cap_next = NULL;
 
 	rtskb->cap_flags |= RTSKB_CAP_SHARED;
+	rtskb->cap_dev = rtskb->rtdev;
 
 	if (trigger)
 		rtdm_nrtsig_pend(&cap_signal);
@@ -83,16 +102,24 @@ int rtcap_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
 	struct tap_device_t *tap_dev = &tap_device[rtskb->rtdev->ifindex];
 	rtdm_lockctx_t context;
 	bool trigger = false;
+	int active;
 
-	if ((rtskb->cap_comp_skb = rtskb_pool_dequeue(&cap_pool)) == 0) {
+	active = tap_dev->present & XMIT_HOOK;
+	if (active && !(tap_dev->tap_dev->flags & IFF_UP))
+		active &= ~XMIT_HOOK;
+
+	if (!active
+		|| (rtskb->cap_flags & RTSKB_CAP_SHARED)
+		|| (rtskb->cap_comp_skb = rtskb_pool_dequeue(&cap_pool)) == 0) {
 		tap_dev->tap_dev_stats.rx_dropped++;
-		return tap_dev->orig_xmit(rtskb, rtdev);
+		goto done;
 	}
 
 	rtskb->cap_next = NULL;
 	rtskb->cap_start = rtskb->data;
 	rtskb->cap_len = rtskb->len;
 	rtskb->cap_flags |= RTSKB_CAP_SHARED;
+	rtskb->cap_dev = rtdev;
 
 	rtskb->time_stamp = rtdm_clock_read();
 
@@ -109,7 +136,7 @@ int rtcap_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
 
 	if (trigger)
 		rtdm_nrtsig_pend(&cap_signal);
-
+done:
 	return tap_dev->orig_xmit(rtskb, rtdev);
 }
 
@@ -181,7 +208,7 @@ static void rtcap_signal_handler(rtdm_nrtsig_t *nrtsig, void *arg)
 
 		rtdm_lock_put_irqrestore(&rtcap_lock, context);
 
-		ifindex = rtskb->rtdev->ifindex;
+		ifindex = rtskb->cap_dev->ifindex;
 		active = tap_device[ifindex].present;
 
 		if (active) {
@@ -340,6 +367,7 @@ void cleanup_tap_devices(void)
 
 			unregister_netdev(tap_device[i].tap_dev);
 			free_netdev(tap_device[i].tap_dev);
+			tap_device[i].present = 0;
 		}
 }
 
@@ -481,18 +509,20 @@ void rtcap_cleanup(void)
 {
 	rtdm_lockctx_t context;
 
-	rtdm_nrtsig_destroy(&cap_signal);
-
 	/* unregister capturing handlers
      * (take lock to avoid any unloading code before handler was left) */
 	rtdm_lock_get_irqsave(&rtcap_lock, context);
 	rtcap_handler = NULL;
 	rtdm_lock_put_irqrestore(&rtcap_lock, context);
 
+	cleanup_tap_devices();
+
+	msleep(10);
+
+	rtdm_nrtsig_destroy(&cap_signal);
+
 	/* empty queue (should be already empty) */
 	rtcap_signal_handler(0, NULL /* we ignore them anyway */);
-
-	cleanup_tap_devices();
 
 	rtskb_pool_release(&cap_pool);
 

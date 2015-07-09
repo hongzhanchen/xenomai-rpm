@@ -24,3 +24,5 @@ rtnet-y :=  \
 	eth.o
 
 rtnet-$(CONFIG_XENO_DRIVERS_NET_RTWLAN) += rtwlan.o
+
+rtnet-$(CONFIG_XENO_DRIVERS_NET_VLAN) += vlan.o

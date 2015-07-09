@@ -329,6 +329,9 @@ static void init_etherdev(struct rtnet_device *rtdev, struct module *module)
 	rtdev->flags = IFF_BROADCAST; /* TODO: IFF_MULTICAST; */
 	rtdev->get_mtu = rt_hard_mtu;
 	rtdev->rt_owner = module;
+#ifdef CONFIG_XENO_DRIVERS_NET_VLAN
+	INIT_LIST_HEAD(&rtdev->vlan_link);
+#endif
 
 	memset(rtdev->broadcast, 0xFF, ETH_ALEN);
 	strcpy(rtdev->name, "rteth%d");
@@ -524,6 +527,15 @@ int rt_register_rtnetdev(struct rtnet_device *rtdev)
 	/* requires at least driver layer version 2.0 */
 	if (rtdev->vers < RTDEV_VERS_2_0)
 		return -EINVAL;
+
+#ifdef CONFIG_XENO_DRIVERS_NET_VLAN
+	if ((rtdev->features & NETIF_F_HW_VLAN_CTAG_FILTER) &&
+	    (!rtdev->vlan_rx_add_vid || !rtdev->vlan_rx_kill_vid)) {
+	    printk("RTnet: %s has VLAN hardware filtering but does not provide "
+		    "callbacks\n", rtdev->name);
+	    return -EINVAL;
+	}
+#endif
 
 	if (rtdev->features & NETIF_F_LLTX)
 		rtdev->start_xmit = rtdev->hard_start_xmit;
@@ -995,7 +1007,7 @@ int rt_dev_mc_delete(struct rtnet_device *dev, void *addr, int alen, int glbl)
 
     rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
 
-    for (dmip = &dev->mc_list; (dmi = *dmip) != NULL; dmip = &dmi->next) {
+    for (dmip = &rtdev_mc_list(dev); (dmi = *dmip) != NULL; dmip = &dmi->next) {
         /*
          *  Find the entry we want to delete. The device could
          *  have variable length entries so check these too.
@@ -1015,7 +1027,7 @@ int rt_dev_mc_delete(struct rtnet_device *dev, void *addr, int alen, int glbl)
              *  Last user. So delete the entry.
              */
             *dmip = dmi->next;
-            dev->mc_count--;
+            rtdev_mc_count(dev)--;
 
             /*
              *  We have altered the list, so the card
@@ -1050,7 +1062,7 @@ int rt_dev_mc_add(struct rtnet_device *dev, void *addr, int alen, int glbl)
     dmi1 = rtdm_malloc(sizeof(*dmi1));
 
     rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
-    for (dmi = dev->mc_list; dmi != NULL; dmi = dmi->next) {
+    for (dmi = rtdev_mc_list(dev); dmi != NULL; dmi = dmi->next) {
         if (memcmp(dmi->dmi_addr, addr, dmi->dmi_addrlen) == 0 &&
             dmi->dmi_addrlen == alen) {
             if (glbl) {
@@ -1070,11 +1082,11 @@ int rt_dev_mc_add(struct rtnet_device *dev, void *addr, int alen, int glbl)
     }
     memcpy(dmi->dmi_addr, addr, alen);
     dmi->dmi_addrlen = alen;
-    dmi->next = dev->mc_list;
+    dmi->next = rtdev_mc_list(dev);
     dmi->dmi_users = 1;
     dmi->dmi_gusers = glbl ? 1 : 0;
-    dev->mc_list = dmi;
-    dev->mc_count++;
+    rtdev_mc_list(dev) = dmi;
+    rtdev_mc_count(dev)++;
 
     __rt_dev_mc_upload(dev);
 
@@ -1099,16 +1111,16 @@ void rt_dev_mc_discard(struct rtnet_device *dev)
 
     rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
 
-    while (dev->mc_list != NULL) {
-        struct rtdev_mc_list *tmp = dev->mc_list;
-        dev->mc_list = tmp->next;
+    while (rtdev_mc_list(dev) != NULL) {
+        struct rtdev_mc_list *tmp = rtdev_mc_list(dev);
+        rtdev_mc_list(dev) = tmp->next;
         if (tmp->dmi_users > tmp->dmi_gusers)
             printk("dev_mc_discard: multicast leakage! dmi_users=%d\n", tmp->dmi_users);
         rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
         rtdm_free(tmp);
         rtdm_lock_get_irqsave(&dev->rtdev_lock, flags);
     }
-    dev->mc_count = 0;
+    rtdev_mc_count(dev) = 0;
 
     rtdm_lock_put_irqrestore(&dev->rtdev_lock, flags);
 }

@@ -58,12 +58,12 @@ static inline int rtnetif_queue_stopped(struct rtnet_device *rtdev)
 
 static inline int rtnetif_running(struct rtnet_device *rtdev)
 {
-	return test_bit(__RTNET_LINK_STATE_START, &rtdev->link_state);
+	return test_bit(__RTNET_LINK_STATE_START, &__rtdev_real_dev(rtdev)->link_state);
 }
 
 static inline int rtnetif_device_present(struct rtnet_device *rtdev)
 {
-	return test_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
+	return test_bit(__RTNET_LINK_STATE_PRESENT, &__rtdev_real_dev(rtdev)->link_state);
 }
 
 static inline void rtnetif_device_detach(struct rtnet_device *rtdev)
@@ -100,7 +100,7 @@ static inline void rtnetif_carrier_off(struct rtnet_device *rtdev)
 
 static inline int rtnetif_carrier_ok(struct rtnet_device *rtdev)
 {
-	return !test_bit(__RTNET_LINK_STATE_NOCARRIER, &rtdev->link_state);
+	return !test_bit(__RTNET_LINK_STATE_NOCARRIER, &__rtdev_real_dev(rtdev)->link_state);
 }
 
 #define NIPQUAD(addr)                                                          \

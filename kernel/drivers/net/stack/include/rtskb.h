@@ -219,6 +219,7 @@ struct rtskb {
 	unsigned char *cap_start; /* start offset for capturing           */
 	unsigned int cap_len; /* capture length of this rtskb         */
 	nanosecs_abs_t cap_rtmac_stamp; /* RTmac enqueuing time            */
+        struct rtnet_device *cap_dev;	 /* Captured interface */
 #endif
 
 	struct list_head entry; /* for global rtskb list */

@@ -34,6 +34,7 @@
 #include <rtnet_rtpc.h>
 #include <stack_mgr.h>
 #include <rtwlan.h>
+#include <rtvlan.h>
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("RTnet stack core");
@@ -352,6 +353,8 @@ int __init rtnet_init(void)
 	if ((err = rtpc_init()) != 0)
 		goto err_out6;
 
+	rtvlan_proto_init();
+
 	rtnet_corectl_register();
 
 	return 0;
@@ -386,6 +389,8 @@ err_out1:
 void __exit rtnet_release(void)
 {
 	rtnet_corectl_unregister();
+
+	rtvlan_proto_release();
 
 	rtpc_cleanup();
 
