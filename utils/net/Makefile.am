@@ -11,6 +11,7 @@ sbin_PROGRAMS = \
 	rtcfg \
 	rtifconfig \
 	rtiwconfig \
+	rtvconfig \
 	rtping  \
 	rtroute \
 	tdmacfg
