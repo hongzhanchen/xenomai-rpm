@@ -574,7 +574,7 @@ extern s32 e1000e_setup_link(struct e1000_hw *hw);
 extern void e1000_clear_vfta_generic(struct e1000_hw *hw);
 extern void e1000e_init_rx_addrs(struct e1000_hw *hw, u16 rar_count);
 extern void e1000e_update_mc_addr_list_generic(struct e1000_hw *hw,
-					       u8 *mc_addr_list,
+					       struct rtdev_mc_list *mc_addr_list,
 					       u32 mc_addr_count);
 extern void e1000e_rar_set(struct e1000_hw *hw, u8 *addr, u32 index);
 extern s32 e1000e_set_fc_watermarks(struct e1000_hw *hw);

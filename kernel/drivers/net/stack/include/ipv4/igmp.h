@@ -87,8 +87,8 @@ static inline bool rtnet_in_multicast(u32 addr)
 }
 
 #ifdef CONFIG_XENO_DRIVERS_NET_RTIPV4_IGMP
-int rt_ip_mc_join_group(struct rtsocket *sk, struct ip_mreq *imr);
-int rt_ip_mc_leave_group(struct rtsocket *sk, struct ip_mreq *imr);
+int rt_ip_mc_join_group(struct rtsocket *sk, const struct ip_mreq *imr);
+int rt_ip_mc_leave_group(struct rtsocket *sk, const struct ip_mreq *imr);
 void rt_ip_mc_drop_socket(struct rtsocket *sk);
 void rt_ip_mc_dec_group(struct rtnet_device *rtdev, u32 addr);
 void rt_ip_mc_inc_group(struct rtnet_device *rtdev, u32 addr);

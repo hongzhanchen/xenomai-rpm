@@ -339,7 +339,7 @@ void rt_ip_mc_dec_group(struct rtnet_device *rtdev, u32 addr)
     rtdm_lock_put_irqrestore(&mc_list_lock, flags);
 }
 
-static struct rtnet_device *rt_ip_mc_find_dev(struct ip_mreq *imr)
+static struct rtnet_device *rt_ip_mc_find_dev(const struct ip_mreq *imr)
 {
     struct rtnet_device *rtdev = NULL;
 
@@ -353,7 +353,7 @@ static struct rtnet_device *rt_ip_mc_find_dev(struct ip_mreq *imr)
  *	Join a socket to a group
  */
 
-int rt_ip_mc_join_group(struct rtsocket *sk, struct ip_mreq *imr)
+int rt_ip_mc_join_group(struct rtsocket *sk, const struct ip_mreq *imr)
 {
     int err = 0;
     u32 addr = imr->imr_multiaddr.s_addr;
@@ -399,7 +399,7 @@ int rt_ip_mc_join_group(struct rtsocket *sk, struct ip_mreq *imr)
 /*
  *	Ask a socket to leave a group.
  */
-int rt_ip_mc_leave_group(struct rtsocket *sk, struct ip_mreq *imr)
+int rt_ip_mc_leave_group(struct rtsocket *sk, const struct ip_mreq *imr)
 {
     u32 addr = imr->imr_multiaddr.s_addr;
     struct  rtnet_device *rtdev = rt_ip_mc_find_dev(imr);

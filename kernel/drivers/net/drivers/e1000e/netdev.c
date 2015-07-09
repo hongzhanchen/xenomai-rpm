@@ -2156,7 +2156,8 @@ static void e1000_configure_rx(struct e1000_adapter *adapter)
  *  Updates the Multicast Table Array.
  *  The caller must have a packed mc_addr_list of multicast addresses.
  **/
-static void e1000_update_mc_addr_list(struct e1000_hw *hw, u8 *mc_addr_list,
+static void e1000_update_mc_addr_list(struct e1000_hw *hw,
+				struct rtdev_mc_list *mc_addr_list,
 				      u32 mc_addr_count)
 {
 	hw->mac.ops.update_mc_addr_list(hw, mc_addr_list, mc_addr_count);
@@ -2198,7 +2199,7 @@ static void e1000_set_multi(struct rtnet_device *netdev)
 
 	ew32(RCTL, rctl);
 
-	e1000_update_mc_addr_list(hw, NULL, 0);
+	e1000_update_mc_addr_list(hw, netdev->mc_list, netdev->mc_count);
 
 	if (netdev->features & NETIF_F_HW_VLAN_CTAG_RX)
 		e1000e_vlan_strip_enable(adapter);
@@ -4005,6 +4006,7 @@ static int e1000_probe(struct pci_dev *pdev,
 	netdev->open = e1000_open;
 	netdev->stop = e1000_close;
 	netdev->hard_start_xmit = e1000_xmit_frame;
+	netdev->set_multicast_list = e1000_set_multi;
 	//netdev->get_stats = e1000_get_stats;
 	netdev->map_rtskb = e1000_map_rtskb;
 	netdev->unmap_rtskb = e1000_unmap_rtskb;
