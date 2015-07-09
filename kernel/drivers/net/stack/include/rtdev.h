@@ -38,8 +38,13 @@
 
 #define RTDEV_VERS_2_0 0x0200
 
-#define PRIV_FLAG_UP 0
-#define PRIV_FLAG_ADDING_ROUTE 1
+/*
+ * We need to merge regular netdev_priv_flags with our own private
+ * device flags for VLAN, multicast support. Pick non-conflicting bit
+ * positions.
+ */
+#define PRIV_FLAG_UP                    30
+#define PRIV_FLAG_ADDING_ROUTE          31
 
 #ifndef NETIF_F_LLTX
 #define NETIF_F_LLTX 4096
