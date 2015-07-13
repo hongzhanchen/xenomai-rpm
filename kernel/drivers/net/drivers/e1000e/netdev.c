@@ -1756,21 +1756,6 @@ static void e1000e_vlan_strip_disable(struct e1000_adapter *adapter)
 	ew32(CTRL, ctrl);
 }
 
-/**
- * e1000e_vlan_strip_enable - helper to enable HW VLAN stripping
- * @adapter: board private structure to initialize
- **/
-static void e1000e_vlan_strip_enable(struct e1000_adapter *adapter)
-{
-	struct e1000_hw *hw = &adapter->hw;
-	u32 ctrl;
-
-	/* enable VLAN tag insert/strip */
-	ctrl = er32(CTRL);
-	ctrl |= E1000_CTRL_VME;
-	ew32(CTRL, ctrl);
-}
-
 static void e1000_update_mng_vlan(struct e1000_adapter *adapter)
 {
 	struct rtnet_device *netdev = adapter->netdev;
@@ -2181,29 +2166,24 @@ static void e1000_set_multi(struct rtnet_device *netdev)
 	/* Check for Promiscuous and All Multicast modes */
 
 	rctl = er32(RCTL);
+	rctl &= ~(E1000_RCTL_UPE | E1000_RCTL_MPE);
 
 	if (netdev->flags & IFF_PROMISC) {
 		rctl |= (E1000_RCTL_UPE | E1000_RCTL_MPE);
-		rctl &= ~E1000_RCTL_VFE;
 		/* Do not hardware filter VLANs in promisc mode */
 		e1000e_vlan_filter_disable(adapter);
 	} else {
 		if (netdev->flags & IFF_ALLMULTI) {
 			rctl |= E1000_RCTL_MPE;
-			rctl &= ~E1000_RCTL_UPE;
 		} else {
-			rctl &= ~(E1000_RCTL_UPE | E1000_RCTL_MPE);
+			e1000_update_mc_addr_list(hw, netdev->mc_list, netdev->mc_count);
 		}
 		e1000e_vlan_filter_enable(adapter);
+		rctl |= E1000_RCTL_UPE;
 	}
 
 	ew32(RCTL, rctl);
 
-	e1000_update_mc_addr_list(hw, netdev->mc_list, netdev->mc_count);
-
-	if (netdev->features & NETIF_F_HW_VLAN_CTAG_RX)
-		e1000e_vlan_strip_enable(adapter);
-	else
 		e1000e_vlan_strip_disable(adapter);
 }
 
@@ -4014,6 +3994,8 @@ static int e1000_probe(struct pci_dev *pdev,
 
 	netdev->mem_start = mmio_start;
 	netdev->mem_end = mmio_start + mmio_len;
+	netdev->vlan_rx_add_vid = e1000_vlan_rx_add_vid;
+	netdev->vlan_rx_kill_vid = e1000_vlan_rx_kill_vid;
 
 	adapter->bd_number = cards_found++;
 
