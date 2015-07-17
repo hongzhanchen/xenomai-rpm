@@ -79,6 +79,8 @@ struct rtsocket {
 			int ifindex;
 		} packet;
 	} prot;
+
+	u64 timestamp;
 };
 
 static inline struct rtdm_fd *rt_socket_fd(struct rtsocket *sock)

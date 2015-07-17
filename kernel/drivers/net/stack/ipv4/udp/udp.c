@@ -359,6 +359,8 @@ int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request, void __user *arg)
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
 	const struct _rtdm_setsockaddr_args *setaddr;
 	struct _rtdm_setsockaddr_args _setaddr;
+	unsigned long ns;
+	struct timeval tv;
 
 	/* fast path for common socket IOCTLs */
 	if (_IOC_TYPE(request) == RTIOC_TYPE_NETWORK)
@@ -376,6 +378,12 @@ int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request, void __user *arg)
 
 		return rt_udp_connect(fd, sock, setaddr->addr,
 				      setaddr->addrlen);
+
+	case SIOCGSTAMP:
+		tv.tv_sec = xnclock_divrem_billion(sock->timestamp, &ns);
+		tv.tv_usec = ns / 1000;
+
+		return copy_to_user(arg, &tv, sizeof(tv));
 
 	default:
 		return rt_ip_ioctl(fd, request, arg);
@@ -469,6 +477,7 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *u_msg,
 
 	/* iterate over all IP fragments */
 	do {
+		sock->timestamp = skb->time_stamp;
 		rtskb_trim(skb, data_len);
 
 		block_size = skb->len;
