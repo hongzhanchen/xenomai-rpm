@@ -697,6 +697,9 @@ ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
 
 	rtdm_lock_put_irqrestore(&udp_socket_base_lock, context);
 
+	if (daddr == 0)
+		return 0;
+
 	if ((daddr | dport) == 0) {
 		err = -EINVAL;
 		goto out;
