@@ -2070,8 +2070,8 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	netdev->map_rtskb = igb_map_rtskb;
 	netdev->unmap_rtskb = igb_unmap_rtskb;
 	netdev->do_ioctl = igb_ioctl;
+	netdev->set_multicast_list = igb_set_rx_mode;
 #if 0
-	netdev->set_multicast_list = igb_set_multi;
 	netdev->set_mac_address = igb_set_mac;
 	netdev->change_mtu = igb_change_mtu;
 
@@ -3370,34 +3370,18 @@ static int igb_write_mc_addr_list(struct rtnet_device *netdev)
 {
 	struct igb_adapter *adapter = rtnetdev_priv(netdev);
 	struct e1000_hw *hw = &adapter->hw;
-#if 0
-	struct netdev_hw_addr *ha;
-	u8  *mta_list;
-	int i;
-	if (netdev_mc_empty(netdev)) {
+	struct rtdev_mc_list *mc_addr = netdev->mc_list;
+	unsigned mc_addr_count = netdev->mc_count;
+
+	if (!mc_addr_count) {
 		/* nothing to program, so clear mc list */
 		igb_update_mc_addr_list(hw, NULL, 0);
-		igb_restore_vf_multicasts(adapter);
 		return 0;
 	}
 
-	mta_list = kzalloc(netdev_mc_count(netdev) * 6, GFP_ATOMIC);
-	if (!mta_list)
-		return -ENOMEM;
+	igb_update_mc_addr_list(hw, mc_addr, mc_addr_count);
 
-	/* The shared function expects a packed array of only addresses. */
-	i = 0;
-	netdev_for_each_mc_addr(ha, netdev)
-		memcpy(mta_list + (i++ * ETH_ALEN), ha->addr, ETH_ALEN);
-
-	igb_update_mc_addr_list(hw, mta_list, i);
-	kfree(mta_list);
-
-	return netdev_mc_count(netdev);
-#else
-	igb_update_mc_addr_list(hw, NULL, 0);
-	return 0;
-#endif
+	return mc_addr_count;
 }
 
 /**

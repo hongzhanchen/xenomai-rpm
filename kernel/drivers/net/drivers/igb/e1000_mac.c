@@ -440,7 +440,7 @@ static u32 igb_hash_mc_addr(struct e1000_hw *hw, u8 *mc_addr)
  *  The caller must have a packed mc_addr_list of multicast addresses.
  **/
 void igb_update_mc_addr_list(struct e1000_hw *hw,
-			     u8 *mc_addr_list, u32 mc_addr_count)
+			     struct rtdev_mc_list *mc_addr, u32 mc_addr_count)
 {
 	u32 hash_value, hash_bit, hash_reg;
 	int i;
@@ -450,13 +450,13 @@ void igb_update_mc_addr_list(struct e1000_hw *hw,
 
 	/* update mta_shadow from mc_addr_list */
 	for (i = 0; (u32) i < mc_addr_count; i++) {
-		hash_value = igb_hash_mc_addr(hw, mc_addr_list);
+		hash_value = igb_hash_mc_addr(hw, mc_addr->dmi_addr);
 
 		hash_reg = (hash_value >> 5) & (hw->mac.mta_reg_count - 1);
 		hash_bit = hash_value & 0x1F;
 
 		hw->mac.mta_shadow[hash_reg] |= (1 << hash_bit);
-		mc_addr_list += (ETH_ALEN);
+		mc_addr = mc_addr->next;
 	}
 
 	/* replace the entire MTA table */
