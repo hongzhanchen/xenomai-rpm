@@ -26,7 +26,7 @@
 #ifndef __RTDEV_H_
 #define __RTDEV_H_
 
-#define MAX_RT_DEVICES 8
+#define MAX_RT_DEVICES                  32
 
 #ifdef __KERNEL__
 
