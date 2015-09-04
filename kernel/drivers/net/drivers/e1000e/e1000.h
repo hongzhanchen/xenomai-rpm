@@ -378,6 +378,7 @@ struct e1000_adapter {
 	struct e1000_hw_stats stats;
 	struct e1000_phy_info phy_info;
 	struct e1000_phy_stats phy_stats;
+	struct net_device_stats netdev_stats;
 
 	/* Snapshot of PHY registers */
 	struct e1000_phy_regs phy_regs;
@@ -505,9 +506,7 @@ extern int e1000e_setup_rx_resources(struct e1000_adapter *adapter);
 extern int e1000e_setup_tx_resources(struct e1000_adapter *adapter);
 extern void e1000e_free_rx_resources(struct e1000_adapter *adapter);
 extern void e1000e_free_tx_resources(struct e1000_adapter *adapter);
-extern struct rtnl_link_stats64 *e1000e_get_stats64(struct net_device *netdev,
-						    struct rtnl_link_stats64
-						    *stats);
+extern struct net_device_stats *e1000e_get_stats(struct rtnet_device *netdev);
 extern void e1000e_set_interrupt_capability(struct e1000_adapter *adapter);
 extern void e1000e_reset_interrupt_capability(struct e1000_adapter *adapter);
 extern void e1000e_get_hw_control(struct e1000_adapter *adapter);
