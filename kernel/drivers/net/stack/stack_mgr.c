@@ -111,7 +111,7 @@ void rtnetif_rx(struct rtskb *skb)
 	RTNET_ASSERT(skb->rtdev != NULL, return;);
 
 	if (unlikely(rtskb_fifo_insert_inirq(&rx.fifo, skb) < 0)) {
-		rtdm_printk("RTnet: dropping packet in %s()\n", __FUNCTION__);
+		rtdm_printk_ratelimited("RTnet: dropping packet in %s()\n", __FUNCTION__);
 		kfree_rtskb(skb);
 	}
 }
