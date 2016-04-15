@@ -36,6 +36,7 @@
 #include <ipv4_chrdev.h>
 #include <ipv4/icmp.h>
 #include <ipv4/ip_fragment.h>
+#include <ipv4/ip_input.h>
 #include <ipv4/ip_output.h>
 #include <ipv4/protocol.h>
 #include <ipv4/route.h>
@@ -129,6 +130,14 @@ void rt_icmp_cleanup_echo_requests(void)
  */
 static void rt_icmp_discard(struct rtskb *skb)
 {
+#ifdef CONFIG_XENO_DRIVERS_NET_ADDON_PROXY
+    if (rt_ip_fallback_handler) {
+        /* If a fallback handler for IP protocol has been installed,
+         * call it. */
+	__rtskb_push(skb, skb->nh.iph->ihl*4 + sizeof(struct icmphdr));
+        rt_ip_fallback_handler(skb);
+    }
+#endif
 }
 
 static int rt_icmp_glue_reply_bits(const void *p, unsigned char *to,
@@ -206,6 +215,7 @@ static void rt_icmp_echo_reply(struct rtskb *skb)
 		rtdm_lock_put_irqrestore(&echo_calls_lock, context);
 	} else {
 		rtdm_lock_put_irqrestore(&echo_calls_lock, context);
+		rt_icmp_discard(skb);
 		return;
 	}
 
@@ -407,8 +417,12 @@ static struct rt_icmp_control rt_icmp_pointers[NR_ICMP_TYPES + 1] = {
  */
 struct rtsocket *rt_icmp_dest_socket(struct rtskb *skb)
 {
+	if (!list_empty(&echo_calls)) {
 	rt_socket_reference(icmp_socket);
 	return icmp_socket;
+	}
+
+	return NULL;
 }
 
 /***
