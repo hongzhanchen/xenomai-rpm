@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <float.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -46,7 +47,9 @@ unsigned int    count    = 0;
 int             delay    = 1000;
 unsigned int    sent     = 0;
 unsigned int    received = 0;
-float           wc_rtt   = 0;
+float           max_rtt   = FLT_MIN;
+float           min_rtt   = FLT_MAX;
+float           avr_rtt   = 0.0f;
 
 
 void help(void)
@@ -81,9 +84,9 @@ void print_statistics()
 {
     printf("\n--- %s rtping statistics ---\n"
            "%d packets transmitted, %d received, %d%% packet loss\n"
-           "worst case rtt = %.1f us\n",
+           "rtt min/avg/max = %.1f/%.1f/%.1f us\n",
            inet_ntoa(addr), sent, received, 100 - ((received * 100) / sent),
-           wc_rtt);
+           min_rtt, avr_rtt/received, max_rtt);
     exit(0);
 }
 
@@ -117,8 +120,11 @@ void ping(int signal)
     received++;
     from.s_addr = cmd.args.ping.ip_addr;
     rtt = (float)cmd.args.ping.rtt / (float)1000;
-    if (rtt > wc_rtt)
-        wc_rtt = rtt;
+    if (rtt > max_rtt)
+        max_rtt = rtt;
+    if (rtt < min_rtt)
+        min_rtt = rtt;
+    avr_rtt += rtt;
     printf("%d bytes from %s: icmp_seq=%d time=%.1f us\n",
            ret, inet_ntoa(from), cmd.args.ping.sequence, rtt);
 
