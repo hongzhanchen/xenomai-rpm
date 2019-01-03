@@ -11,7 +11,7 @@
  *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- *  
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -35,6 +35,7 @@ smokey_test_plugin(interrupt,
 			   SMOKEY_STRING(device),
 			   SMOKEY_STRING(trigger),
 			   SMOKEY_BOOL(select),
+			   SMOKEY_BOOL(timestamp),
 		   ),
    "Wait for interrupts from a GPIO pin.\n"
    "\tdevice=<device-path>\n"
@@ -79,7 +80,7 @@ static int run_interrupt(struct smokey_test *t, int argc, char *const argv[])
 	struct rtdm_gpio_readout rdo;
 	struct timespec now;
 	fd_set set;
-	
+
 	smokey_parse_args(t, argc, argv);
 
 	if (!SMOKEY_ARG_ISSET(interrupt, device)) {
@@ -127,7 +128,7 @@ static int run_interrupt(struct smokey_test *t, int argc, char *const argv[])
 
 	FD_ZERO(&set);
 	FD_SET(fd, &set);
-	
+
 	for (;;) {
 		if (do_select) {
 			ret = select(fd + 1, &set, NULL, NULL, NULL);
@@ -206,7 +207,7 @@ static int run_write_value(struct smokey_test *t, int argc, char *const argv[])
 {
 	const char *device = NULL;
 	int fd, ret, value;
-	
+
 	smokey_parse_args(t, argc, argv);
 
 	if (!SMOKEY_ARG_ISSET(write_value, device)) {
@@ -226,7 +227,7 @@ static int run_write_value(struct smokey_test *t, int argc, char *const argv[])
 	value = 1;
 	if (!__Terrno(ret, ioctl(fd, GPIO_RTIOC_DIR_OUT, &value)))
 		return ret;
-	
+
 	ret = write(fd, &value, sizeof(value));
 	close(fd);
 
