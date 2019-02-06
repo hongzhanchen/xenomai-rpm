@@ -26,10 +26,10 @@
 
 s32 igb_acquire_swfw_sync_i210(struct e1000_hw *hw, u16 mask);
 void igb_release_swfw_sync_i210(struct e1000_hw *hw, u16 mask);
-s32 igb_valid_led_default_i210(struct e1000_hw *hw, u16 *data);
+s32 igb_valid_led_default_i210(struct e1000_hw *hw, u16 * data);
 s32 igb_read_invm_version(struct e1000_hw *hw,
 			  struct e1000_fw_version *invm_ver);
-s32 igb_read_xmdio_reg(struct e1000_hw *hw, u16 addr, u8 dev_addr, u16 *data);
+s32 igb_read_xmdio_reg(struct e1000_hw *hw, u16 addr, u8 dev_addr, u16 * data);
 s32 igb_write_xmdio_reg(struct e1000_hw *hw, u16 addr, u8 dev_addr, u16 data);
 s32 igb_init_nvm_params_i210(struct e1000_hw *hw);
 bool igb_get_flash_presence_i210(struct e1000_hw *hw);
@@ -46,12 +46,12 @@ s32 igb_pll_workaround_i210(struct e1000_hw *hw);
 	(u16)(((invm_dword) & 0xFFFF0000) >> 16)
 
 enum E1000_INVM_STRUCTURE_TYPE {
-	E1000_INVM_UNINITIALIZED_STRUCTURE		= 0x00,
-	E1000_INVM_WORD_AUTOLOAD_STRUCTURE		= 0x01,
-	E1000_INVM_CSR_AUTOLOAD_STRUCTURE		= 0x02,
-	E1000_INVM_PHY_REGISTER_AUTOLOAD_STRUCTURE	= 0x03,
-	E1000_INVM_RSA_KEY_SHA256_STRUCTURE		= 0x04,
-	E1000_INVM_INVALIDATED_STRUCTURE		= 0x0F,
+	E1000_INVM_UNINITIALIZED_STRUCTURE = 0x00,
+	E1000_INVM_WORD_AUTOLOAD_STRUCTURE = 0x01,
+	E1000_INVM_CSR_AUTOLOAD_STRUCTURE = 0x02,
+	E1000_INVM_PHY_REGISTER_AUTOLOAD_STRUCTURE = 0x03,
+	E1000_INVM_RSA_KEY_SHA256_STRUCTURE = 0x04,
+	E1000_INVM_INVALIDATED_STRUCTURE = 0x0F,
 };
 
 #define E1000_INVM_RSA_KEY_SHA256_DATA_SIZE_IN_DWORDS	8

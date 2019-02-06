@@ -19,8 +19,6 @@
 #include <linux/init.h>
 #include <asm/unaligned.h>
 
-
-
 /* Serial EEPROM section. */
 /* The main routine to parse the very complicated SROM structure.
    Search www.digital.com for "21X4 SROM" to get details.
@@ -30,41 +28,44 @@
 
 /* Known cards that have old-style EEPROMs. */
 static struct eeprom_fixup eeprom_fixups[] = {
-  {"Asante", 0, 0, 0x94, {0x1e00, 0x0000, 0x0800, 0x0100, 0x018c,
-			  0x0000, 0x0000, 0xe078, 0x0001, 0x0050, 0x0018 }},
-  {"SMC9332DST", 0, 0, 0xC0, { 0x1e00, 0x0000, 0x0800, 0x041f,
-			   0x0000, 0x009E, /* 10baseT */
-			   0x0004, 0x009E, /* 10baseT-FD */
-			   0x0903, 0x006D, /* 100baseTx */
-			   0x0905, 0x006D, /* 100baseTx-FD */ }},
-  {"Cogent EM100", 0, 0, 0x92, { 0x1e00, 0x0000, 0x0800, 0x063f,
-				 0x0107, 0x8021, /* 100baseFx */
-				 0x0108, 0x8021, /* 100baseFx-FD */
-				 0x0100, 0x009E, /* 10baseT */
-				 0x0104, 0x009E, /* 10baseT-FD */
-				 0x0103, 0x006D, /* 100baseTx */
-				 0x0105, 0x006D, /* 100baseTx-FD */ }},
-  {"Maxtech NX-110", 0, 0, 0xE8, { 0x1e00, 0x0000, 0x0800, 0x0513,
-				   0x1001, 0x009E, /* 10base2, CSR12 0x10*/
-				   0x0000, 0x009E, /* 10baseT */
-				   0x0004, 0x009E, /* 10baseT-FD */
-				   0x0303, 0x006D, /* 100baseTx, CSR12 0x03 */
-				   0x0305, 0x006D, /* 100baseTx-FD CSR12 0x03 */}},
-  {"Accton EN1207", 0, 0, 0xE8, { 0x1e00, 0x0000, 0x0800, 0x051F,
-				  0x1B01, 0x0000, /* 10base2,   CSR12 0x1B */
-				  0x0B00, 0x009E, /* 10baseT,   CSR12 0x0B */
-				  0x0B04, 0x009E, /* 10baseT-FD,CSR12 0x0B */
-				  0x1B03, 0x006D, /* 100baseTx, CSR12 0x1B */
-				  0x1B05, 0x006D, /* 100baseTx-FD CSR12 0x1B */
-   }},
-  {"NetWinder", 0x00, 0x10, 0x57,
-	/* Default media = MII
-	 * MII block, reset sequence (3) = 0x0821 0x0000 0x0001, capabilities 0x01e1
-	 */
-	{ 0x1e00, 0x0000, 0x000b, 0x8f01, 0x0103, 0x0300, 0x0821, 0x000, 0x0001, 0x0000, 0x01e1 }
-  },
-  {0, 0, 0, 0, {}}};
-
+	{"Asante", 0, 0, 0x94, {0x1e00, 0x0000, 0x0800, 0x0100, 0x018c,
+				0x0000, 0x0000, 0xe078, 0x0001, 0x0050,
+				0x0018}},
+	{"SMC9332DST", 0, 0, 0xC0, {0x1e00, 0x0000, 0x0800, 0x041f,
+				    0x0000, 0x009E,	/* 10baseT */
+				    0x0004, 0x009E,	/* 10baseT-FD */
+				    0x0903, 0x006D,	/* 100baseTx */
+				    0x0905, 0x006D, /* 100baseTx-FD */ }},
+	{"Cogent EM100", 0, 0, 0x92, {0x1e00, 0x0000, 0x0800, 0x063f,
+				      0x0107, 0x8021,	/* 100baseFx */
+				      0x0108, 0x8021,	/* 100baseFx-FD */
+				      0x0100, 0x009E,	/* 10baseT */
+				      0x0104, 0x009E,	/* 10baseT-FD */
+				      0x0103, 0x006D,	/* 100baseTx */
+				      0x0105, 0x006D, /* 100baseTx-FD */ }},
+	{"Maxtech NX-110", 0, 0, 0xE8, {0x1e00, 0x0000, 0x0800, 0x0513,
+					0x1001, 0x009E,	/* 10base2, CSR12 0x10 */
+					0x0000, 0x009E,	/* 10baseT */
+					0x0004, 0x009E,	/* 10baseT-FD */
+					0x0303, 0x006D,	/* 100baseTx, CSR12 0x03 */
+					0x0305, 0x006D,
+					/* 100baseTx-FD CSR12 0x03 */ }},
+	{"Accton EN1207", 0, 0, 0xE8, {0x1e00, 0x0000, 0x0800, 0x051F,
+				       0x1B01, 0x0000,	/* 10base2,   CSR12 0x1B */
+				       0x0B00, 0x009E,	/* 10baseT,   CSR12 0x0B */
+				       0x0B04, 0x009E,	/* 10baseT-FD,CSR12 0x0B */
+				       0x1B03, 0x006D,	/* 100baseTx, CSR12 0x1B */
+				       0x1B05, 0x006D,	/* 100baseTx-FD CSR12 0x1B */
+				       }},
+	{"NetWinder", 0x00, 0x10, 0x57,
+	 /* Default media = MII
+	  * MII block, reset sequence (3) = 0x0821 0x0000 0x0001, capabilities 0x01e1
+	  */
+	 {0x1e00, 0x0000, 0x000b, 0x8f01, 0x0103, 0x0300, 0x0821, 0x000, 0x0001,
+	  0x0000, 0x01e1}
+	 },
+	{0, 0, 0, 0, {}}
+};
 
 static const char *block_name[] = {
 	"21140 non-MII",
@@ -75,8 +76,7 @@ static const char *block_name[] = {
 	"21143 reset method"
 };
 
-
-void tulip_parse_eeprom(/*RTnet*/struct rtnet_device *rtdev)
+void tulip_parse_eeprom( /*RTnet */ struct rtnet_device *rtdev)
 {
 	/* The last media info list parsed, for multiport boards.  */
 	static struct mediatable *last_mediatable;
@@ -89,70 +89,81 @@ void tulip_parse_eeprom(/*RTnet*/struct rtnet_device *rtdev)
 	tp->mtable = 0;
 	/* Detect an old-style (SA only) EEPROM layout:
 	   memcmp(eedata, eedata+16, 8). */
-	for (i = 0; i < 8; i ++)
-		if (ee_data[i] != ee_data[16+i])
+	for (i = 0; i < 8; i++)
+		if (ee_data[i] != ee_data[16 + i])
 			break;
 	if (i >= 8) {
 		if (ee_data[0] == 0xff) {
 			if (last_mediatable) {
 				controller_index++;
-				/*RTnet*/rtdm_printk(KERN_INFO "%s:  Controller %d of multiport board.\n",
-					   rtdev->name, controller_index);
+				/*RTnet */ rtdm_printk(KERN_INFO
+						       "%s:  Controller %d of multiport board.\n",
+						       rtdev->name,
+						       controller_index);
 				tp->mtable = last_mediatable;
 				ee_data = last_ee_data;
 				goto subsequent_board;
 			} else
-				/*RTnet*/rtdm_printk(KERN_INFO "%s:  Missing EEPROM, this interface may "
-					   "not work correctly!\n",
-			   rtdev->name);
+				/*RTnet */ rtdm_printk(KERN_INFO
+						       "%s:  Missing EEPROM, this interface may "
+						       "not work correctly!\n",
+						       rtdev->name);
 			return;
 		}
-	  /* Do a fix-up based on the vendor half of the station address prefix. */
-	  for (i = 0; eeprom_fixups[i].name; i++) {
-		if (rtdev->dev_addr[0] == eeprom_fixups[i].addr0
-			&&  rtdev->dev_addr[1] == eeprom_fixups[i].addr1
-			&&  rtdev->dev_addr[2] == eeprom_fixups[i].addr2) {
-		  if (rtdev->dev_addr[2] == 0xE8  &&  ee_data[0x1a] == 0x55)
-			  i++;			/* An Accton EN1207, not an outlaw Maxtech. */
-		  memcpy(ee_data + 26, eeprom_fixups[i].newtable,
-				 sizeof(eeprom_fixups[i].newtable));
-		  /*RTnet*/rtdm_printk(KERN_INFO "%s: Old format EEPROM on '%s' board.  Using"
-				 " substitute media control info.\n",
-				 rtdev->name, eeprom_fixups[i].name);
-		  break;
+		/* Do a fix-up based on the vendor half of the station address prefix. */
+		for (i = 0; eeprom_fixups[i].name; i++) {
+			if (rtdev->dev_addr[0] == eeprom_fixups[i].addr0
+			    && rtdev->dev_addr[1] == eeprom_fixups[i].addr1
+			    && rtdev->dev_addr[2] == eeprom_fixups[i].addr2) {
+				if (rtdev->dev_addr[2] == 0xE8
+				    && ee_data[0x1a] == 0x55)
+					i++;	/* An Accton EN1207, not an outlaw Maxtech. */
+				memcpy(ee_data + 26, eeprom_fixups[i].newtable,
+				       sizeof(eeprom_fixups[i].newtable));
+				/*RTnet */ rtdm_printk(KERN_INFO
+						       "%s: Old format EEPROM on '%s' board.  Using"
+						       " substitute media control info.\n",
+						       rtdev->name,
+						       eeprom_fixups[i].name);
+				break;
+			}
 		}
-	  }
-	  if (eeprom_fixups[i].name == NULL) { /* No fixup found. */
-		  /*RTnet*/rtdm_printk(KERN_INFO "%s: Old style EEPROM with no media selection "
-				 "information.\n",
-			   rtdev->name);
-		return;
-	  }
+		if (eeprom_fixups[i].name == NULL) {	/* No fixup found. */
+			/*RTnet */ rtdm_printk(KERN_INFO
+					       "%s: Old style EEPROM with no media selection "
+					       "information.\n", rtdev->name);
+			return;
+		}
 	}
 
 	controller_index = 0;
-	if (ee_data[19] > 1) {		/* Multiport board. */
+	if (ee_data[19] > 1) {	/* Multiport board. */
 		last_ee_data = ee_data;
 	}
 subsequent_board:
 
-	if (ee_data[27] == 0) {		/* No valid media table. */
+	if (ee_data[27] == 0) {	/* No valid media table. */
 	} else if (tp->chip_id == DC21041) {
-		unsigned char *p = (void *)ee_data + ee_data[27 + controller_index*3];
+		unsigned char *p =
+		    (void *)ee_data + ee_data[27 + controller_index * 3];
 		int media = get_u16(p);
 		int count = p[2];
 		p += 3;
 
-		/*RTnet*/rtdm_printk(KERN_INFO "%s: 21041 Media table, default media %4.4x (%s).\n",
-			   rtdev->name, media,
-			   media & 0x0800 ? "Autosense" : medianame[media & MEDIA_MASK]);
+		/*RTnet */ rtdm_printk(KERN_INFO
+				       "%s: 21041 Media table, default media %4.4x (%s).\n",
+				       rtdev->name, media,
+				       media & 0x0800 ? "Autosense" :
+				       medianame[media & MEDIA_MASK]);
 		for (i = 0; i < count; i++) {
 			unsigned char media_block = *p++;
 			int media_code = media_block & MEDIA_MASK;
 			if (media_block & 0x40)
 				p += 6;
-			/*RTnet*/rtdm_printk(KERN_INFO "%s:  21041 media #%d, %s.\n",
-				   rtdev->name, media_code, medianame[media_code]);
+			/*RTnet */ rtdm_printk(KERN_INFO
+					       "%s:  21041 media #%d, %s.\n",
+					       rtdev->name, media_code,
+					       medianame[media_code]);
 		}
 	} else {
 		unsigned char *p = (void *)ee_data + ee_data[27];
@@ -166,18 +177,22 @@ subsequent_board:
 			csr12dir = *p++;
 		count = *p++;
 
-	        /* there is no phy information, don't even try to build mtable */
-	        if (count == 0) {
+		/* there is no phy information, don't even try to build mtable */
+		if (count == 0) {
 			if (tulip_debug > 0)
-				/*RTnet*/rtdm_printk(KERN_WARNING "%s: no phy info, aborting mtable build\n", rtdev->name);
-		        return;
+				/*RTnet */
+				rtdm_printk(KERN_WARNING
+					    "%s: no phy info, aborting mtable build\n",
+					    rtdev->name);
+			return;
 		}
 
 		mtable = (struct mediatable *)
-		    kmalloc(sizeof(struct mediatable) + count*sizeof(struct medialeaf), GFP_KERNEL);
+		    kmalloc(sizeof(struct mediatable) +
+			    count * sizeof(struct medialeaf), GFP_KERNEL);
 
 		if (mtable == NULL)
-			return;				/* Horrible, impossible failure. */
+			return;	/* Horrible, impossible failure. */
 		last_mediatable = tp->mtable = mtable;
 		mtable->defaultmedia = media;
 		mtable->leafcount = count;
@@ -185,12 +200,15 @@ subsequent_board:
 		mtable->has_nonmii = mtable->has_mii = mtable->has_reset = 0;
 		mtable->csr15dir = mtable->csr15val = 0;
 
-		/*RTnet*/rtdm_printk(KERN_INFO "%s:  EEPROM default media type %s.\n", rtdev->name,
-			   media & 0x0800 ? "Autosense" : medianame[media & MEDIA_MASK]);
+		/*RTnet */ rtdm_printk(KERN_INFO
+				       "%s:  EEPROM default media type %s.\n",
+				       rtdev->name,
+				       media & 0x0800 ? "Autosense" :
+				       medianame[media & MEDIA_MASK]);
 		for (i = 0; i < count; i++) {
 			struct medialeaf *leaf = &mtable->mleaf[i];
 
-			if ((p[0] & 0x80) == 0) { /* 21140 Compact block. */
+			if ((p[0] & 0x80) == 0) {	/* 21140 Compact block. */
 				leaf->type = 0;
 				leaf->media = p[0] & 0x3f;
 				leaf->leafdata = p;
@@ -202,7 +220,8 @@ subsequent_board:
 				if (p[1] == 0x05) {
 					mtable->has_reset = i;
 					leaf->media = p[2] & 0x0f;
-				} else if (tp->chip_id == DM910X && p[1] == 0x80) {
+				} else if (tp->chip_id == DM910X
+					   && p[1] == 0x80) {
 					/* Hack to ignore Davicom delay period block */
 					mtable->leafcount--;
 					count--;
@@ -215,55 +234,95 @@ subsequent_board:
 
 					mtable->has_mii = 1;
 					leaf->media = 11;
-					gpr_len=p[3]*2;
-					reset_len=p[4+gpr_len]*2;
-					new_advertise |= get_u16(&p[7+gpr_len+reset_len]);
+					gpr_len = p[3] * 2;
+					reset_len = p[4 + gpr_len] * 2;
+					new_advertise |=
+					    get_u16(&p
+						    [7 + gpr_len + reset_len]);
 				} else {
 					mtable->has_nonmii = 1;
 					leaf->media = p[2] & MEDIA_MASK;
 					/* Davicom's media number for 100BaseTX is strange */
-					if (tp->chip_id == DM910X && leaf->media == 1)
+					if (tp->chip_id == DM910X
+					    && leaf->media == 1)
 						leaf->media = 3;
 					switch (leaf->media) {
-					case 0: new_advertise |= 0x0020; break;
-					case 4: new_advertise |= 0x0040; break;
-					case 3: new_advertise |= 0x0080; break;
-					case 5: new_advertise |= 0x0100; break;
-					case 6: new_advertise |= 0x0200; break;
+					case 0:
+						new_advertise |= 0x0020;
+						break;
+					case 4:
+						new_advertise |= 0x0040;
+						break;
+					case 3:
+						new_advertise |= 0x0080;
+						break;
+					case 5:
+						new_advertise |= 0x0100;
+						break;
+					case 6:
+						new_advertise |= 0x0200;
+						break;
 					}
-					if (p[1] == 2  &&  leaf->media == 0) {
+					if (p[1] == 2 && leaf->media == 0) {
 						if (p[2] & 0x40) {
-							u32 base15 = get_unaligned((u16*)&p[7]);
+							u32 base15 =
+							    get_unaligned((u16
+									   *) &
+									  p[7]);
 							mtable->csr15dir =
-								(get_unaligned((u16*)&p[9])<<16) + base15;
+							    (get_unaligned
+							     ((u16 *) & p[9]) <<
+							     16) + base15;
 							mtable->csr15val =
-								(get_unaligned((u16*)&p[11])<<16) + base15;
+							    (get_unaligned
+							     ((u16 *) & p[11])
+							     << 16) + base15;
 						} else {
-							mtable->csr15dir = get_unaligned((u16*)&p[3])<<16;
-							mtable->csr15val = get_unaligned((u16*)&p[5])<<16;
+							mtable->csr15dir =
+							    get_unaligned((u16
+									   *) &
+									  p[3])
+							    << 16;
+							mtable->csr15val =
+							    get_unaligned((u16
+									   *) &
+									  p[5])
+							    << 16;
 						}
 					}
 				}
 				leaf->leafdata = p + 2;
 				p += (p[0] & 0x3f) + 1;
 			}
-			if (tulip_debug > 1  &&  leaf->media == 11) {
+			if (tulip_debug > 1 && leaf->media == 11) {
 				unsigned char *bp = leaf->leafdata;
-				/*RTnet*/rtdm_printk(KERN_INFO "%s:  MII interface PHY %d, setup/reset "
-					   "sequences %d/%d long, capabilities %2.2x %2.2x.\n",
-					   rtdev->name, bp[0], bp[1], bp[2 + bp[1]*2],
-					   bp[5 + bp[2 + bp[1]*2]*2], bp[4 + bp[2 + bp[1]*2]*2]);
+				/*RTnet */ rtdm_printk(KERN_INFO
+						       "%s:  MII interface PHY %d, setup/reset "
+						       "sequences %d/%d long, capabilities %2.2x %2.2x.\n",
+						       rtdev->name, bp[0],
+						       bp[1], bp[2 + bp[1] * 2],
+						       bp[5 +
+							  bp[2 +
+							     bp[1] * 2] * 2],
+						       bp[4 +
+							  bp[2 +
+							     bp[1] * 2] * 2]);
 			}
-			/*RTnet*/rtdm_printk(KERN_INFO "%s:  Index #%d - Media %s (#%d) described "
-				   "by a %s (%d) block.\n",
-				   rtdev->name, i, medianame[leaf->media & 15], leaf->media,
-				   leaf->type < ARRAY_SIZE(block_name) ? block_name[leaf->type] : "<unknown>",
-				   leaf->type);
+			/*RTnet */
+			rtdm_printk(KERN_INFO
+				    "%s:  Index #%d - Media %s (#%d) described "
+				    "by a %s (%d) block.\n", rtdev->name, i,
+				    medianame[leaf->media & 15], leaf->media,
+				    leaf->type <
+				    ARRAY_SIZE(block_name) ? block_name[leaf->
+									type] :
+				    "<unknown>", leaf->type);
 		}
 		if (new_advertise)
 			tp->sym_advertise = new_advertise;
 	}
 }
+
 /* Reading a serial EEPROM is a "bit" grungy, but we work our way through:->.*/
 
 /*  EEPROM_Ctrl bits. */
@@ -301,7 +360,8 @@ int tulip_read_eeprom(long ioaddr, int location, int addr_len)
 		eeprom_delay();
 		outl(EE_ENB | dataval | EE_SHIFT_CLK, ee_addr);
 		eeprom_delay();
-		retval = (retval << 1) | ((inl(ee_addr) & EE_DATA_READ) ? 1 : 0);
+		retval =
+		    (retval << 1) | ((inl(ee_addr) & EE_DATA_READ) ? 1 : 0);
 	}
 	outl(EE_ENB, ee_addr);
 	eeprom_delay();
@@ -309,7 +369,8 @@ int tulip_read_eeprom(long ioaddr, int location, int addr_len)
 	for (i = 16; i > 0; i--) {
 		outl(EE_ENB | EE_SHIFT_CLK, ee_addr);
 		eeprom_delay();
-		retval = (retval << 1) | ((inl(ee_addr) & EE_DATA_READ) ? 1 : 0);
+		retval =
+		    (retval << 1) | ((inl(ee_addr) & EE_DATA_READ) ? 1 : 0);
 		outl(EE_ENB, ee_addr);
 		eeprom_delay();
 	}
@@ -318,4 +379,3 @@ int tulip_read_eeprom(long ioaddr, int location, int addr_len)
 	outl(EE_ENB & ~EE_CS, ee_addr);
 	return retval;
 }
-

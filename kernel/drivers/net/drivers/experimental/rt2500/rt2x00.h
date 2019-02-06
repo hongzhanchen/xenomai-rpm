@@ -143,64 +143,61 @@ extern int rt2x00_debug_level;
 /*
  * Device 802.11abg capabilities.
  */
-static struct _rt2x00_capabilities{
-    u8				txpower[6];
-    u8				bitrate[12];
+static struct _rt2x00_capabilities {
+	u8 txpower[6];
+	u8 bitrate[12];
 } __attribute__ ((packed)) capabilities = {
-    /*
-     * tx-power.
-     */
-    .txpower = {
-          3, 12, 25, 50, 75, 100,
-      },
+	/*
+	 * tx-power.
+	 */
+	.txpower = {
+	3, 12, 25, 50, 75, 100,},
+	    /*
+	     * Bitrates
+	     */
+	    .bitrate = {
+		2, 4, 11, 22,	/* CCK. */
+		    12, 18, 24, 36, 48, 72, 96, 108,	/* OFDM. */
+},};
 
-    /*
-     * Bitrates
-     */
-    .bitrate = {
-         2, 4, 11, 22,						/* CCK. */
-         12, 18, 24, 36, 48, 72, 96, 108,			/* OFDM. */
-     },
-};
+struct _rt2x00_config {
 
-struct _rt2x00_config{
-
-    u8				config_flags;
+	u8 config_flags;
 #define CONFIG_DROP_BCAST           0x0001
 #define CONFIG_DROP_MCAST           0x0002
 #define CONFIG_AUTORESP             0x0004
 
-    u8                         antenna_tx;
-    u8                         antenna_rx;
+	u8 antenna_tx;
+	u8 antenna_rx;
 
-    u8				bssid[ETH_ALEN];
-    u8				short_retry;
-    u8				long_retry;
+	u8 bssid[ETH_ALEN];
+	u8 short_retry;
+	u8 long_retry;
 
-    u8                          channel;
-    u8                          bitrate;	/* 0.5Mbit/sec */
-    u8				txpower;	/* % */
+	u8 channel;
+	u8 bitrate;		/* 0.5Mbit/sec */
+	u8 txpower;		/* % */
 
-    u8				bbpsens;
+	u8 bbpsens;
 
-    /*
-     * LED status
-     */
-    u8				led_status;
+	/*
+	 * LED status
+	 */
+	u8 led_status;
 
-    u16				__pad2;		/* For alignment only. */
+	u16 __pad2;		/* For alignment only. */
 
-    /*
-     * Duration values in us.
-     */
-    u8				plcp;
-    u8				sifs;
-    u8				slot_time;
+	/*
+	 * Duration values in us.
+	 */
+	u8 plcp;
+	u8 sifs;
+	u8 slot_time;
 
-    /*
-     * Configuration values that have to be updated to device.
-     */
-    u16				update_flags;
+	/*
+	 * Configuration values that have to be updated to device.
+	 */
+	u16 update_flags;
 #define UPDATE_ALL_CONFIG		0xffff
 #define UPDATE_BSSID			0x0001
 #define UPDATE_PACKET_FILTER		0x0002
@@ -215,41 +212,41 @@ struct _rt2x00_config{
 #define UPDATE_LED_STATUS		0x0400
 #define UPDATE_BBPSENS                  0x0800
 
-}  __attribute__ ((packed));
+} __attribute__ ((packed));
 
 struct _rt2x00_core {
 
-    /*
-     * RT2x00 device status flags (atomic read/write access).
-     */
-    unsigned long			flags;
+	/*
+	 * RT2x00 device status flags (atomic read/write access).
+	 */
+	unsigned long flags;
 
-#define DEVICE_ENABLED			0 /* Device has been opened. */
-#define DEVICE_AWAKE			1 /* Device is not suspended. */
-#define DEVICE_RADIO_ON			2 /* Device antenna is enabled. */
-#define DEVICE_CONFIG_UPDATE            3 /* Device is updating configuration. */
+#define DEVICE_ENABLED			0	/* Device has been opened. */
+#define DEVICE_AWAKE			1	/* Device is not suspended. */
+#define DEVICE_RADIO_ON			2	/* Device antenna is enabled. */
+#define DEVICE_CONFIG_UPDATE            3	/* Device is updating configuration. */
 
-    /*
-     * Device handler.
-     */
-    struct _rt2x00_dev_handler	*handler;
+	/*
+	 * Device handler.
+	 */
+	struct _rt2x00_dev_handler *handler;
 
-    /*
-     * RTnet device we belong to.
-     */
-    struct rtnet_device		*rtnet_dev;
+	/*
+	 * RTnet device we belong to.
+	 */
+	struct rtnet_device *rtnet_dev;
 
-    /*
-     * RTwlan stack structure.
-     */
-    struct rtwlan_device	*rtwlan_dev;
+	/*
+	 * RTwlan stack structure.
+	 */
+	struct rtwlan_device *rtwlan_dev;
 
-    /*
-     * Device configuration.
-     */
-    struct _rt2x00_config	config;
+	/*
+	 * Device configuration.
+	 */
+	struct _rt2x00_config config;
 
-    void * priv;
+	void *priv;
 
 } __attribute__ ((packed));
 
@@ -258,43 +255,46 @@ struct _rt2x00_core {
  */
 struct _rt2x00_dev_handler {
 
-    /*
-     * Device specific module.
-     */
-    struct module	*dev_module;
+	/*
+	 * Device specific module.
+	 */
+	struct module *dev_module;
 
-    /*
-     * Initialization handlers.
-     */
-    int (*dev_probe)(struct _rt2x00_core *core, void *priv);
-    int (*dev_remove)(struct _rt2x00_core *core);
+	/*
+	 * Initialization handlers.
+	 */
+	int (*dev_probe) (struct _rt2x00_core * core, void *priv);
+	int (*dev_remove) (struct _rt2x00_core * core);
 
-    /*
-     * Radio control.
-     */
-    int (*dev_radio_on)(struct _rt2x00_core *core);
-    int (*dev_radio_off)(struct _rt2x00_core *core);
+	/*
+	 * Radio control.
+	 */
+	int (*dev_radio_on) (struct _rt2x00_core * core);
+	int (*dev_radio_off) (struct _rt2x00_core * core);
 
-    /*
-     * Configuration handlers.
-     */
-    int (*dev_update_config)(struct _rt2x00_core *core, u16 update_flags);
+	/*
+	 * Configuration handlers.
+	 */
+	int (*dev_update_config) (struct _rt2x00_core * core, u16 update_flags);
 
-    /*
-     * xmit handler.
-     */
-    int (*dev_xmit_packet)(struct _rt2x00_core *core, struct rtskb *rtskb, u16 rate, u16 xmit_flags);
+	/*
+	 * xmit handler.
+	 */
+	int (*dev_xmit_packet) (struct _rt2x00_core * core,
+				struct rtskb * rtskb, u16 rate, u16 xmit_flags);
 
-    /*
-     * Handler for direct access to register from core.
-     */
-    int (*dev_register_access)(struct _rt2x00_core * core, int request, u32 address, u32 * value);
+	/*
+	 * Handler for direct access to register from core.
+	 */
+	int (*dev_register_access) (struct _rt2x00_core * core, int request,
+				    u32 address, u32 * value);
 
-}  __attribute__ ((packed));
+} __attribute__ ((packed));
 
-static inline void * rt2x00_priv(const struct _rt2x00_core *core) {
+static inline void *rt2x00_priv(const struct _rt2x00_core *core)
+{
 
-    return core->priv;
+	return core->priv;
 }
 
 /*
@@ -306,24 +306,23 @@ static inline void * rt2x00_priv(const struct _rt2x00_core *core) {
 #define ACK_SIZE				14
 #define IEEE80211_HEADER			24
 
-static inline u16
-get_duration(const unsigned int size, const u8 rate) {
+static inline u16 get_duration(const unsigned int size, const u8 rate)
+{
 
-    return ((size * 8 * 2) / rate);
+	return ((size * 8 * 2) / rate);
 }
 
-static inline u16
-get_duration_res(const unsigned int size, const u8 rate) {
+static inline u16 get_duration_res(const unsigned int size, const u8 rate)
+{
 
-    return ((size * 8 * 2) % rate);
+	return ((size * 8 * 2) % rate);
 }
 
-static inline u16
-get_preamble(const struct _rt2x00_config *config) {
+static inline u16 get_preamble(const struct _rt2x00_config *config)
+{
 
-    return 144;
+	return 144;
 }
-
 
 /*
  * Register handlers.
@@ -331,89 +330,101 @@ get_preamble(const struct _rt2x00_config *config) {
  * This will simplify the process of setting and reading a certain field
  * inside the register.
  */
-struct _rt2x00_field16{
-    u16	bit_offset;
-    u16	bit_mask;
+struct _rt2x00_field16 {
+	u16 bit_offset;
+	u16 bit_mask;
 } __attribute__ ((packed));
 
-struct _rt2x00_field32{
-    u32	bit_offset;
-    u32	bit_mask;
+struct _rt2x00_field32 {
+	u32 bit_offset;
+	u32 bit_mask;
 } __attribute__ ((packed));
 
 #define FIELD16(__offset, __mask)	( (struct _rt2x00_field16) { (__offset), (__mask) } )
 #define FIELD32(__offset, __mask)	( (struct _rt2x00_field32) { (__offset), (__mask) } )
 
 static inline void
-rt2x00_set_field32(u32 *reg, const struct _rt2x00_field32 field, const u32 value) {
+rt2x00_set_field32(u32 * reg, const struct _rt2x00_field32 field,
+		   const u32 value)
+{
 
-    *reg &= cpu_to_le32(~(field.bit_mask));
-    *reg |= cpu_to_le32((value << field.bit_offset) & field.bit_mask);
+	*reg &= cpu_to_le32(~(field.bit_mask));
+	*reg |= cpu_to_le32((value << field.bit_offset) & field.bit_mask);
 }
 
 static inline void
-rt2x00_set_field32_nb(u32 *reg, const struct _rt2x00_field32 field, const u32 value) {
+rt2x00_set_field32_nb(u32 * reg, const struct _rt2x00_field32 field,
+		      const u32 value)
+{
 
-    *reg &= ~(field.bit_mask);
-    *reg |= (value << field.bit_offset) & field.bit_mask;
+	*reg &= ~(field.bit_mask);
+	*reg |= (value << field.bit_offset) & field.bit_mask;
 }
 
 static inline u32
-rt2x00_get_field32(const u32 reg, const struct _rt2x00_field32 field) {
+rt2x00_get_field32(const u32 reg, const struct _rt2x00_field32 field)
+{
 
-    return (le32_to_cpu(reg) & field.bit_mask) >> field.bit_offset;
+	return (le32_to_cpu(reg) & field.bit_mask) >> field.bit_offset;
 }
 
 static inline u32
-rt2x00_get_field32_nb(const u32 reg, const struct _rt2x00_field32 field) {
+rt2x00_get_field32_nb(const u32 reg, const struct _rt2x00_field32 field)
+{
 
-    return (reg & field.bit_mask) >> field.bit_offset;
+	return (reg & field.bit_mask) >> field.bit_offset;
 }
 
 static inline void
-rt2x00_set_field16(u16 *reg, const struct _rt2x00_field16 field, const u16 value) {
+rt2x00_set_field16(u16 * reg, const struct _rt2x00_field16 field,
+		   const u16 value)
+{
 
-    *reg &= cpu_to_le16(~(field.bit_mask));
-    *reg |= cpu_to_le16((value << field.bit_offset) & field.bit_mask);
+	*reg &= cpu_to_le16(~(field.bit_mask));
+	*reg |= cpu_to_le16((value << field.bit_offset) & field.bit_mask);
 }
 
 static inline void
-rt2x00_set_field16_nb(u16 *reg, const struct _rt2x00_field16 field, const u16 value) {
+rt2x00_set_field16_nb(u16 * reg, const struct _rt2x00_field16 field,
+		      const u16 value)
+{
 
-    *reg &= ~(field.bit_mask);
-    *reg |= (value << field.bit_offset) & field.bit_mask;
+	*reg &= ~(field.bit_mask);
+	*reg |= (value << field.bit_offset) & field.bit_mask;
 }
 
 static inline u16
-rt2x00_get_field16(const u16 reg, const struct _rt2x00_field16 field) {
+rt2x00_get_field16(const u16 reg, const struct _rt2x00_field16 field)
+{
 
-    return (le16_to_cpu(reg) & field.bit_mask) >> field.bit_offset;
+	return (le16_to_cpu(reg) & field.bit_mask) >> field.bit_offset;
 }
 
 static inline u16
-rt2x00_get_field16_nb(const u16 reg, const struct _rt2x00_field16 field) {
+rt2x00_get_field16_nb(const u16 reg, const struct _rt2x00_field16 field)
+{
 
-    return (reg & field.bit_mask) >> field.bit_offset;
+	return (reg & field.bit_mask) >> field.bit_offset;
 }
 
 /*
  * rf register sructure for channel selection.
  */
-struct _rf_channel{
-    u32				rf1;
-    u32				rf2;
-    u32				rf3;
-    u32				rf4;
-}__attribute__ ((packed));
+struct _rf_channel {
+	u32 rf1;
+	u32 rf2;
+	u32 rf3;
+	u32 rf4;
+} __attribute__ ((packed));
 
 /*
  * Chipset identification
  * The chipset on the device is composed of a RT and RF chip.
  * The chipset combination is important for determining device capabilities.
  */
-struct _rt2x00_chip{
-    u16				rt;
-    u16				rf;
+struct _rt2x00_chip {
+	u16 rt;
+	u16 rf;
 } __attribute__ ((packed));
 
 /*
@@ -422,30 +433,31 @@ struct _rt2x00_chip{
  * To prevent problems, all rf values will be masked to clearly seperate each chipset.
  */
 static inline void
-set_chip(struct _rt2x00_chip *chipset, const u16 rt, const u16 rf) {
+set_chip(struct _rt2x00_chip *chipset, const u16 rt, const u16 rf)
+{
 
-    INFO("Chipset detected - rt: %04x, rf: %04x.\n", rt, rf);
+	INFO("Chipset detected - rt: %04x, rf: %04x.\n", rt, rf);
 
-    chipset->rt = rt;
-    chipset->rf = rf | (chipset->rt & 0xff00);
+	chipset->rt = rt;
+	chipset->rf = rf | (chipset->rt & 0xff00);
 }
 
-static inline char
-rt2x00_rt(const struct _rt2x00_chip *chipset, const u16 chip) {
+static inline char rt2x00_rt(const struct _rt2x00_chip *chipset, const u16 chip)
+{
 
-    return (chipset->rt == chip);
+	return (chipset->rt == chip);
 }
 
-static inline char
-rt2x00_rf(const struct _rt2x00_chip *chipset, const u16 chip) {
+static inline char rt2x00_rf(const struct _rt2x00_chip *chipset, const u16 chip)
+{
 
-    return (chipset->rf == chip);
+	return (chipset->rf == chip);
 }
 
-static inline u16
-rt2x00_get_rf(const struct _rt2x00_chip *chipset) {
+static inline u16 rt2x00_get_rf(const struct _rt2x00_chip *chipset)
+{
 
-    return chipset->rf;
+	return chipset->rf;
 }
 
 /*
@@ -458,44 +470,44 @@ rt2x00_get_rf(const struct _rt2x00_chip *chipset) {
  */
 struct _data_ring {
 
-    /*
-     * Base address of packet ring.
-     */
-    dma_addr_t			data_dma;
-    void			*data_addr;
+	/*
+	 * Base address of packet ring.
+	 */
+	dma_addr_t data_dma;
+	void *data_addr;
 
-    /*
-     * Private device specific data.
-     */
-    void			*priv;
-    struct _rt2x00_core		*core;
+	/*
+	 * Private device specific data.
+	 */
+	void *priv;
+	struct _rt2x00_core *core;
 
-    /*
-     * Current index values.
-     */
-    u8				index;
-    u8				index_done;
+	/*
+	 * Current index values.
+	 */
+	u8 index;
+	u8 index_done;
 
-    /*
-     * Ring type set with RING_* define.
-     */
-    u8				ring_type;
+	/*
+	 * Ring type set with RING_* define.
+	 */
+	u8 ring_type;
 
-    /*
-     * Number of entries in this ring.
-     */
-    u8				max_entries;
+	/*
+	 * Number of entries in this ring.
+	 */
+	u8 max_entries;
 
-    /*
-     * Size of packet and descriptor in bytes.
-     */
-    u16				entry_size;
-    u16				desc_size;
+	/*
+	 * Size of packet and descriptor in bytes.
+	 */
+	u16 entry_size;
+	u16 desc_size;
 
-    /*
-     * Total allocated memory size.
-     */
-    u32				mem_size;
+	/*
+	 * Total allocated memory size.
+	 */
+	u32 mem_size;
 } __attribute__ ((packed));
 
 /*
@@ -510,86 +522,94 @@ struct _data_ring {
 /*
  * Initialization and cleanup routines.
  */
-static inline void rt2x00_init_ring(
-                                    struct _rt2x00_core *core,
-                                    struct _data_ring *ring,
-                                    const u8 ring_type,
-                                    const u16 max_entries,
-                                    const u16 entry_size,
-                                    const u16 desc_size) {
+static inline void rt2x00_init_ring(struct _rt2x00_core *core,
+				    struct _data_ring *ring,
+				    const u8 ring_type,
+				    const u16 max_entries,
+				    const u16 entry_size, const u16 desc_size)
+{
 
-    ring->core = core;
-    ring->index = 0;
-    ring->index_done = 0;
-    ring->ring_type = ring_type;
-    ring->max_entries = max_entries;
-    ring->entry_size = entry_size;
-    ring->desc_size = desc_size;
-    ring->mem_size = ring->max_entries * (ring->desc_size + ring->entry_size);
+	ring->core = core;
+	ring->index = 0;
+	ring->index_done = 0;
+	ring->ring_type = ring_type;
+	ring->max_entries = max_entries;
+	ring->entry_size = entry_size;
+	ring->desc_size = desc_size;
+	ring->mem_size =
+	    ring->max_entries * (ring->desc_size + ring->entry_size);
 }
 
-static inline void rt2x00_deinit_ring(struct _data_ring *ring) {
+static inline void rt2x00_deinit_ring(struct _data_ring *ring)
+{
 
-    ring->core = NULL;
-    ring->index = 0;
-    ring->index_done = 0;
-    ring->ring_type = 0;
-    ring->max_entries = 0;
-    ring->entry_size = 0;
-    ring->desc_size = 0;
-    ring->mem_size = 0;
+	ring->core = NULL;
+	ring->index = 0;
+	ring->index_done = 0;
+	ring->ring_type = 0;
+	ring->max_entries = 0;
+	ring->entry_size = 0;
+	ring->desc_size = 0;
+	ring->mem_size = 0;
 }
 
 /*
  * Ring index manipulation functions.
  */
-static inline void rt2x00_ring_index_inc(struct _data_ring *ring) {
+static inline void rt2x00_ring_index_inc(struct _data_ring *ring)
+{
 
-    ring->index = (++ring->index < ring->max_entries) ? ring->index : 0;
+	ring->index = (++ring->index < ring->max_entries) ? ring->index : 0;
 }
 
-static inline void rt2x00_ring_index_done_inc(struct _data_ring *ring) {
+static inline void rt2x00_ring_index_done_inc(struct _data_ring *ring)
+{
 
-    ring->index_done = (++ring->index_done < ring->max_entries) ? ring->index_done : 0;
+	ring->index_done =
+	    (++ring->index_done < ring->max_entries) ? ring->index_done : 0;
 }
 
-static inline void rt2x00_ring_clear_index(struct _data_ring *ring) {
+static inline void rt2x00_ring_clear_index(struct _data_ring *ring)
+{
 
-    ring->index = 0;
-    ring->index_done = 0;
+	ring->index = 0;
+	ring->index_done = 0;
 }
 
-static inline u8 rt2x00_ring_empty(struct _data_ring *ring) {
+static inline u8 rt2x00_ring_empty(struct _data_ring *ring)
+{
 
-    return ring->index_done == ring->index;
+	return ring->index_done == ring->index;
 }
 
-static inline u8 rt2x00_ring_free_entries(struct _data_ring *ring) {
+static inline u8 rt2x00_ring_free_entries(struct _data_ring *ring)
+{
 
-    if(ring->index >= ring->index_done)
-        return ring->max_entries - (ring->index - ring->index_done);
-    else
-        return ring->index_done - ring->index;
+	if (ring->index >= ring->index_done)
+		return ring->max_entries - (ring->index - ring->index_done);
+	else
+		return ring->index_done - ring->index;
 }
 
 /*
  * Return PLCP value matching the rate.
  * PLCP values according to ieee802.11a-1999 p.14.
  */
-static inline u8 rt2x00_get_plcp(const u8 rate) {
+static inline u8 rt2x00_get_plcp(const u8 rate)
+{
 
-    u8	counter = 0x00;
-    u8	plcp[12] = {
-        0x00, 0x01, 0x02, 0x03,					/* CCK. */
-        0x0b, 0x0f, 0x0a, 0x0e, 0x09, 0x0d, 0x08, 0x0c,		/* OFDM. */
-    };
+	u8 counter = 0x00;
+	u8 plcp[12] = {
+		0x00, 0x01, 0x02, 0x03,	/* CCK. */
+		0x0b, 0x0f, 0x0a, 0x0e, 0x09, 0x0d, 0x08, 0x0c,	/* OFDM. */
+	};
 
-    for(; counter < 12; counter++){
-        if(capabilities.bitrate[counter] == rate)
-            return plcp[counter];
-    }
+	for (; counter < 12; counter++) {
+		if (capabilities.bitrate[counter] == rate)
+			return plcp[counter];
+	}
 
-    return 0xff;
+	return 0xff;
 }
 
 #define OFDM_CHANNEL(__channel)		( (__channel) >= CHANNEL_OFDM_MIN && (__channel) <= CHANNEL_OFDM_MAX )
@@ -601,30 +621,30 @@ static inline u8 rt2x00_get_plcp(const u8 rate) {
  * Return the index value of the channel starting from the first channel of the range.
  * Where range can be OFDM, UNII (low), HiperLAN2 or UNII (high).
  */
-static inline int rt2x00_get_channel_index(const u8 channel) {
+static inline int rt2x00_get_channel_index(const u8 channel)
+{
 
-    if(OFDM_CHANNEL(channel))
-        return (channel - 1);
+	if (OFDM_CHANNEL(channel))
+		return (channel - 1);
 
-    if(channel % 4)
-        return -EINVAL;
+	if (channel % 4)
+		return -EINVAL;
 
-    if(UNII_LOW_CHANNEL(channel))
-        return ((channel - CHANNEL_UNII_LOW_MIN) / 4);
-    else if(HIPERLAN2_CHANNEL(channel))
-        return ((channel - CHANNEL_HIPERLAN2_MIN) / 4);
-    else if(UNII_HIGH_CHANNEL(channel))
-        return ((channel - CHANNEL_UNII_HIGH_MIN) / 4);
-    return -EINVAL;
+	if (UNII_LOW_CHANNEL(channel))
+		return ((channel - CHANNEL_UNII_LOW_MIN) / 4);
+	else if (HIPERLAN2_CHANNEL(channel))
+		return ((channel - CHANNEL_HIPERLAN2_MIN) / 4);
+	else if (UNII_HIGH_CHANNEL(channel))
+		return ((channel - CHANNEL_UNII_HIGH_MIN) / 4);
+	return -EINVAL;
 }
-
 
 /*
  * RT2x00 core module functions that can be used in the device specific modules.
  */
-extern struct rtnet_device * rt2x00_core_probe(struct _rt2x00_dev_handler * handler, void *priv, u32 sizeof_dev);
+extern struct rtnet_device *rt2x00_core_probe(struct _rt2x00_dev_handler
+					      *handler, void *priv,
+					      u32 sizeof_dev);
 extern void rt2x00_core_remove(struct rtnet_device *rtnet_dev);
 
 #endif
-
-

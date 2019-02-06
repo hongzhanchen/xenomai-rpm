@@ -31,44 +31,44 @@
 
 struct rtwlan_cmd {
 
-    struct rtnet_ioctl_head head;
+	struct rtnet_ioctl_head head;
 
-    union {
+	union {
 
-        struct {
-            unsigned int    bitrate;
-            unsigned int    channel;
-            unsigned int    retry;
-            unsigned int    txpower;
-            unsigned int    mode;
-            unsigned int    autoresponder;
-            unsigned int    dropbcast;
-            unsigned int    dropmcast;
-            unsigned int    bbpsens;
-        }set;
+		struct {
+			unsigned int bitrate;
+			unsigned int channel;
+			unsigned int retry;
+			unsigned int txpower;
+			unsigned int mode;
+			unsigned int autoresponder;
+			unsigned int dropbcast;
+			unsigned int dropmcast;
+			unsigned int bbpsens;
+		} set;
 
-        struct {
-            unsigned int    address;
-            unsigned int    value;
-        }reg;
+		struct {
+			unsigned int address;
+			unsigned int value;
+		} reg;
 
-        struct {
-            int            ifindex;
-            unsigned int   flags;
-            unsigned int   bitrate;
-            unsigned int   channel;
-            unsigned int   retry;
-            unsigned int   txpower;
-            unsigned int   bbpsens; 
-            unsigned int   mode;
-            unsigned int   autoresponder;
-            unsigned int   dropbcast;
-            unsigned int   dropmcast;
-            unsigned int   rx_packets;
-            unsigned int   tx_packets;
-            unsigned int   tx_retry;
-        }info;
-    }args;
+		struct {
+			int ifindex;
+			unsigned int flags;
+			unsigned int bitrate;
+			unsigned int channel;
+			unsigned int retry;
+			unsigned int txpower;
+			unsigned int bbpsens;
+			unsigned int mode;
+			unsigned int autoresponder;
+			unsigned int dropbcast;
+			unsigned int dropmcast;
+			unsigned int rx_packets;
+			unsigned int tx_packets;
+			unsigned int tx_retry;
+		} info;
+	} args;
 };
 
 #define RTNET_IOC_TYPE_RTWLAN 8
@@ -115,6 +115,5 @@ struct rtwlan_cmd {
 
 #define IOC_RTWLAN_AUTORESP  _IOWR(RTNET_IOC_TYPE_RTWLAN, 13,   \
                                    struct rtwlan_cmd)
-
 
 #endif

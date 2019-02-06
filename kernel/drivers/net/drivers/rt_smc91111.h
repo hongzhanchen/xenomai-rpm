@@ -40,15 +40,13 @@
 
 /* I want some simple types */
 
-typedef unsigned char			byte;
-typedef unsigned short			word;
-typedef unsigned long int 		dword;
-
+typedef unsigned char byte;
+typedef unsigned short word;
+typedef unsigned long int dword;
 
 /* Because of bank switching, the LAN91xxx uses only 16 I/O ports */
 
 #define SMC_IO_EXTENT	16
-
 
 /*---------------------------------------------------------------
  .  
@@ -74,23 +72,22 @@ typedef unsigned long int 		dword;
 
 // Transmit Control Register
 /* BANK 0  */
-#define	TCR_REG 	0x0000 	// transmit control register 
+#define	TCR_REG 	0x0000	// transmit control register
 #define TCR_ENABLE	0x0001	// When 1 we can transmit
 #define TCR_LOOP	0x0002	// Controls output pin LBK
 #define TCR_FORCOL	0x0004	// When 1 will force a collision
 #define TCR_PAD_EN	0x0080	// When 1 will pad tx frames < 64 bytes w/0
 #define TCR_NOCRC	0x0100	// When 1 will not append CRC to tx frames
 #define TCR_MON_CSN	0x0400	// When 1 tx monitors carrier
-#define TCR_FDUPLX    	0x0800  // When 1 enables full duplex operation
+#define TCR_FDUPLX    	0x0800	// When 1 enables full duplex operation
 #define TCR_STP_SQET	0x1000	// When 1 stops tx if Signal Quality Error
 #define	TCR_EPH_LOOP	0x2000	// When 1 enables EPH block loopback
 #define	TCR_SWFDUP	0x8000	// When 1 enables Switched Full Duplex mode
 
 #define	TCR_CLEAR	0	/* do NOTHING */
-/* the default settings for the TCR register : */ 
+/* the default settings for the TCR register : */
 /* QUESTION: do I want to enable padding of short packets ? */
-#define	TCR_DEFAULT  	TCR_ENABLE 
-
+#define	TCR_DEFAULT  	TCR_ENABLE
 
 // EPH Status Register
 /* BANK 0  */
@@ -110,7 +107,6 @@ typedef unsigned long int 		dword;
 #define ES_LINK_OK	0x4000	// Driven by inverted value of nLNK pin
 #define ES_TXUNRN	0x8000	// Tx Underrun
 
-
 // Receive Control Register
 /* BANK 0  */
 #define	RCR_REG		0x0004
@@ -119,9 +115,9 @@ typedef unsigned long int 		dword;
 #define	RCR_ALMUL	0x0004	// When set accepts all multicast frames
 #define RCR_RXEN	0x0100	// IFF this is set, we can receive packets
 #define	RCR_STRIP_CRC	0x0200	// When set strips CRC from rx packets
-#define	RCR_ABORT_ENB	0x0200	// When set will abort rx on collision 
+#define	RCR_ABORT_ENB	0x0200	// When set will abort rx on collision
 #define	RCR_FILT_CAR	0x0400	// When set filters leading 12 bit s of carrier
-#define RCR_SOFTRST	0x8000 	// resets the chip
+#define RCR_SOFTRST	0x8000	// resets the chip
 
 /* the normal settings for the RCR register : */
 #define	RCR_DEFAULT	(RCR_STRIP_CRC | RCR_RXEN)
@@ -159,23 +155,20 @@ typedef unsigned long int 		dword;
 /* All Banks */
 #define BSR_REG	0x000E
 
-
 // Configuration Reg
 /* BANK 1 */
 #define CONFIG_REG	0x0000
 #define CONFIG_EXT_PHY	0x0200	// 1=external MII, 0=internal Phy
 #define CONFIG_GPCNTRL	0x0400	// Inverse value drives pin nCNTRL
 #define CONFIG_NO_WAIT	0x1000	// When 1 no extra wait states on ISA bus
-#define CONFIG_EPH_POWER_EN 0x8000 // When 0 EPH is placed into low power mode.
+#define CONFIG_EPH_POWER_EN 0x8000	// When 0 EPH is placed into low power mode.
 
 // Default is powered-up, Internal Phy, Wait States, and pin nCNTRL=low
 #define CONFIG_DEFAULT	(CONFIG_EPH_POWER_EN)
 
-
 // Base Address Register
 /* BANK 1 */
 #define	BASE_REG	0x0002
-
 
 // Individual Address Registers
 /* BANK 1 */
@@ -183,92 +176,80 @@ typedef unsigned long int 		dword;
 #define	ADDR1_REG	0x0006
 #define	ADDR2_REG	0x0008
 
-
 // General Purpose Register
 /* BANK 1 */
 #define	GP_REG		0x000A
 
-
 // Control Register
 /* BANK 1 */
 #define	CTL_REG		0x000C
-#define CTL_RCV_BAD	0x4000 // When 1 bad CRC packets are received
-#define CTL_AUTO_RELEASE 0x0800 // When 1 tx pages are released automatically
-#define	CTL_LE_ENABLE	0x0080 // When 1 enables Link Error interrupt
-#define	CTL_CR_ENABLE	0x0040 // When 1 enables Counter Rollover interrupt
-#define	CTL_TE_ENABLE	0x0020 // When 1 enables Transmit Error interrupt
-#define	CTL_EEPROM_SELECT 0x0004 // Controls EEPROM reload & store
-#define	CTL_RELOAD	0x0002 // When set reads EEPROM into registers
-#define	CTL_STORE	0x0001 // When set stores registers into EEPROM
-
+#define CTL_RCV_BAD	0x4000	// When 1 bad CRC packets are received
+#define CTL_AUTO_RELEASE 0x0800	// When 1 tx pages are released automatically
+#define	CTL_LE_ENABLE	0x0080	// When 1 enables Link Error interrupt
+#define	CTL_CR_ENABLE	0x0040	// When 1 enables Counter Rollover interrupt
+#define	CTL_TE_ENABLE	0x0020	// When 1 enables Transmit Error interrupt
+#define	CTL_EEPROM_SELECT 0x0004	// Controls EEPROM reload & store
+#define	CTL_RELOAD	0x0002	// When set reads EEPROM into registers
+#define	CTL_STORE	0x0001	// When set stores registers into EEPROM
 
 // MMU Command Register
 /* BANK 2 */
 #define MMU_CMD_REG	0x0000
 #define MC_BUSY		1	// When 1 the last release has not completed
 #define MC_NOP		(0<<5)	// No Op
-#define	MC_ALLOC	(1<<5) 	// OR with number of 256 byte packets
+#define	MC_ALLOC	(1<<5)	// OR with number of 256 byte packets
 #define	MC_RESET	(2<<5)	// Reset MMU to initial state
-#define	MC_REMOVE	(3<<5) 	// Remove the current rx packet
-#define MC_RELEASE  	(4<<5) 	// Remove and release the current rx packet
-#define MC_FREEPKT  	(5<<5) 	// Release packet in PNR register
+#define	MC_REMOVE	(3<<5)	// Remove the current rx packet
+#define MC_RELEASE  	(4<<5)	// Remove and release the current rx packet
+#define MC_FREEPKT  	(5<<5)	// Release packet in PNR register
 #define MC_ENQUEUE	(6<<5)	// Enqueue the packet for transmit
 #define MC_RSTTXFIFO	(7<<5)	// Reset the TX FIFOs
-
 
 // Packet Number Register
 /* BANK 2 */
 #define	PN_REG		0x0002
-
 
 // Allocation Result Register
 /* BANK 2 */
 #define	AR_REG		0x0003
 #define AR_FAILED	0x80	// Alocation Failed
 
-
 // RX FIFO Ports Register
 /* BANK 2 */
 #define RXFIFO_REG	0x0004	// Must be read as a word
 #define RXFIFO_REMPTY	0x8000	// RX FIFO Empty
-
 
 // TX FIFO Ports Register
 /* BANK 2 */
 #define TXFIFO_REG	RXFIFO_REG	// Must be read as a word
 #define TXFIFO_TEMPTY	0x80	// TX FIFO Empty
 
-
 // Pointer Register
 /* BANK 2 */
 #define PTR_REG		0x0006
-#define	PTR_RCV		0x8000 // 1=Receive area, 0=Transmit area
-#define	PTR_AUTOINC 	0x4000 // Auto increment the pointer on each access
-#define PTR_READ	0x2000 // When 1 the operation is a read
-
+#define	PTR_RCV		0x8000	// 1=Receive area, 0=Transmit area
+#define	PTR_AUTOINC 	0x4000	// Auto increment the pointer on each access
+#define PTR_READ	0x2000	// When 1 the operation is a read
 
 // Data Register
 /* BANK 2 */
 #define	DATA_REG	0x0008
 
-
 // Interrupt Status/Acknowledge Register
 /* BANK 2 */
 #define	INT_REG		0x000C
 
-
 // Interrupt Mask Register
 /* BANK 2 */
 #define IM_REG		0x000D
-#define	IM_MDINT	0x80 // PHY MI Register 18 Interrupt
-#define	IM_ERCV_INT	0x40 // Early Receive Interrupt
-#define	IM_EPH_INT	0x20 // Set by Etheret Protocol Handler section
-#define	IM_RX_OVRN_INT	0x10 // Set by Receiver Overruns
-#define	IM_ALLOC_INT	0x08 // Set when allocation request is completed
-#define	IM_TX_EMPTY_INT	0x04 // Set if the TX FIFO goes empty
-#define	IM_TX_INT	0x02 // Transmit Interrrupt
-#define IM_RCV_INT	0x01 // Receive Interrupt
-
+#define	IM_MDINT	0x80	// PHY MI Register 18 Interrupt
+#define	IM_ERCV_INT	0x40	// Early Receive Interrupt
+#define	IM_EPH_INT	0x20	// Set by Etheret Protocol Handler section
+#define	IM_RX_OVRN_INT	0x10	// Set by Receiver Overruns
+#define	IM_ALLOC_INT	0x08	// Set when allocation request is completed
+#define	IM_TX_EMPTY_INT	0x04	// Set if the TX FIFO goes empty
+#define	IM_TX_INT	0x02	// Transmit Interrrupt
+#define IM_RCV_INT	0x01	// Receive Interrupt
 
 // Multicast Table Registers
 /* BANK 3 */
@@ -277,33 +258,29 @@ typedef unsigned long int 		dword;
 #define	MCAST_REG3	0x0004
 #define	MCAST_REG4	0x0006
 
-
 // Management Interface Register (MII)
 /* BANK 3 */
 #define	MII_REG		0x0008
-#define MII_MSK_CRS100	0x4000 // Disables CRS100 detection during tx half dup
-#define MII_MDOE	0x0008 // MII Output Enable
-#define MII_MCLK	0x0004 // MII Clock, pin MDCLK
-#define MII_MDI		0x0002 // MII Input, pin MDI
-#define MII_MDO		0x0001 // MII Output, pin MDO
-
+#define MII_MSK_CRS100	0x4000	// Disables CRS100 detection during tx half dup
+#define MII_MDOE	0x0008	// MII Output Enable
+#define MII_MCLK	0x0004	// MII Clock, pin MDCLK
+#define MII_MDI		0x0002	// MII Input, pin MDI
+#define MII_MDO		0x0001	// MII Output, pin MDO
 
 // Revision Register
 /* BANK 3 */
-#define	REV_REG		0x000A /* ( hi: chip id   low: rev # ) */
-
+#define	REV_REG		0x000A	/* ( hi: chip id   low: rev # ) */
 
 // Early RCV Register
 /* BANK 3 */
 /* this is NOT on SMC9192 */
 #define	ERCV_REG	0x000C
-#define ERCV_RCV_DISCRD	0x0080 // When 1 discards a packet being received
-#define ERCV_THRESHOLD	0x001F // ERCV Threshold Mask
+#define ERCV_RCV_DISCRD	0x0080	// When 1 discards a packet being received
+#define ERCV_THRESHOLD	0x001F	// ERCV Threshold Mask
 
 // External Register
 /* BANK 7 */
 #define	EXT_REG		0x0000
-
 
 #define CHIP_9192	3
 #define CHIP_9194	4
@@ -313,17 +290,18 @@ typedef unsigned long int 		dword;
 #define CHIP_91100FD	8
 #define CHIP_91111FD	9
 
-static const char * chip_ids[ 15 ] =  { 
-	NULL, NULL, NULL, 
+static const char *chip_ids[15] = {
+	NULL, NULL, NULL,
 	/* 3 */ "SMC91C90/91C92",
 	/* 4 */ "SMC91C94",
 	/* 5 */ "SMC91C95",
 	/* 6 */ "SMC91C96",
-	/* 7 */ "SMC91C100", 
-	/* 8 */ "SMC91C100FD", 
-	/* 9 */ "SMC91C11xFD", 
-	NULL, NULL, 
-	NULL, NULL, NULL};  
+	/* 7 */ "SMC91C100",
+	/* 8 */ "SMC91C100FD",
+	/* 9 */ "SMC91C11xFD",
+	NULL, NULL,
+	NULL, NULL, NULL
+};
 
 /* 
  . Transmit status bits 
@@ -343,15 +321,13 @@ static const char * chip_ids[ 15 ] =  {
 #define RS_TOOLONG	0x0800
 #define RS_TOOSHORT	0x0400
 #define RS_MULTICAST	0x0001
-#define RS_ERRORS	(RS_ALGNERR | RS_BADCRC | RS_TOOLONG | RS_TOOSHORT) 
-
+#define RS_ERRORS	(RS_ALGNERR | RS_BADCRC | RS_TOOLONG | RS_TOOSHORT)
 
 // PHY Types
 enum {
 	PHY_LAN83C183 = 1,	// LAN91C111 Internal PHY
 	PHY_LAN83C180
 };
-
 
 // PHY Register Addresses (LAN91C111 Internal PHY)
 
@@ -360,10 +336,10 @@ enum {
 #define PHY_CNTL_RST		0x8000	// 1=PHY Reset
 #define PHY_CNTL_LPBK		0x4000	// 1=PHY Loopback
 #define PHY_CNTL_SPEED		0x2000	// 1=100Mbps, 0=10Mpbs
-#define PHY_CNTL_ANEG_EN	0x1000 // 1=Enable Auto negotiation
+#define PHY_CNTL_ANEG_EN	0x1000	// 1=Enable Auto negotiation
 #define PHY_CNTL_PDN		0x0800	// 1=PHY Power Down mode
 #define PHY_CNTL_MII_DIS	0x0400	// 1=MII 4 bit interface disabled
-#define PHY_CNTL_ANEG_RST	0x0200 // 1=Reset Auto negotiate
+#define PHY_CNTL_ANEG_RST	0x0200	// 1=Reset Auto negotiate
 #define PHY_CNTL_DPLX		0x0100	// 1=Full Duplex, 0=Half Duplex
 #define PHY_CNTL_COLTST		0x0080	// 1= MII Colision Test
 
@@ -416,7 +392,6 @@ enum {
 #define PHY_CFG1_TLVL_MASK	0x003C
 #define PHY_CFG1_TRF_MASK	0x0003	// Transmitter Rise/Fall time
 
-
 // PHY Configuration Register 2
 #define PHY_CFG2_REG		0x11
 #define PHY_CFG2_APOLDIS	0x0020	// 1=Auto Polarity Correction disabled
@@ -441,8 +416,6 @@ enum {
 #define PHY_MASK_REG		0x13	// Interrupt Mask
 // Uses the same bit definitions as PHY_INT_REG
 
-
-
 /*-------------------------------------------------------------------------
  .  I define some macros to make it easier to do somewhat common
  . or slightly complicated, repeated tasks. 
@@ -450,7 +423,7 @@ enum {
 
 /* select a register bank, 0 to 3  */
 
-#define SMC_SELECT_BANK(x)  { outw( x, ioaddr + BANK_SELECT ); } 
+#define SMC_SELECT_BANK(x)  { outw( x, ioaddr + BANK_SELECT ); }
 
 /* this enables an interrupt in the interrupt mask register */
 #define SMC_ENABLE_INT(x) {\
@@ -481,11 +454,9 @@ enum {
  .  IM_MDINT, for PHY Register 18 Status Changes
  --------------------------------------------------------------------------*/
 #define SMC_INTERRUPT_MASK   (IM_EPH_INT | IM_RX_OVRN_INT | IM_RCV_INT | \
-	IM_MDINT) 
-
+	IM_MDINT)
 
 #ifdef CONFIG_SYSCTL
-
 
 /*
  * Declarations for the sysctl interface, which allows users the ability to
@@ -493,7 +464,7 @@ enum {
  * module currently registers its sysctl table dynamically, the sysctl path
  * for module FOO is /proc/sys/dev/ethX/FOO
  */
-#define CTL_SMC         (CTL_BUS+1389)      // arbitrary and hopefully unused
+#define CTL_SMC         (CTL_BUS+1389)	// arbitrary and hopefully unused
 
 enum {
 	CTL_SMC_INFO = 1,	// Sysctl files information
@@ -560,7 +531,5 @@ enum {
 };
 
 #endif // CONFIG_SYSCTL
- 
-#endif  /* _SMC_91111_H_ */
 
-
+#endif /* _SMC_91111_H_ */

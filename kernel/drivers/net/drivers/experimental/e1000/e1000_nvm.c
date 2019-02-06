@@ -36,7 +36,7 @@
  *
  *  Enable/Raise the EEPROM clock bit.
  **/
-static void e1000_raise_eec_clk(struct e1000_hw *hw, u32 *eecd)
+static void e1000_raise_eec_clk(struct e1000_hw *hw, u32 * eecd)
 {
 	*eecd = *eecd | E1000_EECD_SK;
 	E1000_WRITE_REG(hw, E1000_EECD, *eecd);
@@ -51,7 +51,7 @@ static void e1000_raise_eec_clk(struct e1000_hw *hw, u32 *eecd)
  *
  *  Clear/Lower the EEPROM clock bit.
  **/
-static void e1000_lower_eec_clk(struct e1000_hw *hw, u32 *eecd)
+static void e1000_lower_eec_clk(struct e1000_hw *hw, u32 * eecd)
 {
 	*eecd = *eecd & ~E1000_EECD_SK;
 	E1000_WRITE_REG(hw, E1000_EECD, *eecd);
@@ -152,7 +152,7 @@ static u16 e1000_shift_in_eec_bits(struct e1000_hw *hw, u16 count)
  *  Polls the EEPROM status bit for either read or write completion based
  *  upon the value of 'ee_reg'.
  **/
-s32 e1000_poll_eerd_eewr_done(struct e1000_hw *hw, int ee_reg)
+s32 e1000_poll_eerd_eewr_done(struct e1000_hw * hw, int ee_reg)
 {
 	u32 attempts = 100000;
 	u32 i, reg = 0;
@@ -185,7 +185,7 @@ s32 e1000_poll_eerd_eewr_done(struct e1000_hw *hw, int ee_reg)
  *  Return successful if access grant bit set, else clear the request for
  *  EEPROM access and return -E1000_ERR_NVM (-1).
  **/
-s32 e1000_acquire_nvm_generic(struct e1000_hw *hw)
+s32 e1000_acquire_nvm_generic(struct e1000_hw * hw)
 {
 	u32 eecd = E1000_READ_REG(hw, E1000_EECD);
 	s32 timeout = E1000_NVM_GRANT_ATTEMPTS;
@@ -338,8 +338,8 @@ static s32 e1000_ready_nvm_eeprom(struct e1000_hw *hw)
 		 */
 		while (timeout) {
 			e1000_shift_out_eec_bits(hw, NVM_RDSR_OPCODE_SPI,
-			                         hw->nvm.opcode_bits);
-			spi_stat_reg = (u8)e1000_shift_in_eec_bits(hw, 8);
+						 hw->nvm.opcode_bits);
+			spi_stat_reg = (u8) e1000_shift_in_eec_bits(hw, 8);
 			if (!(spi_stat_reg & NVM_STATUS_RDY_SPI))
 				break;
 
@@ -368,7 +368,7 @@ out:
  *
  *  Reads a 16 bit word from the EEPROM.
  **/
-s32 e1000_read_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
+s32 e1000_read_nvm_spi(struct e1000_hw * hw, u16 offset, u16 words, u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
 	u32 i = 0;
@@ -404,7 +404,7 @@ s32 e1000_read_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 
 	/* Send the READ command (opcode + addr) */
 	e1000_shift_out_eec_bits(hw, read_opcode, nvm->opcode_bits);
-	e1000_shift_out_eec_bits(hw, (u16)(offset*2), nvm->address_bits);
+	e1000_shift_out_eec_bits(hw, (u16) (offset * 2), nvm->address_bits);
 
 	/*
 	 * Read the data.  SPI NVMs increment the address with each byte
@@ -432,8 +432,8 @@ out:
  *
  *  Reads a 16 bit word from the EEPROM.
  **/
-s32 e1000_read_nvm_microwire(struct e1000_hw *hw, u16 offset, u16 words,
-                             u16 *data)
+s32 e1000_read_nvm_microwire(struct e1000_hw * hw, u16 offset, u16 words,
+			     u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
 	u32 i = 0;
@@ -464,8 +464,8 @@ s32 e1000_read_nvm_microwire(struct e1000_hw *hw, u16 offset, u16 words,
 	for (i = 0; i < words; i++) {
 		/* Send the READ command (opcode + addr) */
 		e1000_shift_out_eec_bits(hw, read_opcode, nvm->opcode_bits);
-		e1000_shift_out_eec_bits(hw, (u16)(offset + i),
-					nvm->address_bits);
+		e1000_shift_out_eec_bits(hw, (u16) (offset + i),
+					 nvm->address_bits);
 
 		/*
 		 * Read the data.  For microwire, each word requires the
@@ -491,7 +491,7 @@ out:
  *
  *  Reads a 16 bit word from the EEPROM using the EERD register.
  **/
-s32 e1000_read_nvm_eerd(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
+s32 e1000_read_nvm_eerd(struct e1000_hw * hw, u16 offset, u16 words, u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
 	u32 i, eerd = 0;
@@ -511,8 +511,8 @@ s32 e1000_read_nvm_eerd(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 	}
 
 	for (i = 0; i < words; i++) {
-		eerd = ((offset+i) << E1000_NVM_RW_ADDR_SHIFT) +
-		       E1000_NVM_RW_REG_START;
+		eerd = ((offset + i) << E1000_NVM_RW_ADDR_SHIFT) +
+		    E1000_NVM_RW_REG_START;
 
 		E1000_WRITE_REG(hw, E1000_EERD, eerd);
 		ret_val = e1000_poll_eerd_eewr_done(hw, E1000_NVM_POLL_READ);
@@ -520,7 +520,7 @@ s32 e1000_read_nvm_eerd(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 			break;
 
 		data[i] = (E1000_READ_REG(hw, E1000_EERD) >>
-		           E1000_NVM_RW_REG_DATA);
+			   E1000_NVM_RW_REG_DATA);
 	}
 
 out:
@@ -539,7 +539,7 @@ out:
  *  If e1000_update_nvm_checksum is not called after this function , the
  *  EEPROM will most likley contain an invalid checksum.
  **/
-s32 e1000_write_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
+s32 e1000_write_nvm_spi(struct e1000_hw * hw, u16 offset, u16 words, u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
 	s32 ret_val;
@@ -575,7 +575,7 @@ s32 e1000_write_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 
 		/* Send the WRITE ENABLE command (8 bit opcode) */
 		e1000_shift_out_eec_bits(hw, NVM_WREN_OPCODE_SPI,
-		                         nvm->opcode_bits);
+					 nvm->opcode_bits);
 
 		e1000_standby_nvm(hw);
 
@@ -588,8 +588,8 @@ s32 e1000_write_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 
 		/* Send the Write command (8-bit opcode + addr) */
 		e1000_shift_out_eec_bits(hw, write_opcode, nvm->opcode_bits);
-		e1000_shift_out_eec_bits(hw, (u16)((offset + widx) * 2),
-		                         nvm->address_bits);
+		e1000_shift_out_eec_bits(hw, (u16) ((offset + widx) * 2),
+					 nvm->address_bits);
 
 		/* Loop to allow for up to whole page write of eeprom */
 		while (widx < words) {
@@ -625,11 +625,11 @@ out:
  *  If e1000_update_nvm_checksum is not called after this function , the
  *  EEPROM will most likley contain an invalid checksum.
  **/
-s32 e1000_write_nvm_microwire(struct e1000_hw *hw, u16 offset, u16 words,
-                              u16 *data)
+s32 e1000_write_nvm_microwire(struct e1000_hw * hw, u16 offset, u16 words,
+			      u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
-	s32  ret_val;
+	s32 ret_val;
 	u32 eecd;
 	u16 words_written = 0;
 	u16 widx = 0;
@@ -656,18 +656,18 @@ s32 e1000_write_nvm_microwire(struct e1000_hw *hw, u16 offset, u16 words,
 		goto release;
 
 	e1000_shift_out_eec_bits(hw, NVM_EWEN_OPCODE_MICROWIRE,
-	                         (u16)(nvm->opcode_bits + 2));
+				 (u16) (nvm->opcode_bits + 2));
 
-	e1000_shift_out_eec_bits(hw, 0, (u16)(nvm->address_bits - 2));
+	e1000_shift_out_eec_bits(hw, 0, (u16) (nvm->address_bits - 2));
 
 	e1000_standby_nvm(hw);
 
 	while (words_written < words) {
 		e1000_shift_out_eec_bits(hw, NVM_WRITE_OPCODE_MICROWIRE,
-		                         nvm->opcode_bits);
+					 nvm->opcode_bits);
 
-		e1000_shift_out_eec_bits(hw, (u16)(offset + words_written),
-		                         nvm->address_bits);
+		e1000_shift_out_eec_bits(hw, (u16) (offset + words_written),
+					 nvm->address_bits);
 
 		e1000_shift_out_eec_bits(hw, data[words_written], 16);
 
@@ -692,9 +692,9 @@ s32 e1000_write_nvm_microwire(struct e1000_hw *hw, u16 offset, u16 words,
 	}
 
 	e1000_shift_out_eec_bits(hw, NVM_EWDS_OPCODE_MICROWIRE,
-	                         (u16)(nvm->opcode_bits + 2));
+				 (u16) (nvm->opcode_bits + 2));
 
-	e1000_shift_out_eec_bits(hw, 0, (u16)(nvm->address_bits - 2));
+	e1000_shift_out_eec_bits(hw, 0, (u16) (nvm->address_bits - 2));
 
 release:
 	e1000_release_nvm(hw);
@@ -711,9 +711,9 @@ out:
  *  Reads the product board assembly (PBA) number from the EEPROM and stores
  *  the value in pba_num.
  **/
-s32 e1000_read_pba_num_generic(struct e1000_hw *hw, u32 *pba_num)
+s32 e1000_read_pba_num_generic(struct e1000_hw * hw, u32 * pba_num)
 {
-	s32  ret_val;
+	s32 ret_val;
 	u16 nvm_data;
 
 	DEBUGFUNC("e1000_read_pba_num_generic");
@@ -723,7 +723,7 @@ s32 e1000_read_pba_num_generic(struct e1000_hw *hw, u32 *pba_num)
 		DEBUGOUT("NVM Read Error\n");
 		goto out;
 	}
-	*pba_num = (u32)(nvm_data << 16);
+	*pba_num = (u32) (nvm_data << 16);
 
 	ret_val = e1000_read_nvm(hw, NVM_PBA_OFFSET_1, 1, &nvm_data);
 	if (ret_val) {
@@ -744,9 +744,9 @@ out:
  *  Since devices with two ports use the same EEPROM, we increment the
  *  last bit in the MAC address for the second port.
  **/
-s32 e1000_read_mac_addr_generic(struct e1000_hw *hw)
+s32 e1000_read_mac_addr_generic(struct e1000_hw * hw)
 {
-	s32  ret_val = E1000_SUCCESS;
+	s32 ret_val = E1000_SUCCESS;
 	u16 offset, nvm_data, i;
 
 	DEBUGFUNC("e1000_read_mac_addr");
@@ -758,8 +758,8 @@ s32 e1000_read_mac_addr_generic(struct e1000_hw *hw)
 			DEBUGOUT("NVM Read Error\n");
 			goto out;
 		}
-		hw->mac.perm_addr[i] = (u8)(nvm_data & 0xFF);
-		hw->mac.perm_addr[i+1] = (u8)(nvm_data >> 8);
+		hw->mac.perm_addr[i] = (u8) (nvm_data & 0xFF);
+		hw->mac.perm_addr[i + 1] = (u8) (nvm_data >> 8);
 	}
 
 	/* Flip last bit of mac address if we're on second port */
@@ -780,7 +780,7 @@ out:
  *  Calculates the EEPROM checksum by reading/adding each word of the EEPROM
  *  and then verifies that the sum of the EEPROM is equal to 0xBABA.
  **/
-s32 e1000_validate_nvm_checksum_generic(struct e1000_hw *hw)
+s32 e1000_validate_nvm_checksum_generic(struct e1000_hw * hw)
 {
 	s32 ret_val = E1000_SUCCESS;
 	u16 checksum = 0;
@@ -815,9 +815,9 @@ out:
  *  up to the checksum.  Then calculates the EEPROM checksum and writes the
  *  value to the EEPROM.
  **/
-s32 e1000_update_nvm_checksum_generic(struct e1000_hw *hw)
+s32 e1000_update_nvm_checksum_generic(struct e1000_hw * hw)
 {
-	s32  ret_val;
+	s32 ret_val;
 	u16 checksum = 0;
 	u16 i, nvm_data;
 
@@ -890,4 +890,3 @@ void e1000_release_nvm(struct e1000_hw *hw)
 	if (hw->func.release_nvm)
 		hw->func.release_nvm(hw);
 }
-

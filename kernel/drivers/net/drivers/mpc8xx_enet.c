@@ -60,11 +60,11 @@ MODULE_AUTHOR("Maintainer: Wolfgang Grandegger <wg@denx.de>");
 MODULE_DESCRIPTION("RTnet MPC8xx SCC Ethernet driver");
 MODULE_LICENSE("GPL");
 
-static unsigned int rx_pool_size =  0;
+static unsigned int rx_pool_size = 0;
 MODULE_PARM(rx_pool_size, "i");
 MODULE_PARM_DESC(rx_pool_size, "Receive buffer pool size");
 
-static unsigned int rtnet_scc = 1; /* SCC1 */
+static unsigned int rtnet_scc = 1;	/* SCC1 */
 MODULE_PARM(rtnet_scc, "i");
 MODULE_PARM_DESC(rtnet_scc, "SCCx port for RTnet, x=1..3 (default=1)");
 
@@ -141,31 +141,32 @@ MODULE_PARM_DESC(rtnet_scc, "SCCx port for RTnet, x=1..3 (default=1)");
 struct scc_enet_private {
 	/* The addresses of a Tx/Rx-in-place packets/buffers. */
 	struct rtskb *tx_skbuff[TX_RING_SIZE];
-	ushort	skb_cur;
-	ushort	skb_dirty;
+	ushort skb_cur;
+	ushort skb_dirty;
 
 	/* CPM dual port RAM relative addresses.
-	*/
-	cbd_t	*rx_bd_base;		/* Address of Rx and Tx buffers. */
-	cbd_t	*tx_bd_base;
-	cbd_t	*cur_rx, *cur_tx;		/* The next free ring entry */
-	cbd_t	*dirty_tx;	/* The ring entries to be free()ed. */
-	scc_t	*sccp;
+	 */
+	cbd_t *rx_bd_base;	/* Address of Rx and Tx buffers. */
+	cbd_t *tx_bd_base;
+	cbd_t *cur_rx, *cur_tx;	/* The next free ring entry */
+	cbd_t *dirty_tx;	/* The ring entries to be free()ed. */
+	scc_t *sccp;
 
 	/* Virtual addresses for the receive buffers because we can't
 	 * do a __va() on them anymore.
 	 */
 	unsigned char *rx_vaddr[RX_RING_SIZE];
-	struct	net_device_stats stats;
-	uint	tx_full;
+	struct net_device_stats stats;
+	uint tx_full;
 	rtdm_lock_t lock;
 	rtdm_irq_t irq_handle;
 };
 
 static int scc_enet_open(struct rtnet_device *rtdev);
 static int scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev);
-static int scc_enet_rx(struct rtnet_device *rtdev, int *packets, nanosecs_abs_t *time_stamp);
-static int scc_enet_interrupt(rtdm_irq_t *irq_handle);
+static int scc_enet_rx(struct rtnet_device *rtdev, int *packets,
+		       nanosecs_abs_t * time_stamp);
+static int scc_enet_interrupt(rtdm_irq_t * irq_handle);
 static int scc_enet_close(struct rtnet_device *rtdev);
 
 static struct net_device_stats *scc_enet_get_stats(struct rtnet_device *rtdev);
@@ -187,26 +188,23 @@ static int PROFF_ENET;
 static int SCC_ENET;
 static int CPMVEC_ENET;
 
-static int
-scc_enet_open(struct rtnet_device *rtdev)
+static int scc_enet_open(struct rtnet_device *rtdev)
 {
 	/* I should reset the ring buffers here, but I don't yet know
 	 * a simple way to do that.
 	 */
 	rtnetif_start_queue(rtdev);
 
-	return 0;					/* Always succeed */
+	return 0;		/* Always succeed */
 }
 
-static int
-scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
+static int scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 {
 	struct scc_enet_private *cep = (struct scc_enet_private *)rtdev->priv;
-	volatile cbd_t	*bdp;
+	volatile cbd_t *bdp;
 	rtdm_lockctx_t context;
 
-
-	RT_DEBUG(__FUNCTION__": ...\n");
+	RT_DEBUG(__FUNCTION__ ": ...\n");
 
 	/* Fill in a Tx ring entry */
 	bdp = cep->cur_tx;
@@ -226,23 +224,23 @@ scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 	bdp->cbd_sc &= ~BD_ENET_TX_STATS;
 
 	/* If the frame is short, tell CPM to pad it.
-	*/
+	 */
 	if (skb->len <= ETH_ZLEN)
 		bdp->cbd_sc |= BD_ENET_TX_PAD;
 	else
 		bdp->cbd_sc &= ~BD_ENET_TX_PAD;
 
 	/* Set buffer length and buffer pointer.
-	*/
+	 */
 	bdp->cbd_datlen = skb->len;
 	bdp->cbd_bufaddr = __pa(skb->data);
 
 	/* Save skb pointer.
-	*/
+	 */
 	cep->tx_skbuff[cep->skb_cur] = skb;
 
 	cep->stats.tx_bytes += skb->len;
-	cep->skb_cur = (cep->skb_cur+1) & TX_RING_MOD_MASK;
+	cep->skb_cur = (cep->skb_cur + 1) & TX_RING_MOD_MASK;
 
 	/* Prevent interrupts from changing the Tx ring from underneath us. */
 	// *** RTnet ***
@@ -250,7 +248,8 @@ scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 
 	/* Get and patch time stamp just before the transmission */
 	if (skb->xmit_stamp)
-		*skb->xmit_stamp = cpu_to_be64(rtdm_clock_read() + *skb->xmit_stamp);
+		*skb->xmit_stamp =
+		    cpu_to_be64(rtdm_clock_read() + *skb->xmit_stamp);
 
 	/* Push the data cache so the CPM does not get stale memory
 	 * data.
@@ -258,14 +257,15 @@ scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 	flush_dcache_range((unsigned long)(skb->data),
 			   (unsigned long)(skb->data + skb->len));
 
-
 	/* Send it on its way.  Tell CPM its ready, interrupt when done,
 	 * its the last BD of the frame, and to put the CRC on the end.
 	 */
-	bdp->cbd_sc |= (BD_ENET_TX_READY | BD_ENET_TX_INTR | BD_ENET_TX_LAST | BD_ENET_TX_TC);
+	bdp->cbd_sc |=
+	    (BD_ENET_TX_READY | BD_ENET_TX_INTR | BD_ENET_TX_LAST |
+	     BD_ENET_TX_TC);
 
 	/* If this was the last BD in the ring, start at the beginning again.
-	*/
+	 */
 	if (bdp->cbd_sc & BD_ENET_TX_WRAP)
 		bdp = cep->tx_bd_base;
 	else
@@ -276,7 +276,7 @@ scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 		cep->tx_full = 1;
 	}
 
-	cep->cur_tx = (cbd_t *)bdp;
+	cep->cur_tx = (cbd_t *) bdp;
 
 	// *** RTnet ***
 	rtdm_lock_put_irqrestore(&cep->lock, context);
@@ -285,8 +285,7 @@ scc_enet_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 }
 
 #ifdef ORIGINAL_VERSION
-static void
-scc_enet_timeout(struct net_device *dev)
+static void scc_enet_timeout(struct net_device *dev)
 {
 	struct scc_enet_private *cep = (struct scc_enet_private *)dev->priv;
 
@@ -294,23 +293,18 @@ scc_enet_timeout(struct net_device *dev)
 	cep->stats.tx_errors++;
 #ifndef final_version
 	{
-		int	i;
-		cbd_t	*bdp;
+		int i;
+		cbd_t *bdp;
 		printk(" Ring data dump: cur_tx %p%s cur_rx %p.\n",
-		       cep->cur_tx, cep->tx_full ? " (full)" : "",
-		       cep->cur_rx);
+		       cep->cur_tx, cep->tx_full ? " (full)" : "", cep->cur_rx);
 		bdp = cep->tx_bd_base;
-		for (i = 0 ; i < TX_RING_SIZE; i++, bdp++)
+		for (i = 0; i < TX_RING_SIZE; i++, bdp++)
 			printk("%04x %04x %08x\n",
-			       bdp->cbd_sc,
-			       bdp->cbd_datlen,
-			       bdp->cbd_bufaddr);
+			       bdp->cbd_sc, bdp->cbd_datlen, bdp->cbd_bufaddr);
 		bdp = cep->rx_bd_base;
-		for (i = 0 ; i < RX_RING_SIZE; i++, bdp++)
+		for (i = 0; i < RX_RING_SIZE; i++, bdp++)
 			printk("%04x %04x %08x\n",
-			       bdp->cbd_sc,
-			       bdp->cbd_datlen,
-			       bdp->cbd_bufaddr);
+			       bdp->cbd_sc, bdp->cbd_datlen, bdp->cbd_bufaddr);
 	}
 #endif
 	if (!cep->tx_full)
@@ -321,27 +315,27 @@ scc_enet_timeout(struct net_device *dev)
 /* The interrupt handler.
  * This is called from the CPM handler, not the MPC core interrupt.
  */
-static int scc_enet_interrupt(rtdm_irq_t *irq_handle)
+static int scc_enet_interrupt(rtdm_irq_t * irq_handle)
 {
-	struct rtnet_device *rtdev = rtdm_irq_get_arg(irq_handle, struct rtnet_device);
+	struct rtnet_device *rtdev =
+	    rtdm_irq_get_arg(irq_handle, struct rtnet_device);
 	int packets = 0;
-	struct	scc_enet_private *cep;
-	volatile cbd_t	*bdp;
-	ushort	int_events;
-	int	must_restart;
+	struct scc_enet_private *cep;
+	volatile cbd_t *bdp;
+	ushort int_events;
+	int must_restart;
 	nanosecs_abs_t time_stamp = rtdm_clock_read();
-
 
 	cep = (struct scc_enet_private *)rtdev->priv;
 
 	/* Get the interrupt events that caused us to be here.
-	*/
+	 */
 	int_events = cep->sccp->scc_scce;
 	cep->sccp->scc_scce = int_events;
 	must_restart = 0;
 
 	/* Handle receive event in its own function.
-	*/
+	 */
 	if (int_events & SCCE_ENET_RXF) {
 		scc_enet_rx(rtdev, &packets, &time_stamp);
 	}
@@ -356,92 +350,93 @@ static int scc_enet_interrupt(rtdm_irq_t *irq_handle)
 	 */
 
 	/* Transmit OK, or non-fatal error.  Update the buffer descriptors.
-	*/
+	 */
 	if (int_events & (SCCE_ENET_TXE | SCCE_ENET_TXB)) {
-	    rtdm_lock_get(&cep->lock);
-	    bdp = cep->dirty_tx;
-	    while ((bdp->cbd_sc&BD_ENET_TX_READY)==0) {
-		RT_DEBUG(__FUNCTION__": Tx ok\n");
-		if ((bdp==cep->cur_tx) && (cep->tx_full == 0))
-		    break;
+		rtdm_lock_get(&cep->lock);
+		bdp = cep->dirty_tx;
+		while ((bdp->cbd_sc & BD_ENET_TX_READY) == 0) {
+			RT_DEBUG(__FUNCTION__ ": Tx ok\n");
+			if ((bdp == cep->cur_tx) && (cep->tx_full == 0))
+				break;
 
-		if (bdp->cbd_sc & BD_ENET_TX_HB)	/* No heartbeat */
-			cep->stats.tx_heartbeat_errors++;
-		if (bdp->cbd_sc & BD_ENET_TX_LC)	/* Late collision */
-			cep->stats.tx_window_errors++;
-		if (bdp->cbd_sc & BD_ENET_TX_RL)	/* Retrans limit */
-			cep->stats.tx_aborted_errors++;
-		if (bdp->cbd_sc & BD_ENET_TX_UN)	/* Underrun */
-			cep->stats.tx_fifo_errors++;
-		if (bdp->cbd_sc & BD_ENET_TX_CSL)	/* Carrier lost */
-			cep->stats.tx_carrier_errors++;
+			if (bdp->cbd_sc & BD_ENET_TX_HB)	/* No heartbeat */
+				cep->stats.tx_heartbeat_errors++;
+			if (bdp->cbd_sc & BD_ENET_TX_LC)	/* Late collision */
+				cep->stats.tx_window_errors++;
+			if (bdp->cbd_sc & BD_ENET_TX_RL)	/* Retrans limit */
+				cep->stats.tx_aborted_errors++;
+			if (bdp->cbd_sc & BD_ENET_TX_UN)	/* Underrun */
+				cep->stats.tx_fifo_errors++;
+			if (bdp->cbd_sc & BD_ENET_TX_CSL)	/* Carrier lost */
+				cep->stats.tx_carrier_errors++;
 
+			/* No heartbeat or Lost carrier are not really bad errors.
+			 * The others require a restart transmit command.
+			 */
+			if (bdp->cbd_sc &
+			    (BD_ENET_TX_LC | BD_ENET_TX_RL | BD_ENET_TX_UN)) {
+				must_restart = 1;
+				cep->stats.tx_errors++;
+			}
 
-		/* No heartbeat or Lost carrier are not really bad errors.
-		 * The others require a restart transmit command.
-		 */
-		if (bdp->cbd_sc &
-		    (BD_ENET_TX_LC | BD_ENET_TX_RL | BD_ENET_TX_UN)) {
-			must_restart = 1;
-			cep->stats.tx_errors++;
+			cep->stats.tx_packets++;
+
+			/* Deferred means some collisions occurred during transmit,
+			 * but we eventually sent the packet OK.
+			 */
+			if (bdp->cbd_sc & BD_ENET_TX_DEF)
+				cep->stats.collisions++;
+
+			/* Free the sk buffer associated with this last transmit.
+			 */
+			dev_kfree_rtskb(cep->tx_skbuff[cep->skb_dirty]);
+			cep->skb_dirty =
+			    (cep->skb_dirty + 1) & TX_RING_MOD_MASK;
+
+			/* Update pointer to next buffer descriptor to be transmitted.
+			 */
+			if (bdp->cbd_sc & BD_ENET_TX_WRAP)
+				bdp = cep->tx_bd_base;
+			else
+				bdp++;
+
+			/* I don't know if we can be held off from processing these
+			 * interrupts for more than one frame time.  I really hope
+			 * not.  In such a case, we would now want to check the
+			 * currently available BD (cur_tx) and determine if any
+			 * buffers between the dirty_tx and cur_tx have also been
+			 * sent.  We would want to process anything in between that
+			 * does not have BD_ENET_TX_READY set.
+			 */
+
+			/* Since we have freed up a buffer, the ring is no longer
+			 * full.
+			 */
+			if (cep->tx_full) {
+				cep->tx_full = 0;
+				if (rtnetif_queue_stopped(rtdev))
+					rtnetif_wake_queue(rtdev);
+			}
+
+			cep->dirty_tx = (cbd_t *) bdp;
 		}
 
-		cep->stats.tx_packets++;
+		if (must_restart) {
+			volatile cpm8xx_t *cp;
 
-		/* Deferred means some collisions occurred during transmit,
-		 * but we eventually sent the packet OK.
-		 */
-		if (bdp->cbd_sc & BD_ENET_TX_DEF)
-			cep->stats.collisions++;
-
-		/* Free the sk buffer associated with this last transmit.
-		*/
-		dev_kfree_rtskb(cep->tx_skbuff[cep->skb_dirty]);
-		cep->skb_dirty = (cep->skb_dirty + 1) & TX_RING_MOD_MASK;
-
-		/* Update pointer to next buffer descriptor to be transmitted.
-		*/
-		if (bdp->cbd_sc & BD_ENET_TX_WRAP)
-			bdp = cep->tx_bd_base;
-		else
-			bdp++;
-
-		/* I don't know if we can be held off from processing these
-		 * interrupts for more than one frame time.  I really hope
-		 * not.  In such a case, we would now want to check the
-		 * currently available BD (cur_tx) and determine if any
-		 * buffers between the dirty_tx and cur_tx have also been
-		 * sent.  We would want to process anything in between that
-		 * does not have BD_ENET_TX_READY set.
-		 */
-
-		/* Since we have freed up a buffer, the ring is no longer
-		 * full.
-		 */
-		if (cep->tx_full) {
-			cep->tx_full = 0;
-			if (rtnetif_queue_stopped(rtdev))
-				rtnetif_wake_queue(rtdev);
+			/* Some transmit errors cause the transmitter to shut
+			 * down.  We now issue a restart transmit.  Since the
+			 * errors close the BD and update the pointers, the restart
+			 * _should_ pick up without having to reset any of our
+			 * pointers either.
+			 */
+			cp = cpmp;
+			cp->cp_cpcr =
+			    mk_cr_cmd(CPM_CR_ENET,
+				      CPM_CR_RESTART_TX) | CPM_CR_FLG;
+			while (cp->cp_cpcr & CPM_CR_FLG) ;
 		}
-
-		cep->dirty_tx = (cbd_t *)bdp;
-	    }
-
-	    if (must_restart) {
-		volatile cpm8xx_t *cp;
-
-		/* Some transmit errors cause the transmitter to shut
-		 * down.  We now issue a restart transmit.  Since the
-		 * errors close the BD and update the pointers, the restart
-		 * _should_ pick up without having to reset any of our
-		 * pointers either.
-		 */
-		cp = cpmp;
-		cp->cp_cpcr =
-		    mk_cr_cmd(CPM_CR_ENET, CPM_CR_RESTART_TX) | CPM_CR_FLG;
-		while (cp->cp_cpcr & CPM_CR_FLG);
-	    }
-	    rtdm_lock_put(&cep->lock);
+		rtdm_lock_put(&cep->lock);
 	}
 
 	/* Check for receive busy, i.e. packets coming but no place to
@@ -464,14 +459,15 @@ static int scc_enet_interrupt(rtdm_irq_t *irq_handle)
  * effectively tossing the packet.
  */
 static int
-scc_enet_rx(struct rtnet_device *rtdev, int* packets, nanosecs_abs_t *time_stamp)
+scc_enet_rx(struct rtnet_device *rtdev, int *packets,
+	    nanosecs_abs_t * time_stamp)
 {
-	struct	scc_enet_private *cep;
-	volatile cbd_t	*bdp;
-	ushort	pkt_len;
-	struct	rtskb *skb;
+	struct scc_enet_private *cep;
+	volatile cbd_t *bdp;
+	ushort pkt_len;
+	struct rtskb *skb;
 
-	RT_DEBUG(__FUNCTION__": ...\n");
+	RT_DEBUG(__FUNCTION__ ": ...\n");
 
 	cep = (struct scc_enet_private *)rtdev->priv;
 
@@ -480,94 +476,93 @@ scc_enet_rx(struct rtnet_device *rtdev, int* packets, nanosecs_abs_t *time_stamp
 	 */
 	bdp = cep->cur_rx;
 
-    for (;;) {
+	for (;;) {
 
-	if (bdp->cbd_sc & BD_ENET_RX_EMPTY)
-		break;
+		if (bdp->cbd_sc & BD_ENET_RX_EMPTY)
+			break;
 
 #ifndef final_version
-	/* Since we have allocated space to hold a complete frame, both
-	 * the first and last indicators should be set.
-	 */
-	if ((bdp->cbd_sc & (BD_ENET_RX_FIRST | BD_ENET_RX_LAST)) !=
-		(BD_ENET_RX_FIRST | BD_ENET_RX_LAST))
+		/* Since we have allocated space to hold a complete frame, both
+		 * the first and last indicators should be set.
+		 */
+		if ((bdp->cbd_sc & (BD_ENET_RX_FIRST | BD_ENET_RX_LAST)) !=
+		    (BD_ENET_RX_FIRST | BD_ENET_RX_LAST))
 			rtdm_printk("CPM ENET: rcv is not first+last\n");
 #endif
 
-	/* Frame too long or too short.
-	*/
-	if (bdp->cbd_sc & (BD_ENET_RX_LG | BD_ENET_RX_SH))
-		cep->stats.rx_length_errors++;
-	if (bdp->cbd_sc & BD_ENET_RX_NO)	/* Frame alignment */
-		cep->stats.rx_frame_errors++;
-	if (bdp->cbd_sc & BD_ENET_RX_CR)	/* CRC Error */
-		cep->stats.rx_crc_errors++;
-	if (bdp->cbd_sc & BD_ENET_RX_OV)	/* FIFO overrun */
-		cep->stats.rx_crc_errors++;
-
-	/* Report late collisions as a frame error.
-	 * On this error, the BD is closed, but we don't know what we
-	 * have in the buffer.  So, just drop this frame on the floor.
-	 */
-	if (bdp->cbd_sc & BD_ENET_RX_CL) {
-		cep->stats.rx_frame_errors++;
-	}
-	else {
-
-		/* Process the incoming frame.
-		*/
-		cep->stats.rx_packets++;
-		pkt_len = bdp->cbd_datlen;
-		cep->stats.rx_bytes += pkt_len;
-
-		/* This does 16 byte alignment, much more than we need.
-		 * The packet length includes FCS, but we don't want to
-		 * include that when passing upstream as it messes up
-		 * bridging applications.
+		/* Frame too long or too short.
 		 */
-		skb = rtnetdev_alloc_rtskb(rtdev, pkt_len-4);
-		if (skb == NULL) {
-			rtdm_printk("%s: Memory squeeze, dropping packet.\n", rtdev->name);
-			cep->stats.rx_dropped++;
+		if (bdp->cbd_sc & (BD_ENET_RX_LG | BD_ENET_RX_SH))
+			cep->stats.rx_length_errors++;
+		if (bdp->cbd_sc & BD_ENET_RX_NO)	/* Frame alignment */
+			cep->stats.rx_frame_errors++;
+		if (bdp->cbd_sc & BD_ENET_RX_CR)	/* CRC Error */
+			cep->stats.rx_crc_errors++;
+		if (bdp->cbd_sc & BD_ENET_RX_OV)	/* FIFO overrun */
+			cep->stats.rx_crc_errors++;
+
+		/* Report late collisions as a frame error.
+		 * On this error, the BD is closed, but we don't know what we
+		 * have in the buffer.  So, just drop this frame on the floor.
+		 */
+		if (bdp->cbd_sc & BD_ENET_RX_CL) {
+			cep->stats.rx_frame_errors++;
+		} else {
+
+			/* Process the incoming frame.
+			 */
+			cep->stats.rx_packets++;
+			pkt_len = bdp->cbd_datlen;
+			cep->stats.rx_bytes += pkt_len;
+
+			/* This does 16 byte alignment, much more than we need.
+			 * The packet length includes FCS, but we don't want to
+			 * include that when passing upstream as it messes up
+			 * bridging applications.
+			 */
+			skb = rtnetdev_alloc_rtskb(rtdev, pkt_len - 4);
+			if (skb == NULL) {
+				rtdm_printk
+				    ("%s: Memory squeeze, dropping packet.\n",
+				     rtdev->name);
+				cep->stats.rx_dropped++;
+			} else {
+				rtskb_put(skb, pkt_len - 4);	/* Make room */
+				memcpy(skb->data,
+				       cep->rx_vaddr[bdp - cep->rx_bd_base],
+				       pkt_len - 4);
+				skb->protocol = rt_eth_type_trans(skb, rtdev);
+				skb->time_stamp = *time_stamp;
+				rtnetif_rx(skb);
+				(*packets)++;
+			}
 		}
-		else {
-			rtskb_put(skb,pkt_len-4); /* Make room */
-			memcpy(skb->data,
-			       cep->rx_vaddr[bdp - cep->rx_bd_base],
-			       pkt_len-4);
-			skb->protocol=rt_eth_type_trans(skb,rtdev);
-			skb->time_stamp = *time_stamp;
-			rtnetif_rx(skb);
-			(*packets)++;
-		}
+
+		/* Clear the status flags for this buffer.
+		 */
+		bdp->cbd_sc &= ~BD_ENET_RX_STATS;
+
+		/* Mark the buffer empty.
+		 */
+		bdp->cbd_sc |= BD_ENET_RX_EMPTY;
+
+		/* Update BD pointer to next entry.
+		 */
+		if (bdp->cbd_sc & BD_ENET_RX_WRAP)
+			bdp = cep->rx_bd_base;
+		else
+			bdp++;
+
 	}
-
-	/* Clear the status flags for this buffer.
-	*/
-	bdp->cbd_sc &= ~BD_ENET_RX_STATS;
-
-	/* Mark the buffer empty.
-	*/
-	bdp->cbd_sc |= BD_ENET_RX_EMPTY;
-
-	/* Update BD pointer to next entry.
-	*/
-	if (bdp->cbd_sc & BD_ENET_RX_WRAP)
-		bdp = cep->rx_bd_base;
-	else
-		bdp++;
-
-    }
-	cep->cur_rx = (cbd_t *)bdp;
+	cep->cur_rx = (cbd_t *) bdp;
 
 	return 0;
 }
 
-static int
-scc_enet_close(struct rtnet_device *rtdev)
+static int scc_enet_close(struct rtnet_device *rtdev)
 {
 	/* Don't know what to do yet.
-	*/
+	 */
 	rtnetif_stop_queue(rtdev);
 
 	return 0;
@@ -593,18 +588,18 @@ static struct net_device_stats *scc_enet_get_stats(struct rtnet_device *rtdev)
 
 static void set_multicast_list(struct net_device *dev)
 {
-	struct	scc_enet_private *cep;
-	struct	dev_mc_list *dmi;
-	u_char	*mcptr, *tdptr;
+	struct scc_enet_private *cep;
+	struct dev_mc_list *dmi;
+	u_char *mcptr, *tdptr;
 	volatile scc_enet_t *ep;
-	int	i, j;
+	int i, j;
 	cep = (struct scc_enet_private *)dev->priv;
 
 	/* Get pointer to SCC area in parameter RAM.
-	*/
-	ep = (scc_enet_t *)dev->base_addr;
+	 */
+	ep = (scc_enet_t *) dev->base_addr;
 
-	if (dev->flags&IFF_PROMISC) {
+	if (dev->flags & IFF_PROMISC) {
 
 		/* Log any net taps. */
 		printk("%s: Promiscuous mode enabled.\n", dev->name);
@@ -621,10 +616,9 @@ static void set_multicast_list(struct net_device *dev)
 			ep->sen_gaddr2 = 0xffff;
 			ep->sen_gaddr3 = 0xffff;
 			ep->sen_gaddr4 = 0xffff;
-		}
-		else {
+		} else {
 			/* Clear filter and add the addresses in the list.
-			*/
+			 */
 			ep->sen_gaddr1 = 0;
 			ep->sen_gaddr2 = 0;
 			ep->sen_gaddr3 = 0;
@@ -632,10 +626,10 @@ static void set_multicast_list(struct net_device *dev)
 
 			dmi = dev->mc_list;
 
-			for (i=0; i<dev->mc_count; i++) {
+			for (i = 0; i < dev->mc_count; i++) {
 
 				/* Only support group multicast for now.
-				*/
+				 */
 				if (!(dmi->dmi_addr[0] & 1))
 					continue;
 
@@ -643,18 +637,20 @@ static void set_multicast_list(struct net_device *dev)
 				 * and taddr is MSB first.  We have to
 				 * copy bytes MSB first from dmi_addr.
 				 */
-				mcptr = (u_char *)dmi->dmi_addr + 5;
-				tdptr = (u_char *)&ep->sen_taddrh;
-				for (j=0; j<6; j++)
+				mcptr = (u_char *) dmi->dmi_addr + 5;
+				tdptr = (u_char *) & ep->sen_taddrh;
+				for (j = 0; j < 6; j++)
 					*tdptr++ = *mcptr--;
 
 				/* Ask CPM to run CRC and set bit in
 				 * filter mask.
 				 */
-				cpmp->cp_cpcr = mk_cr_cmd(CPM_CR_ENET, CPM_CR_SET_GADDR) | CPM_CR_FLG;
+				cpmp->cp_cpcr =
+				    mk_cr_cmd(CPM_CR_ENET,
+					      CPM_CR_SET_GADDR) | CPM_CR_FLG;
 				/* this delay is necessary here -- Cort */
 				udelay(10);
-				while (cpmp->cp_cpcr & CPM_CR_FLG);
+				while (cpmp->cp_cpcr & CPM_CR_FLG) ;
 			}
 		}
 	}
@@ -672,20 +668,20 @@ int __init scc_enet_init(void)
 	struct rtnet_device *rtdev = NULL;
 	struct scc_enet_private *cep;
 	int i, j, k;
-	unsigned char	*eap, *ba;
-	dma_addr_t	mem_addr;
-	bd_t		*bd;
-	volatile	cbd_t		*bdp;
-	volatile	cpm8xx_t	*cp;
-	volatile	scc_t		*sccp;
-	volatile	scc_enet_t	*ep;
-	volatile	immap_t		*immap;
+	unsigned char *eap, *ba;
+	dma_addr_t mem_addr;
+	bd_t *bd;
+	volatile cbd_t *bdp;
+	volatile cpm8xx_t *cp;
+	volatile scc_t *sccp;
+	volatile scc_enet_t *ep;
+	volatile immap_t *immap;
 
-	cp = cpmp;	/* Get pointer to Communication Processor */
+	cp = cpmp;		/* Get pointer to Communication Processor */
 
-	immap = (immap_t *)(mfspr(IMMR) & 0xFFFF0000);	/* and to internal registers */
+	immap = (immap_t *) (mfspr(IMMR) & 0xFFFF0000);	/* and to internal registers */
 
-	bd = (bd_t *)__res;
+	bd = (bd_t *) __res;
 
 	/* Configure the SCC parameters (this has formerly be done
 	 * by macro definitions).
@@ -693,33 +689,34 @@ int __init scc_enet_init(void)
 	switch (rtnet_scc) {
 	case 3:
 		CPM_CR_ENET = CPM_CR_CH_SCC3;
-		PROFF_ENET  = PROFF_SCC3;
-		SCC_ENET    = 2;		/* Index, not number! */
+		PROFF_ENET = PROFF_SCC3;
+		SCC_ENET = 2;	/* Index, not number! */
 		CPMVEC_ENET = CPMVEC_SCC3;
 		break;
 	case 2:
 		CPM_CR_ENET = CPM_CR_CH_SCC2;
-		PROFF_ENET  = PROFF_SCC2;
-		SCC_ENET    = 1;		/* Index, not number! */
+		PROFF_ENET = PROFF_SCC2;
+		SCC_ENET = 1;	/* Index, not number! */
 		CPMVEC_ENET = CPMVEC_SCC2;
 		break;
 	case 1:
 		CPM_CR_ENET = CPM_CR_CH_SCC1;
-		PROFF_ENET  = PROFF_SCC1;
-		SCC_ENET    = 0;		/* Index, not number! */
+		PROFF_ENET = PROFF_SCC1;
+		SCC_ENET = 0;	/* Index, not number! */
 		CPMVEC_ENET = CPMVEC_SCC1;
 		break;
 	default:
-		printk(KERN_ERR "enet: SCC%d doesn't exit (check rtnet_scc)\n", rtnet_scc);
+		printk(KERN_ERR "enet: SCC%d doesn't exit (check rtnet_scc)\n",
+		       rtnet_scc);
 		return -1;
 	}
 
 	/* Allocate some private information and create an Ethernet device instance.
-	*/
+	 */
 	if (!rx_pool_size)
 		rx_pool_size = RX_RING_SIZE * 2;
 	rtdev = rtdev_root = rt_alloc_etherdev(sizeof(struct scc_enet_private),
-					rx_pool_size + TX_RING_SIZE);
+					       rx_pool_size + TX_RING_SIZE);
 	if (rtdev == NULL) {
 		printk(KERN_ERR "enet: Could not allocate ethernet device.\n");
 		return -1;
@@ -732,16 +729,16 @@ int __init scc_enet_init(void)
 	rtdm_lock_init(&cep->lock);
 
 	/* Get pointer to SCC area in parameter RAM.
-	*/
-	ep = (scc_enet_t *)(&cp->cp_dparam[PROFF_ENET]);
+	 */
+	ep = (scc_enet_t *) (&cp->cp_dparam[PROFF_ENET]);
 
 	/* And another to the SCC register area.
-	*/
+	 */
 	sccp = (volatile scc_t *)(&cp->cp_scc[SCC_ENET]);
-	cep->sccp = (scc_t *)sccp;		/* Keep the pointer handy */
+	cep->sccp = (scc_t *) sccp;	/* Keep the pointer handy */
 
 	/* Disable receive and transmit in case EPPC-Bug started it.
-	*/
+	 */
 	sccp->scc_gsmrl &= ~(SCC_GSMRL_ENR | SCC_GSMRL_ENT);
 
 	/* Cookbook style from the MPC860 manual.....
@@ -754,16 +751,16 @@ int __init scc_enet_init(void)
 
 #if (defined(PA_ENET_RXD) && defined(PA_ENET_TXD))
 	/* Configure port A pins for Txd and Rxd.
-	*/
-	immap->im_ioport.iop_papar |=  (PA_ENET_RXD | PA_ENET_TXD);
+	 */
+	immap->im_ioport.iop_papar |= (PA_ENET_RXD | PA_ENET_TXD);
 	immap->im_ioport.iop_padir &= ~(PA_ENET_RXD | PA_ENET_TXD);
-	immap->im_ioport.iop_paodr &=                ~PA_ENET_TXD;
+	immap->im_ioport.iop_paodr &= ~PA_ENET_TXD;
 #elif (defined(PB_ENET_RXD) && defined(PB_ENET_TXD))
 	/* Configure port B pins for Txd and Rxd.
-	*/
-	immap->im_cpm.cp_pbpar |=  (PB_ENET_RXD | PB_ENET_TXD);
+	 */
+	immap->im_cpm.cp_pbpar |= (PB_ENET_RXD | PB_ENET_TXD);
 	immap->im_cpm.cp_pbdir &= ~(PB_ENET_RXD | PB_ENET_TXD);
-	immap->im_cpm.cp_pbodr &=		 ~PB_ENET_TXD;
+	immap->im_cpm.cp_pbodr &= ~PB_ENET_TXD;
 #else
 #error Exactly ONE pair of PA_ENET_[RT]XD, PB_ENET_[RT]XD must be defined
 #endif
@@ -772,27 +769,27 @@ int __init scc_enet_init(void)
 	/* Configure port C pins to disable External Loopback
 	 */
 	immap->im_ioport.iop_pcpar &= ~PC_ENET_LBK;
-	immap->im_ioport.iop_pcdir |=  PC_ENET_LBK;
-	immap->im_ioport.iop_pcso  &= ~PC_ENET_LBK;
+	immap->im_ioport.iop_pcdir |= PC_ENET_LBK;
+	immap->im_ioport.iop_pcso &= ~PC_ENET_LBK;
 	immap->im_ioport.iop_pcdat &= ~PC_ENET_LBK;	/* Disable Loopback */
-#endif	/* PC_ENET_LBK */
+#endif /* PC_ENET_LBK */
 
 	/* Configure port C pins to enable CLSN and RENA.
-	*/
+	 */
 	immap->im_ioport.iop_pcpar &= ~(PC_ENET_CLSN | PC_ENET_RENA);
 	immap->im_ioport.iop_pcdir &= ~(PC_ENET_CLSN | PC_ENET_RENA);
-	immap->im_ioport.iop_pcso  |=  (PC_ENET_CLSN | PC_ENET_RENA);
+	immap->im_ioport.iop_pcso |= (PC_ENET_CLSN | PC_ENET_RENA);
 
 	/* Configure port A for TCLK and RCLK.
-	*/
-	immap->im_ioport.iop_papar |=  (PA_ENET_TCLK | PA_ENET_RCLK);
+	 */
+	immap->im_ioport.iop_papar |= (PA_ENET_TCLK | PA_ENET_RCLK);
 	immap->im_ioport.iop_padir &= ~(PA_ENET_TCLK | PA_ENET_RCLK);
 
 	/* Configure Serial Interface clock routing.
 	 * First, clear all SCC bits to zero, then set the ones we want.
 	 */
 	cp->cp_sicr &= ~SICR_ENET_MASK;
-	cp->cp_sicr |=  SICR_ENET_CLKRT;
+	cp->cp_sicr |= SICR_ENET_CLKRT;
 
 	/* Manual says set SDDR, but I can't find anything with that
 	 * name.  I think it is a misprint, and should be SDCR.  This
@@ -805,11 +802,11 @@ int __init scc_enet_init(void)
 	 */
 	i = m8xx_cpm_dpalloc(sizeof(cbd_t) * RX_RING_SIZE);
 	ep->sen_genscc.scc_rbase = i;
-	cep->rx_bd_base = (cbd_t *)&cp->cp_dpmem[i];
+	cep->rx_bd_base = (cbd_t *) & cp->cp_dpmem[i];
 
 	i = m8xx_cpm_dpalloc(sizeof(cbd_t) * TX_RING_SIZE);
 	ep->sen_genscc.scc_tbase = i;
-	cep->tx_bd_base = (cbd_t *)&cp->cp_dpmem[i];
+	cep->tx_bd_base = (cbd_t *) & cp->cp_dpmem[i];
 
 	cep->dirty_tx = cep->cur_tx = cep->tx_bd_base;
 	cep->cur_rx = cep->rx_bd_base;
@@ -820,12 +817,12 @@ int __init scc_enet_init(void)
 	 * already running.
 	 * In addition, we have to do it later because we don't yet have
 	 * all of the BD control/status set properly.
-	cp->cp_cpcr = mk_cr_cmd(CPM_CR_ENET, CPM_CR_INIT_RX) | CPM_CR_FLG;
-	while (cp->cp_cpcr & CPM_CR_FLG);
+	 cp->cp_cpcr = mk_cr_cmd(CPM_CR_ENET, CPM_CR_INIT_RX) | CPM_CR_FLG;
+	 while (cp->cp_cpcr & CPM_CR_FLG);
 	 */
 
 	/* Initialize function code registers for big-endian.
-	*/
+	 */
 	ep->sen_genscc.scc_rfcr = SCC_EB;
 	ep->sen_genscc.scc_tfcr = SCC_EB;
 
@@ -836,7 +833,7 @@ int __init scc_enet_init(void)
 	ep->sen_genscc.scc_mrblr = PKT_MAXBLR_SIZE;
 
 	/* Set CRC preset and mask.
-	*/
+	 */
 	ep->sen_cpres = 0xffffffff;
 	ep->sen_cmask = 0xdebb20e3;
 
@@ -847,14 +844,14 @@ int __init scc_enet_init(void)
 	ep->sen_pads = 0x8888;	/* Tx short frame pad character */
 	ep->sen_retlim = 15;	/* Retry limit threshold */
 
-	ep->sen_maxflr = PKT_MAXBUF_SIZE;   /* maximum frame length register */
-	ep->sen_minflr = PKT_MINBUF_SIZE;  /* minimum frame length register */
+	ep->sen_maxflr = PKT_MAXBUF_SIZE;	/* maximum frame length register */
+	ep->sen_minflr = PKT_MINBUF_SIZE;	/* minimum frame length register */
 
 	ep->sen_maxd1 = PKT_MAXBLR_SIZE;	/* maximum DMA1 length */
 	ep->sen_maxd2 = PKT_MAXBLR_SIZE;	/* maximum DMA2 length */
 
 	/* Clear hash tables.
-	*/
+	 */
 	ep->sen_gaddr1 = 0;
 	ep->sen_gaddr2 = 0;
 	ep->sen_gaddr3 = 0;
@@ -869,11 +866,11 @@ int __init scc_enet_init(void)
 	eap = (unsigned char *)&(ep->sen_paddrh);
 #ifdef CONFIG_FEC_ENET
 	/* We need a second MAC address if FEC is used by Linux */
-	for (i=5; i>=0; i--)
+	for (i = 5; i >= 0; i--)
 		*eap++ = rtdev->dev_addr[i] = (bd->bi_enetaddr[i] |
-					     (i==3 ? 0x80 : 0));
+					       (i == 3 ? 0x80 : 0));
 #else
-	for (i=5; i>=0; i--)
+	for (i = 5; i >= 0; i--)
 		*eap++ = rtdev->dev_addr[i] = bd->bi_enetaddr[i];
 #endif
 
@@ -886,31 +883,32 @@ int __init scc_enet_init(void)
 	 * buffer descriptors.
 	 */
 	bdp = cep->tx_bd_base;
-	for (i=0; i<TX_RING_SIZE; i++) {
+	for (i = 0; i < TX_RING_SIZE; i++) {
 
 		/* Initialize the BD for every fragment in the page.
-		*/
+		 */
 		bdp->cbd_sc = 0;
 		bdp->cbd_bufaddr = 0;
 		bdp++;
 	}
 
 	/* Set the last buffer to wrap.
-	*/
+	 */
 	bdp--;
 	bdp->cbd_sc |= BD_SC_WRAP;
 
 	bdp = cep->rx_bd_base;
 	k = 0;
-	for (i=0; i<CPM_ENET_RX_PAGES; i++) {
+	for (i = 0; i < CPM_ENET_RX_PAGES; i++) {
 
 		/* Allocate a page.
-		*/
-		ba = (unsigned char *)consistent_alloc(GFP_KERNEL, PAGE_SIZE, &mem_addr);
+		 */
+		ba = (unsigned char *)consistent_alloc(GFP_KERNEL, PAGE_SIZE,
+						       &mem_addr);
 
 		/* Initialize the BD for every fragment in the page.
-		*/
-		for (j=0; j<CPM_ENET_RX_FRPPG; j++) {
+		 */
+		for (j = 0; j < CPM_ENET_RX_FRPPG; j++) {
 			bdp->cbd_sc = BD_ENET_RX_EMPTY | BD_ENET_RX_INTR;
 			bdp->cbd_bufaddr = mem_addr;
 			cep->rx_vaddr[k++] = ba;
@@ -921,7 +919,7 @@ int __init scc_enet_init(void)
 	}
 
 	/* Set the last buffer to wrap.
-	*/
+	 */
 	bdp--;
 	bdp->cbd_sc |= BD_SC_WRAP;
 
@@ -930,7 +928,7 @@ int __init scc_enet_init(void)
 	 * the BD initialization.
 	 */
 	cp->cp_cpcr = mk_cr_cmd(CPM_CR_ENET, CPM_CR_INIT_TRX) | CPM_CR_FLG;
-	while (cp->cp_cpcr & CPM_CR_FLG);
+	while (cp->cp_cpcr & CPM_CR_FLG) ;
 
 	cep->skb_cur = cep->skb_dirty = 0;
 
@@ -943,25 +941,27 @@ int __init scc_enet_init(void)
 	sccp->scc_sccm = (SCCE_ENET_TXE | SCCE_ENET_RXF | SCCE_ENET_TXB);
 
 	/* Install our interrupt handler.
-	*/
+	 */
 	rtdev->irq = CPM_IRQ_OFFSET + CPMVEC_ENET;
 	rt_stack_connect(rtdev, &STACK_manager);
 	if ((i = rtdm_irq_request(&cep->irq_handle, rtdev->irq,
-				  scc_enet_interrupt, 0, "rt_mpc8xx_enet", rtdev))) {
+				  scc_enet_interrupt, 0, "rt_mpc8xx_enet",
+				  rtdev))) {
 		printk(KERN_ERR "Couldn't request IRQ %d\n", rtdev->irq);
 		rtdev_free(rtdev);
 		return i;
 	}
 
-
 	/* Set GSMR_H to enable all normal operating modes.
 	 * Set GSMR_L to enable Ethernet to MC68160.
 	 */
 	sccp->scc_gsmrh = 0;
-	sccp->scc_gsmrl = (SCC_GSMRL_TCI | SCC_GSMRL_TPL_48 | SCC_GSMRL_TPP_10 | SCC_GSMRL_MODE_ENET);
+	sccp->scc_gsmrl =
+	    (SCC_GSMRL_TCI | SCC_GSMRL_TPL_48 | SCC_GSMRL_TPP_10 |
+	     SCC_GSMRL_MODE_ENET);
 
 	/* Set sync/delimiters.
-	*/
+	 */
 	sccp->scc_dsr = 0xd555;
 
 	/* Set processing mode.  Use Ethernet CRC, catch broadcast, and
@@ -973,7 +973,7 @@ int __init scc_enet_init(void)
 	 * Unfortunately, there are board implementation differences here.
 	 */
 #if   (!defined (PB_ENET_TENA) &&  defined (PC_ENET_TENA))
-	immap->im_ioport.iop_pcpar |=  PC_ENET_TENA;
+	immap->im_ioport.iop_pcpar |= PC_ENET_TENA;
 	immap->im_ioport.iop_pcdir &= ~PC_ENET_TENA;
 #elif ( defined (PB_ENET_TENA) && !defined (PC_ENET_TENA))
 	cp->cp_pbpar |= PB_ENET_TENA;
@@ -984,15 +984,15 @@ int __init scc_enet_init(void)
 
 #if defined(CONFIG_RPXLITE) || defined(CONFIG_RPXCLASSIC)
 	/* And while we are here, set the configuration to enable ethernet.
-	*/
+	 */
 	*((volatile uint *)RPX_CSR_ADDR) &= ~BCSR0_ETHLPBK;
 	*((volatile uint *)RPX_CSR_ADDR) |=
-			(BCSR0_ETHEN | BCSR0_COLTESTDIS | BCSR0_FULLDPLXDIS);
+	    (BCSR0_ETHEN | BCSR0_COLTESTDIS | BCSR0_FULLDPLXDIS);
 #endif
 
 #ifdef CONFIG_BSEIP
 	/* BSE uses port B and C for PHY control.
-	*/
+	 */
 	cp->cp_pbpar &= ~(PB_BSE_POWERUP | PB_BSE_FDXDIS);
 	cp->cp_pbdir |= (PB_BSE_POWERUP | PB_BSE_FDXDIS);
 	cp->cp_pbdat |= (PB_BSE_POWERUP | PB_BSE_FDXDIS);
@@ -1008,7 +1008,7 @@ int __init scc_enet_init(void)
 	cp->cp_pbdir |= PB_ENET_TENA;
 
 	/* Enable the EEST PHY.
-	*/
+	 */
 	*((volatile uint *)BCSR1) &= ~BCSR1_ETHEN;
 #endif
 
@@ -1033,13 +1033,14 @@ int __init scc_enet_init(void)
 	}
 
 	/* And last, enable the transmit and receive processing.
-	*/
+	 */
 	sccp->scc_gsmrl |= (SCC_GSMRL_ENR | SCC_GSMRL_ENT);
 
-	printk("%s: CPM ENET Version 0.2 on SCC%d, irq %d, addr %02x:%02x:%02x:%02x:%02x:%02x\n",
-	       rtdev->name, SCC_ENET+1, rtdev->irq,
-	       rtdev->dev_addr[0], rtdev->dev_addr[1], rtdev->dev_addr[2],
-	       rtdev->dev_addr[3], rtdev->dev_addr[4], rtdev->dev_addr[5]);
+	printk
+	    ("%s: CPM ENET Version 0.2 on SCC%d, irq %d, addr %02x:%02x:%02x:%02x:%02x:%02x\n",
+	     rtdev->name, SCC_ENET + 1, rtdev->irq, rtdev->dev_addr[0],
+	     rtdev->dev_addr[1], rtdev->dev_addr[2], rtdev->dev_addr[3],
+	     rtdev->dev_addr[4], rtdev->dev_addr[5]);
 
 	return 0;
 }
@@ -1055,7 +1056,7 @@ static void __exit scc_enet_cleanup(void)
 		rtdm_irq_disable(&cep->irq_handle);
 		rtdm_irq_free(&cep->irq_handle);
 
-		ep = (scc_enet_t *)(&cp->cp_dparam[PROFF_ENET]);
+		ep = (scc_enet_t *) (&cp->cp_dparam[PROFF_ENET]);
 		m8xx_cpm_dpfree(ep->sen_genscc.scc_rbase);
 		m8xx_cpm_dpfree(ep->sen_genscc.scc_tbase);
 

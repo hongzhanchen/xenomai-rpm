@@ -55,8 +55,8 @@
 
 /* ........................................................................ */
 
-#define MAX_RBUFF_SZ	0x600		/* 1518 rounded up */
-#define MAX_RX_DESCR	9		/* max number of receive buffers */
+#define MAX_RBUFF_SZ	0x600	/* 1518 rounded up */
+#define MAX_RX_DESCR	9	/* max number of receive buffers */
 
 #define EMAC_DESC_DONE	0x00000001	/* bit for if DMA is done */
 #define EMAC_DESC_WRAP	0x00000002	/* bit for wrap */
@@ -65,40 +65,37 @@
 #define EMAC_MULTICAST	0x40000000	/* multicast address */
 #define EMAC_UNICAST	0x20000000	/* unicast address */
 
-struct rbf_t
-{
+struct rbf_t {
 	unsigned int addr;
 	unsigned long size;
 };
 
-struct recv_desc_bufs
-{
-	struct rbf_t descriptors[MAX_RX_DESCR];		/* must be on sizeof (rbf_t) boundary */
+struct recv_desc_bufs {
+	struct rbf_t descriptors[MAX_RX_DESCR];	/* must be on sizeof (rbf_t) boundary */
 	char recv_buf[MAX_RX_DESCR][MAX_RBUFF_SZ];	/* must be on long boundary */
 };
 
-struct at91_private
-{
+struct at91_private {
 	struct net_device_stats stats;
-	struct mii_if_info mii;			/* ethtool support */
+	struct mii_if_info mii;	/* ethtool support */
 	struct at91_eth_data board_data;	/* board-specific configuration */
-	struct clk *ether_clk;			/* clock */
+	struct clk *ether_clk;	/* clock */
 
 	/* PHY */
-	unsigned long phy_type;			/* type of PHY (PHY_ID) */
-	rtdm_lock_t lock;			/* lock for MDI interface */
-	short phy_media;			/* media interface type */
-	unsigned short phy_address;		/* 5-bit MDI address of PHY (0..31) */
-	struct timer_list check_timer;		/* Poll link status */
+	unsigned long phy_type;	/* type of PHY (PHY_ID) */
+	rtdm_lock_t lock;	/* lock for MDI interface */
+	short phy_media;	/* media interface type */
+	unsigned short phy_address;	/* 5-bit MDI address of PHY (0..31) */
+	struct timer_list check_timer;	/* Poll link status */
 
 	/* Transmit */
-	struct rtskb *skb;			/* holds skb until xmit interrupt completes */
-	dma_addr_t skb_physaddr;		/* phys addr from pci_map_single */
-	int skb_length;				/* saved skb length for pci_unmap_single */
+	struct rtskb *skb;	/* holds skb until xmit interrupt completes */
+	dma_addr_t skb_physaddr;	/* phys addr from pci_map_single */
+	int skb_length;		/* saved skb length for pci_unmap_single */
 
 	/* Receive */
-	int rxBuffIndex;			/* index into receive descriptor list */
-	struct recv_desc_bufs *dlist;		/* descriptor list address */
+	int rxBuffIndex;	/* index into receive descriptor list */
+	struct recv_desc_bufs *dlist;	/* descriptor list address */
 	struct recv_desc_bufs *dlist_phys;	/* descriptor list physical address */
 
 	/* RT Net */

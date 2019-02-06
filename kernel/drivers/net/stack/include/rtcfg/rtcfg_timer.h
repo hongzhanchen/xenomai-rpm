@@ -25,7 +25,7 @@
 #ifndef __RTCFG_TIMER_H_
 #define __RTCFG_TIMER_H_
 
-void rtcfg_timer(rtdm_timer_t *t);
+void rtcfg_timer(rtdm_timer_t * t);
 
 void rtcfg_timer_run(void);
 

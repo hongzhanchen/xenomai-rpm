@@ -31,7 +31,6 @@
 
 #include <rtcfg/rtcfg_event.h>
 
-
 #define ETH_RTCFG                   0x9022
 
 #define RTCFG_SKB_PRIO \
@@ -59,75 +58,74 @@
 
 struct rtcfg_frm_head {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-    u8 id:5;
-    u8 version:3;
+	u8 id:5;
+	u8 version:3;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-    u8 version:3;
-    u8 id:5;
+	u8 version:3;
+	u8 id:5;
 #else
-    #error unsupported byte order
+#error unsupported byte order
 #endif
-} __attribute__((packed));
+} __attribute__ ((packed));
 
 struct rtcfg_frm_stage_1_cfg {
-    struct rtcfg_frm_head head;
-    u8                    addr_type;
-    u8                    client_addr[0];
-    u8                    server_addr[0];
-    u8                    burstrate;
-    u16                   cfg_len;
-    u8                    cfg_data[0];
-} __attribute__((packed));
+	struct rtcfg_frm_head head;
+	u8 addr_type;
+	u8 client_addr[0];
+	u8 server_addr[0];
+	u8 burstrate;
+	u16 cfg_len;
+	u8 cfg_data[0];
+} __attribute__ ((packed));
 
 struct rtcfg_frm_announce {
-    struct rtcfg_frm_head head;
-    u8                    addr_type;
-    u8                    addr[0];
-    u8                    flags;
-    u8                    burstrate;
-} __attribute__((packed));
+	struct rtcfg_frm_head head;
+	u8 addr_type;
+	u8 addr[0];
+	u8 flags;
+	u8 burstrate;
+} __attribute__ ((packed));
 
 struct rtcfg_frm_stage_2_cfg {
-    struct rtcfg_frm_head head;
-    u8                    flags;
-    u32                   stations;
-    u16                   heartbeat_period;
-    u32                   cfg_len;
-    u8                    cfg_data[0];
-} __attribute__((packed));
+	struct rtcfg_frm_head head;
+	u8 flags;
+	u32 stations;
+	u16 heartbeat_period;
+	u32 cfg_len;
+	u8 cfg_data[0];
+} __attribute__ ((packed));
 
 struct rtcfg_frm_stage_2_cfg_frag {
-    struct rtcfg_frm_head head;
-    u32                   frag_offs;
-    u8                    cfg_data[0];
-} __attribute__((packed));
+	struct rtcfg_frm_head head;
+	u32 frag_offs;
+	u8 cfg_data[0];
+} __attribute__ ((packed));
 
 struct rtcfg_frm_ack_cfg {
-    struct rtcfg_frm_head head;
-    u32                   ack_len;
-} __attribute__((packed));
+	struct rtcfg_frm_head head;
+	u32 ack_len;
+} __attribute__ ((packed));
 
 struct rtcfg_frm_simple {
-    struct rtcfg_frm_head head;
-} __attribute__((packed));
+	struct rtcfg_frm_head head;
+} __attribute__ ((packed));
 
 struct rtcfg_frm_dead_station {
-    struct rtcfg_frm_head head;
-    u8                    addr_type;
-    u8                    logical_addr[0];
-    u8                    physical_addr[32];
-} __attribute__((packed));
-
+	struct rtcfg_frm_head head;
+	u8 addr_type;
+	u8 logical_addr[0];
+	u8 physical_addr[32];
+} __attribute__ ((packed));
 
 int rtcfg_send_stage_1(struct rtcfg_connection *conn);
 int rtcfg_send_stage_2(struct rtcfg_connection *conn, int send_data);
 int rtcfg_send_stage_2_frag(struct rtcfg_connection *conn);
 int rtcfg_send_announce_new(int ifindex);
-int rtcfg_send_announce_reply(int ifindex, u8 *dest_mac_addr);
+int rtcfg_send_announce_reply(int ifindex, u8 * dest_mac_addr);
 int rtcfg_send_ack(int ifindex);
 int rtcfg_send_dead_station(struct rtcfg_connection *conn);
 
-int rtcfg_send_simple_frame(int ifindex, int frame_id, u8 *dest_addr);
+int rtcfg_send_simple_frame(int ifindex, int frame_id, u8 * dest_addr);
 
 #define rtcfg_send_ready(ifindex)                                   \
     rtcfg_send_simple_frame(ifindex, RTCFG_ID_READY, NULL)

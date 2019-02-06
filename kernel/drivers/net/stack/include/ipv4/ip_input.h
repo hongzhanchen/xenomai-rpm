@@ -24,11 +24,10 @@
 #include <rtskb.h>
 #include <stack_mgr.h>
 
-
 extern int rt_ip_rcv(struct rtskb *skb, struct rtpacket_type *pt);
 
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_PROXY)
-typedef void (*rt_ip_fallback_handler_t)(struct rtskb *skb);
+typedef void (*rt_ip_fallback_handler_t) (struct rtskb * skb);
 
 /*
  * This hook can be used to register a fallback handler for incoming
@@ -43,5 +42,4 @@ typedef void (*rt_ip_fallback_handler_t)(struct rtskb *skb);
 extern rt_ip_fallback_handler_t rt_ip_fallback_handler;
 #endif
 
-
-#endif  /* __RTNET_IP_INPUT_H_ */
+#endif /* __RTNET_IP_INPUT_H_ */

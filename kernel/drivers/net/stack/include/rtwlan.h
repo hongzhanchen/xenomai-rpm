@@ -137,79 +137,78 @@
 #endif
 
 struct rtwlan_stats {
-    unsigned long	rx_packets;		/* total packets received	*/
-    unsigned long	tx_packets;		/* total packets transmitted	*/
-    unsigned long       tx_retry;               /* total packets transmitted with retry */
+	unsigned long rx_packets;	/* total packets received       */
+	unsigned long tx_packets;	/* total packets transmitted    */
+	unsigned long tx_retry;	/* total packets transmitted with retry */
 };
 
 struct rtwlan_device {
 
-    struct rtwlan_stats stats;
+	struct rtwlan_stats stats;
 
-    struct rtskb_pool skb_pool;
+	struct rtskb_pool skb_pool;
 
-    int mode;
+	int mode;
 
-    int (*hard_start_xmit)(struct rtskb *rtskb, struct rtnet_device * rtnet_dev);
+	int (*hard_start_xmit) (struct rtskb * rtskb,
+				struct rtnet_device * rtnet_dev);
 
-    /* This must be the last item */
-    u8 priv[0];
+	/* This must be the last item */
+	u8 priv[0];
 };
 
 /* Minimal header; can be used for passing 802.11 frames with sufficient
  * information to determine what type of underlying data type is actually
  * stored in the data. */
 struct ieee80211_hdr {
-    u16 frame_ctl;
-    u16 duration_id;
-    u8 payload[0];
+	u16 frame_ctl;
+	u16 duration_id;
+	u8 payload[0];
 } __attribute__ ((packed));
 
 struct ieee80211_hdr_3addr {
-    u16 frame_ctl;
-    u16 duration_id;
-    u8 addr1[ETH_ALEN];
-    u8 addr2[ETH_ALEN];
-    u8 addr3[ETH_ALEN];
-    u16 seq_ctl;
-    u8 payload[0];
+	u16 frame_ctl;
+	u16 duration_id;
+	u8 addr1[ETH_ALEN];
+	u8 addr2[ETH_ALEN];
+	u8 addr3[ETH_ALEN];
+	u16 seq_ctl;
+	u8 payload[0];
 } __attribute__ ((packed));
-
 
 static inline int ieee80211_get_hdrlen(u16 fc)
 {
-    int hdrlen = IEEE80211_3ADDR_LEN;
-    u16 stype = WLAN_FC_GET_STYPE(fc);
+	int hdrlen = IEEE80211_3ADDR_LEN;
+	u16 stype = WLAN_FC_GET_STYPE(fc);
 
-    switch (WLAN_FC_GET_TYPE(fc)) {
+	switch (WLAN_FC_GET_TYPE(fc)) {
 	case IEEE80211_FTYPE_DATA:
-	    if ((fc & IEEE80211_FCTL_FROMDS) && (fc & IEEE80211_FCTL_TODS))
-		hdrlen = IEEE80211_4ADDR_LEN;
-	    if (stype & IEEE80211_STYPE_QOS_DATA)
-		hdrlen += 2;
-	    break;
+		if ((fc & IEEE80211_FCTL_FROMDS) && (fc & IEEE80211_FCTL_TODS))
+			hdrlen = IEEE80211_4ADDR_LEN;
+		if (stype & IEEE80211_STYPE_QOS_DATA)
+			hdrlen += 2;
+		break;
 
 	case IEEE80211_FTYPE_CTL:
-	    switch (WLAN_FC_GET_STYPE(fc)) {
+		switch (WLAN_FC_GET_STYPE(fc)) {
 		case IEEE80211_STYPE_CTS:
 		case IEEE80211_STYPE_ACK:
-		    hdrlen = IEEE80211_1ADDR_LEN;
-		    break;
+			hdrlen = IEEE80211_1ADDR_LEN;
+			break;
 
 		default:
-		    hdrlen = IEEE80211_2ADDR_LEN;
-		    break;
-	    }
-	    break;
-    }
+			hdrlen = IEEE80211_2ADDR_LEN;
+			break;
+		}
+		break;
+	}
 
-    return hdrlen;
+	return hdrlen;
 }
-
 
 static inline int ieee80211_is_ofdm_rate(u8 rate)
 {
-    switch (rate & ~IEEE80211_BASIC_RATE_MASK) {
+	switch (rate & ~IEEE80211_BASIC_RATE_MASK) {
 	case IEEE80211_OFDM_RATE_6MB:
 	case IEEE80211_OFDM_RATE_9MB:
 	case IEEE80211_OFDM_RATE_12MB:
@@ -218,32 +217,32 @@ static inline int ieee80211_is_ofdm_rate(u8 rate)
 	case IEEE80211_OFDM_RATE_36MB:
 	case IEEE80211_OFDM_RATE_48MB:
 	case IEEE80211_OFDM_RATE_54MB:
-	    return 1;
-    }
-    return 0;
+		return 1;
+	}
+	return 0;
 }
 
 static inline int ieee80211_is_dsss_rate(u8 rate)
 {
-    switch (rate & ~IEEE80211_BASIC_RATE_MASK) {
+	switch (rate & ~IEEE80211_BASIC_RATE_MASK) {
 	case IEEE80211_DSSS_RATE_1MB:
 	case IEEE80211_DSSS_RATE_2MB:
 	case IEEE80211_DSSS_RATE_5MB:
 	case IEEE80211_DSSS_RATE_11MB:
-	    return 1;
-    }
-    return 0;
+		return 1;
+	}
+	return 0;
 }
 
-
-static inline void * rtwlan_priv(struct rtwlan_device *rtwlan_dev)
+static inline void *rtwlan_priv(struct rtwlan_device *rtwlan_dev)
 {
-    return (void *)rtwlan_dev + sizeof(struct rtwlan_device);
+	return (void *)rtwlan_dev + sizeof(struct rtwlan_device);
 }
 
-struct rtnet_device * rtwlan_alloc_dev(unsigned sizeof_priv, unsigned dev_pool_size);
-int rtwlan_rx(struct rtskb * rtskb, struct rtnet_device * rtnet_dev);
-int rtwlan_tx(struct rtskb * rtskb, struct rtnet_device * rtnet_dev);
+struct rtnet_device *rtwlan_alloc_dev(unsigned sizeof_priv,
+				      unsigned dev_pool_size);
+int rtwlan_rx(struct rtskb *rtskb, struct rtnet_device *rtnet_dev);
+int rtwlan_tx(struct rtskb *rtskb, struct rtnet_device *rtnet_dev);
 
 #ifdef CONFIG_XENO_DRIVERS_NET_RTWLAN
 int __init rtwlan_init(void);

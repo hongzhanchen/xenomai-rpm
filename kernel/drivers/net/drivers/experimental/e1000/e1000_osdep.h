@@ -26,7 +26,6 @@
 
 *******************************************************************************/
 
-
 /* glue for the OS-dependent part of e1000
  * includes register access macros
  */
@@ -65,7 +64,6 @@
 #ifdef __BIG_ENDIAN
 #define E1000_BIG_ENDIAN __BIG_ENDIAN
 #endif
-
 
 #define DEBUGOUT(S)
 #define DEBUGOUT1(S, A...)

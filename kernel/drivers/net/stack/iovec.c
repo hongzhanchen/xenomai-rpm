@@ -48,7 +48,7 @@ ssize_t rtnet_write_to_iov(struct rtdm_fd *fd,
 		ret = rtnet_put_arg(fd, iov->iov_base, data, nbytes);
 		if (ret)
 			break;
-	
+
 		len -= nbytes;
 		data += nbytes;
 		iov->iov_len -= nbytes;
@@ -62,10 +62,11 @@ ssize_t rtnet_write_to_iov(struct rtdm_fd *fd,
 
 	return ret;
 }
+
 EXPORT_SYMBOL_GPL(rtnet_write_to_iov);
 
-ssize_t rtnet_read_from_iov(struct rtdm_fd *fd,
-			    struct iovec *iov, int iovlen,
+ssize_t rtnet_read_from_iov(struct rtdm_fd * fd,
+			    struct iovec * iov, int iovlen,
 			    void *data, size_t len)
 {
 	ssize_t ret = 0;
@@ -83,11 +84,13 @@ ssize_t rtnet_read_from_iov(struct rtdm_fd *fd,
 		if (!rtdm_fd_is_user(fd))
 			memcpy(data, iov->iov_base, nbytes);
 		else {
-			ret = rtdm_copy_from_user(fd, data, iov->iov_base, nbytes);
+			ret =
+			    rtdm_copy_from_user(fd, data, iov->iov_base,
+						nbytes);
 			if (ret)
 				break;
 		}
-	
+
 		len -= nbytes;
 		data += nbytes;
 		iov->iov_len -= nbytes;
@@ -101,4 +104,5 @@ ssize_t rtnet_read_from_iov(struct rtdm_fd *fd,
 
 	return ret;
 }
+
 EXPORT_SYMBOL_GPL(rtnet_read_from_iov);

@@ -46,7 +46,7 @@
 unsigned int copybreak = COPYBREAK_DEFAULT;
 module_param(copybreak, uint, 0644);
 MODULE_PARM_DESC(copybreak,
-	"Maximum size of packet that is copied to a new buffer on receive");
+		 "Maximum size of packet that is copied to a new buffer on receive");
 
 /*
  * All parameters are treated the same, as an integer array of values.
@@ -153,7 +153,8 @@ E1000_PARAM(KumeranLockLoss, "Enable Kumeran lock loss workaround");
  *
  * Default Value: 1 (enabled)
  */
-E1000_PARAM(WriteProtectNVM, "Write-protect NVM [WARNING: disabling this can lead to corrupted NVM]");
+E1000_PARAM(WriteProtectNVM,
+	    "Write-protect NVM [WARNING: disabling this can lead to corrupted NVM]");
 
 /*
  * Enable CRC Stripping
@@ -162,8 +163,8 @@ E1000_PARAM(WriteProtectNVM, "Write-protect NVM [WARNING: disabling this can lea
  *
  * Default Value: 1 (enabled)
  */
-E1000_PARAM(CrcStripping, "Enable CRC Stripping, disable if your BMC needs " \
-                          "the CRC");
+E1000_PARAM(CrcStripping, "Enable CRC Stripping, disable if your BMC needs "
+	    "the CRC");
 
 struct e1000_option {
 	enum { enable_option, range_option, list_option } type;
@@ -171,20 +172,23 @@ struct e1000_option {
 	const char *err;
 	int def;
 	union {
-		struct { /* range_option info */
+		struct {	/* range_option info */
 			int min;
 			int max;
 		} r;
-		struct { /* list_option info */
+		struct {	/* list_option info */
 			int nr;
-			struct e1000_opt_list { int i; char *str; } *p;
+			struct e1000_opt_list {
+				int i;
+				char *str;
+			} *p;
 		} l;
 	} arg;
 };
 
 static int e1000_validate_option(unsigned int *value,
-					   const struct e1000_option *opt,
-					   struct e1000_adapter *adapter)
+				 const struct e1000_option *opt,
+				 struct e1000_adapter *adapter)
 {
 	if (*value == OPTION_UNSET) {
 		*value = opt->def;
@@ -208,19 +212,19 @@ static int e1000_validate_option(unsigned int *value,
 			return 0;
 		}
 		break;
-	case list_option: {
-		int i;
-		struct e1000_opt_list *ent;
+	case list_option:{
+			int i;
+			struct e1000_opt_list *ent;
 
-		for (i = 0; i < opt->arg.l.nr; i++) {
-			ent = &opt->arg.l.p[i];
-			if (*value == ent->i) {
-				if (ent->str[0] != '\0')
-					e_info("%s\n", ent->str);
-				return 0;
+			for (i = 0; i < opt->arg.l.nr; i++) {
+				ent = &opt->arg.l.p[i];
+				if (*value == ent->i) {
+					if (ent->str[0] != '\0')
+						e_info("%s\n", ent->str);
+					return 0;
+				}
 			}
 		}
-	}
 		break;
 	default:
 		BUG();
@@ -251,15 +255,15 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 		e_notice("Using defaults for all values\n");
 	}
 
-	{ /* Transmit Interrupt Delay */
+	{			/* Transmit Interrupt Delay */
 		static const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Transmit Interrupt Delay",
-			.err  = "using default of "
-				__MODULE_STRING(DEFAULT_TIDV),
-			.def  = DEFAULT_TIDV,
-			.arg  = { .r = { .min = MIN_TXDELAY,
-					 .max = MAX_TXDELAY } }
+			.err = "using default of "
+			    __MODULE_STRING(DEFAULT_TIDV),
+			.def = DEFAULT_TIDV,
+			.arg = {.r = {.min = MIN_TXDELAY,
+				      .max = MAX_TXDELAY}}
 		};
 
 		if (num_TxIntDelay > bd) {
@@ -270,15 +274,15 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->tx_int_delay = opt.def;
 		}
 	}
-	{ /* Transmit Absolute Interrupt Delay */
+	{			/* Transmit Absolute Interrupt Delay */
 		static const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Transmit Absolute Interrupt Delay",
-			.err  = "using default of "
-				__MODULE_STRING(DEFAULT_TADV),
-			.def  = DEFAULT_TADV,
-			.arg  = { .r = { .min = MIN_TXABSDELAY,
-					 .max = MAX_TXABSDELAY } }
+			.err = "using default of "
+			    __MODULE_STRING(DEFAULT_TADV),
+			.def = DEFAULT_TADV,
+			.arg = {.r = {.min = MIN_TXABSDELAY,
+				      .max = MAX_TXABSDELAY}}
 		};
 
 		if (num_TxAbsIntDelay > bd) {
@@ -289,15 +293,15 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->tx_abs_int_delay = opt.def;
 		}
 	}
-	{ /* Receive Interrupt Delay */
+	{			/* Receive Interrupt Delay */
 		static struct e1000_option opt = {
 			.type = range_option,
 			.name = "Receive Interrupt Delay",
-			.err  = "using default of "
-				__MODULE_STRING(DEFAULT_RDTR),
-			.def  = DEFAULT_RDTR,
-			.arg  = { .r = { .min = MIN_RXDELAY,
-					 .max = MAX_RXDELAY } }
+			.err = "using default of "
+			    __MODULE_STRING(DEFAULT_RDTR),
+			.def = DEFAULT_RDTR,
+			.arg = {.r = {.min = MIN_RXDELAY,
+				      .max = MAX_RXDELAY}}
 		};
 
 		if (num_RxIntDelay > bd) {
@@ -308,15 +312,15 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->rx_int_delay = opt.def;
 		}
 	}
-	{ /* Receive Absolute Interrupt Delay */
+	{			/* Receive Absolute Interrupt Delay */
 		static const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Receive Absolute Interrupt Delay",
-			.err  = "using default of "
-				__MODULE_STRING(DEFAULT_RADV),
-			.def  = DEFAULT_RADV,
-			.arg  = { .r = { .min = MIN_RXABSDELAY,
-					 .max = MAX_RXABSDELAY } }
+			.err = "using default of "
+			    __MODULE_STRING(DEFAULT_RADV),
+			.def = DEFAULT_RADV,
+			.arg = {.r = {.min = MIN_RXABSDELAY,
+				      .max = MAX_RXABSDELAY}}
 		};
 
 		if (num_RxAbsIntDelay > bd) {
@@ -327,15 +331,14 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->rx_abs_int_delay = opt.def;
 		}
 	}
-	{ /* Interrupt Throttling Rate */
+	{			/* Interrupt Throttling Rate */
 		static const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Interrupt Throttling Rate (ints/sec)",
-			.err  = "using default of "
-				__MODULE_STRING(DEFAULT_ITR),
-			.def  = DEFAULT_ITR,
-			.arg  = { .r = { .min = MIN_ITR,
-					 .max = MAX_ITR } }
+			.err = "using default of " __MODULE_STRING(DEFAULT_ITR),
+			.def = DEFAULT_ITR,
+			.arg = {.r = {.min = MIN_ITR,
+				      .max = MAX_ITR}}
 		};
 
 		if (num_InterruptThrottleRate > bd) {
@@ -351,7 +354,7 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 				break;
 			case 3:
 				e_info("%s set to dynamic conservative mode\n",
-					opt.name);
+				       opt.name);
 				adapter->itr_setting = adapter->itr;
 				adapter->itr = 20000;
 				break;
@@ -380,7 +383,7 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 					 * they are used as control.
 					 */
 					adapter->itr_setting =
-						adapter->itr & ~3;
+					    adapter->itr & ~3;
 				}
 				break;
 			}
@@ -389,14 +392,14 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->itr = 0;
 		}
 	}
-	{ /* Interrupt Mode */
+	{			/* Interrupt Mode */
 		static struct e1000_option opt = {
 			.type = range_option,
 			.name = "Interrupt Mode",
-			.err  = "defaulting to 2 (MSI-X)",
-			.def  = E1000E_INT_MODE_MSIX,
-			.arg  = { .r = { .min = MIN_INTMODE,
-					 .max = MAX_INTMODE } }
+			.err = "defaulting to 2 (MSI-X)",
+			.def = E1000E_INT_MODE_MSIX,
+			.arg = {.r = {.min = MIN_INTMODE,
+				      .max = MAX_INTMODE}}
 		};
 
 		if (num_IntMode > bd) {
@@ -407,12 +410,12 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->int_mode = opt.def;
 		}
 	}
-	{ /* Smart Power Down */
+	{			/* Smart Power Down */
 		static const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "PHY Smart Power Down",
-			.err  = "defaulting to Disabled",
-			.def  = OPTION_DISABLED
+			.err = "defaulting to Disabled",
+			.def = OPTION_DISABLED
 		};
 
 		if (num_SmartPowerDownEnable > bd) {
@@ -423,12 +426,12 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 				adapter->flags |= FLAG_SMART_POWER_DOWN;
 		}
 	}
-	{ /* CRC Stripping */
+	{			/* CRC Stripping */
 		static const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "CRC Stripping",
-			.err  = "defaulting to Enabled",
-			.def  = OPTION_ENABLED
+			.err = "defaulting to Enabled",
+			.def = OPTION_ENABLED
 		};
 
 		if (num_CrcStripping > bd) {
@@ -440,12 +443,12 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->flags2 |= FLAG2_CRC_STRIPPING;
 		}
 	}
-	{ /* Kumeran Lock Loss Workaround */
+	{			/* Kumeran Lock Loss Workaround */
 		static const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "Kumeran Lock Loss Workaround",
-			.err  = "defaulting to Enabled",
-			.def  = OPTION_ENABLED
+			.err = "defaulting to Enabled",
+			.def = OPTION_ENABLED
 		};
 
 		if (num_KumeranLockLoss > bd) {
@@ -453,24 +456,26 @@ void e1000e_check_options(struct e1000_adapter *adapter)
 			e1000_validate_option(&kmrn_lock_loss, &opt, adapter);
 			if (hw->mac.type == e1000_ich8lan)
 				e1000e_set_kmrn_lock_loss_workaround_ich8lan(hw,
-								kmrn_lock_loss);
+									     kmrn_lock_loss);
 		} else {
 			if (hw->mac.type == e1000_ich8lan)
 				e1000e_set_kmrn_lock_loss_workaround_ich8lan(hw,
-								       opt.def);
+									     opt.
+									     def);
 		}
 	}
-	{ /* Write-protect NVM */
+	{			/* Write-protect NVM */
 		static const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "Write-protect NVM",
-			.err  = "defaulting to Enabled",
-			.def  = OPTION_ENABLED
+			.err = "defaulting to Enabled",
+			.def = OPTION_ENABLED
 		};
 
 		if (adapter->flags & FLAG_IS_ICH) {
 			if (num_WriteProtectNVM > bd) {
-				unsigned int write_protect_nvm = WriteProtectNVM[bd];
+				unsigned int write_protect_nvm =
+				    WriteProtectNVM[bd];
 				e1000_validate_option(&write_protect_nvm, &opt,
 						      adapter);
 				if (write_protect_nvm)

@@ -44,7 +44,7 @@ struct igb_adapter;
 #define E1000_PCS_CFG_IGN_SD	1
 
 /* Interrupt defines */
-#define IGB_START_ITR		648 /* ~6000 ints/sec */
+#define IGB_START_ITR		648	/* ~6000 ints/sec */
 #define IGB_4K_ITR		980
 #define IGB_20K_ITR		196
 #define IGB_70K_ITR		56
@@ -59,7 +59,7 @@ struct igb_adapter;
 #define IGB_MIN_RXD		80
 #define IGB_MAX_RXD		4096
 
-#define IGB_DEFAULT_ITR		3 /* dynamic */
+#define IGB_DEFAULT_ITR		3	/* dynamic */
 #define IGB_MAX_ITR_USECS	10000
 #define IGB_MIN_ITR_USECS	10
 #define NON_Q_VECTORS		1
@@ -98,16 +98,16 @@ struct vf_data_storage {
 	u16 vlans_enabled;
 	u32 flags;
 	unsigned long last_nack;
-	u16 pf_vlan; /* When set, guest VLAN config not allowed. */
+	u16 pf_vlan;		/* When set, guest VLAN config not allowed. */
 	u16 pf_qos;
 	u16 tx_rate;
 	bool spoofchk_enabled;
 };
 
-#define IGB_VF_FLAG_CTS            0x00000001 /* VF is clear to send data */
-#define IGB_VF_FLAG_UNI_PROMISC    0x00000002 /* VF has unicast promisc */
-#define IGB_VF_FLAG_MULTI_PROMISC  0x00000004 /* VF has multicast promisc */
-#define IGB_VF_FLAG_PF_SET_MAC     0x00000008 /* PF has set MAC address */
+#define IGB_VF_FLAG_CTS            0x00000001	/* VF is clear to send data */
+#define IGB_VF_FLAG_UNI_PROMISC    0x00000002	/* VF has unicast promisc */
+#define IGB_VF_FLAG_MULTI_PROMISC  0x00000004	/* VF has multicast promisc */
+#define IGB_VF_FLAG_PF_SET_MAC     0x00000008	/* PF has set MAC address */
 
 /* RX descriptor control thresholds.
  * PTHRESH - MAC will consider prefetch if it has fewer than this number of
@@ -139,7 +139,7 @@ struct vf_data_storage {
 #define IGB_RX_BUFSZ		IGB_RXBUFFER_2048
 
 /* How many Rx Buffers do we bundle into one write to the hardware ? */
-#define IGB_RX_BUFFER_WRITE	16 /* Must be power of 2 */
+#define IGB_RX_BUFFER_WRITE	16	/* Must be power of 2 */
 
 #define AUTO_ALL_MODES		0
 #define IGB_EEPROM_APME		0x0400
@@ -153,13 +153,13 @@ struct vf_data_storage {
 
 enum igb_tx_flags {
 	/* cmd_type flags */
-	IGB_TX_FLAGS_VLAN	= 0x01,
-	IGB_TX_FLAGS_TSO	= 0x02,
-	IGB_TX_FLAGS_TSTAMP	= 0x04,
+	IGB_TX_FLAGS_VLAN = 0x01,
+	IGB_TX_FLAGS_TSO = 0x02,
+	IGB_TX_FLAGS_TSTAMP = 0x04,
 
 	/* olinfo flags */
-	IGB_TX_FLAGS_IPV4	= 0x10,
-	IGB_TX_FLAGS_CSUM	= 0x20,
+	IGB_TX_FLAGS_IPV4 = 0x10,
+	IGB_TX_FLAGS_CSUM = 0x20,
 };
 
 /* VLAN info */
@@ -219,31 +219,31 @@ struct igb_rx_queue_stats {
 };
 
 struct igb_ring_container {
-	struct igb_ring *ring;		/* pointer to linked list of rings */
+	struct igb_ring *ring;	/* pointer to linked list of rings */
 	unsigned int total_bytes;	/* total bytes processed this int */
 	unsigned int total_packets;	/* total packets processed this int */
-	u16 work_limit;			/* total work allowed per interrupt */
-	u8 count;			/* total number of rings in vector */
-	u8 itr;				/* current ITR setting for ring */
+	u16 work_limit;		/* total work allowed per interrupt */
+	u8 count;		/* total number of rings in vector */
+	u8 itr;			/* current ITR setting for ring */
 };
 
 struct igb_ring {
 	struct igb_q_vector *q_vector;	/* backlink to q_vector */
 	struct rtnet_device *netdev;	/* back pointer to net_device */
-	struct device *dev;		/* device pointer for dma mapping */
-	union {				/* array of buffer info structs */
+	struct device *dev;	/* device pointer for dma mapping */
+	union {			/* array of buffer info structs */
 		struct igb_tx_buffer *tx_buffer_info;
 		struct igb_rx_buffer *rx_buffer_info;
 	};
-	void *desc;			/* descriptor ring memory */
-	unsigned long flags;		/* ring specific flags */
-	void __iomem *tail;		/* pointer to ring tail register */
-	dma_addr_t dma;			/* phys address of the ring */
-	unsigned int  size;		/* length of desc. ring in bytes */
+	void *desc;		/* descriptor ring memory */
+	unsigned long flags;	/* ring specific flags */
+	void __iomem *tail;	/* pointer to ring tail register */
+	dma_addr_t dma;		/* phys address of the ring */
+	unsigned int size;	/* length of desc. ring in bytes */
 
-	u16 count;			/* number of desc. in the ring */
-	u8 queue_index;			/* logical index of the ring*/
-	u8 reg_idx;			/* physical index of the ring */
+	u16 count;		/* number of desc. in the ring */
+	u8 queue_index;		/* logical index of the ring */
+	u8 reg_idx;		/* physical index of the ring */
 
 	/* everything past this point are written often */
 	u16 next_to_clean;
@@ -265,8 +265,8 @@ struct igb_ring {
 
 struct igb_q_vector {
 	struct igb_adapter *adapter;	/* backlink */
-	int cpu;			/* CPU for DCA */
-	u32 eims_value;			/* EIMS mask value */
+	int cpu;		/* CPU for DCA */
+	u32 eims_value;		/* EIMS mask value */
 
 	u16 itr_val;
 	u8 set_itr;
@@ -325,7 +325,7 @@ struct hwmon_attr {
 	struct e1000_hw *hw;
 	struct e1000_thermal_diode_data *sensor;
 	char name[12];
-	};
+};
 
 struct hwmon_buff {
 	struct attribute_group group;
@@ -333,7 +333,7 @@ struct hwmon_buff {
 	struct attribute *attrs[E1000_MAX_SENSORS * 4 + 1];
 	struct hwmon_attr hwmon_list[E1000_MAX_SENSORS * 4];
 	unsigned int n_hwmon;
-	};
+};
 #endif
 
 #define IGB_N_EXTTS	2
@@ -389,7 +389,7 @@ struct igb_adapter {
 	struct work_struct reset_task;
 	struct work_struct watchdog_task;
 	bool fc_autoneg;
-	u8  tx_timeout_factor;
+	u8 tx_timeout_factor;
 	struct timer_list blink_timer;
 	unsigned long led_status;
 
@@ -463,7 +463,7 @@ struct igb_adapter {
 /* DMA Coalescing defines */
 #define IGB_MIN_TXPBSIZE	20408
 #define IGB_TX_BUF_4096		4096
-#define IGB_DMCTLX_DCFLUSH_DIS	0x80000000  /* Disable DMA Coal Flush */
+#define IGB_DMCTLX_DCFLUSH_DIS	0x80000000	/* Disable DMA Coal Flush */
 
 #define IGB_82576_TSYNC_SHIFT	19
 #define IGB_TS_HDR_LEN		16
@@ -525,7 +525,7 @@ static inline s32 igb_reset_phy(struct e1000_hw *hw)
 	return 0;
 }
 
-static inline s32 igb_read_phy_reg(struct e1000_hw *hw, u32 offset, u16 *data)
+static inline s32 igb_read_phy_reg(struct e1000_hw *hw, u32 offset, u16 * data)
 {
 	if (hw->phy.ops.read_reg)
 		return hw->phy.ops.read_reg(hw, offset, data);

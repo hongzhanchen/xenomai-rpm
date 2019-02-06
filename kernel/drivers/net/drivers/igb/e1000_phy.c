@@ -28,15 +28,17 @@
 #include "e1000_mac.h"
 #include "e1000_phy.h"
 
-static s32  igb_phy_setup_autoneg(struct e1000_hw *hw);
+static s32 igb_phy_setup_autoneg(struct e1000_hw *hw);
 static void igb_phy_force_speed_duplex_setup(struct e1000_hw *hw,
-					     u16 *phy_ctrl);
-static s32  igb_wait_autoneg(struct e1000_hw *hw);
-static s32  igb_set_master_slave_mode(struct e1000_hw *hw);
+					     u16 * phy_ctrl);
+static s32 igb_wait_autoneg(struct e1000_hw *hw);
+static s32 igb_set_master_slave_mode(struct e1000_hw *hw);
 
 /* Cable length tables */
 static const u16 e1000_m88_cable_length_table[] = {
-	0, 50, 80, 110, 140, 140, E1000_CABLE_LENGTH_UNDEFINED };
+	0, 50, 80, 110, 140, 140, E1000_CABLE_LENGTH_UNDEFINED
+};
+
 #define M88E1000_CABLE_LENGTH_TABLE_SIZE \
 	(sizeof(e1000_m88_cable_length_table) / \
 	sizeof(e1000_m88_cable_length_table[0]))
@@ -49,7 +51,9 @@ static const u16 e1000_igp_2_cable_length_table[] = {
 	40, 45, 51, 56, 61, 66, 70, 75, 79, 83, 87, 91, 94, 98, 101, 104,
 	60, 66, 72, 77, 82, 87, 92, 96, 100, 104, 108, 111, 114, 117, 119, 121,
 	83, 89, 95, 100, 105, 109, 113, 116, 119, 122, 124,
-	104, 109, 114, 118, 121, 124};
+	104, 109, 114, 118, 121, 124
+};
+
 #define IGP02E1000_CABLE_LENGTH_TABLE_SIZE \
 	(sizeof(e1000_igp_2_cable_length_table) / \
 	 sizeof(e1000_igp_2_cable_length_table[0]))
@@ -78,7 +82,7 @@ s32 igb_check_reset_block(struct e1000_hw *hw)
  *  Reads the PHY registers and stores the PHY ID and possibly the PHY
  *  revision in the hardware structure.
  **/
-s32 igb_get_phy_id(struct e1000_hw *hw)
+s32 igb_get_phy_id(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val = 0;
@@ -88,14 +92,14 @@ s32 igb_get_phy_id(struct e1000_hw *hw)
 	if (ret_val)
 		goto out;
 
-	phy->id = (u32)(phy_id << 16);
+	phy->id = (u32) (phy_id << 16);
 	udelay(20);
 	ret_val = phy->ops.read_reg(hw, PHY_ID2, &phy_id);
 	if (ret_val)
 		goto out;
 
-	phy->id |= (u32)(phy_id & PHY_REVISION_MASK);
-	phy->revision = (u32)(phy_id & ~PHY_REVISION_MASK);
+	phy->id |= (u32) (phy_id & PHY_REVISION_MASK);
+	phy->revision = (u32) (phy_id & ~PHY_REVISION_MASK);
 
 out:
 	return ret_val;
@@ -133,7 +137,7 @@ out:
  *  Reads the MDI control regsiter in the PHY at offset and stores the
  *  information read to data.
  **/
-s32 igb_read_phy_reg_mdic(struct e1000_hw *hw, u32 offset, u16 *data)
+s32 igb_read_phy_reg_mdic(struct e1000_hw * hw, u32 offset, u16 * data)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	u32 i, mdic = 0;
@@ -150,8 +154,7 @@ s32 igb_read_phy_reg_mdic(struct e1000_hw *hw, u32 offset, u16 *data)
 	 * PHY to retrieve the desired data.
 	 */
 	mdic = ((offset << E1000_MDIC_REG_SHIFT) |
-		(phy->addr << E1000_MDIC_PHY_SHIFT) |
-		(E1000_MDIC_OP_READ));
+		(phy->addr << E1000_MDIC_PHY_SHIFT) | (E1000_MDIC_OP_READ));
 
 	wr32(E1000_MDIC, mdic);
 
@@ -189,7 +192,7 @@ out:
  *
  *  Writes data to MDI control register in the PHY at offset.
  **/
-s32 igb_write_phy_reg_mdic(struct e1000_hw *hw, u32 offset, u16 data)
+s32 igb_write_phy_reg_mdic(struct e1000_hw * hw, u32 offset, u16 data)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	u32 i, mdic = 0;
@@ -205,10 +208,9 @@ s32 igb_write_phy_reg_mdic(struct e1000_hw *hw, u32 offset, u16 data)
 	 * Control register.  The MAC will take care of interfacing with the
 	 * PHY to retrieve the desired data.
 	 */
-	mdic = (((u32)data) |
+	mdic = (((u32) data) |
 		(offset << E1000_MDIC_REG_SHIFT) |
-		(phy->addr << E1000_MDIC_PHY_SHIFT) |
-		(E1000_MDIC_OP_WRITE));
+		(phy->addr << E1000_MDIC_PHY_SHIFT) | (E1000_MDIC_OP_WRITE));
 
 	wr32(E1000_MDIC, mdic);
 
@@ -246,7 +248,7 @@ out:
  *  Reads the PHY register at offset using the i2c interface and stores the
  *  retrieved information in data.
  **/
-s32 igb_read_phy_reg_i2c(struct e1000_hw *hw, u32 offset, u16 *data)
+s32 igb_read_phy_reg_i2c(struct e1000_hw * hw, u32 offset, u16 * data)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	u32 i, i2ccmd = 0;
@@ -291,16 +293,15 @@ s32 igb_read_phy_reg_i2c(struct e1000_hw *hw, u32 offset, u16 *data)
  *
  *  Writes the data to PHY register at the offset using the i2c interface.
  **/
-s32 igb_write_phy_reg_i2c(struct e1000_hw *hw, u32 offset, u16 data)
+s32 igb_write_phy_reg_i2c(struct e1000_hw * hw, u32 offset, u16 data)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	u32 i, i2ccmd = 0;
 	u16 phy_data_swapped;
 
-	/* Prevent overwritting SFP I2C EEPROM which is at A0 address.*/
+	/* Prevent overwritting SFP I2C EEPROM which is at A0 address. */
 	if ((hw->phy.addr == 0) || (hw->phy.addr > 7)) {
-		hw_dbg("PHY I2C Address %d is out of range.\n",
-			  hw->phy.addr);
+		hw_dbg("PHY I2C Address %d is out of range.\n", hw->phy.addr);
 		return -E1000_ERR_CONFIG;
 	}
 
@@ -313,8 +314,7 @@ s32 igb_write_phy_reg_i2c(struct e1000_hw *hw, u32 offset, u16 data)
 	 */
 	i2ccmd = ((offset << E1000_I2CCMD_REG_ADDR_SHIFT) |
 		  (phy->addr << E1000_I2CCMD_PHY_ADDR_SHIFT) |
-		  E1000_I2CCMD_OPCODE_WRITE |
-		  phy_data_swapped);
+		  E1000_I2CCMD_OPCODE_WRITE | phy_data_swapped);
 
 	wr32(E1000_I2CCMD, i2ccmd);
 
@@ -350,7 +350,7 @@ s32 igb_write_phy_reg_i2c(struct e1000_hw *hw, u32 offset, u16 data)
  *  E1000_I2CCMD_SFP_DIAG_ADDR(<byte offset>) for SFP diagnostics parameters
  *  access
  **/
-s32 igb_read_sfp_data_byte(struct e1000_hw *hw, u16 offset, u8 *data)
+s32 igb_read_sfp_data_byte(struct e1000_hw * hw, u16 offset, u8 * data)
 {
 	u32 i = 0;
 	u32 i2ccmd = 0;
@@ -400,7 +400,7 @@ s32 igb_read_sfp_data_byte(struct e1000_hw *hw, u16 offset, u8 *data)
  *  and storing the retrieved information in data.  Release any acquired
  *  semaphores before exiting.
  **/
-s32 igb_read_phy_reg_igp(struct e1000_hw *hw, u32 offset, u16 *data)
+s32 igb_read_phy_reg_igp(struct e1000_hw * hw, u32 offset, u16 * data)
 {
 	s32 ret_val = 0;
 
@@ -414,15 +414,14 @@ s32 igb_read_phy_reg_igp(struct e1000_hw *hw, u32 offset, u16 *data)
 	if (offset > MAX_PHY_MULTI_PAGE_REG) {
 		ret_val = igb_write_phy_reg_mdic(hw,
 						 IGP01E1000_PHY_PAGE_SELECT,
-						 (u16)offset);
+						 (u16) offset);
 		if (ret_val) {
 			hw->phy.ops.release(hw);
 			goto out;
 		}
 	}
 
-	ret_val = igb_read_phy_reg_mdic(hw, MAX_PHY_REG_ADDRESS & offset,
-					data);
+	ret_val = igb_read_phy_reg_mdic(hw, MAX_PHY_REG_ADDRESS & offset, data);
 
 	hw->phy.ops.release(hw);
 
@@ -439,7 +438,7 @@ out:
  *  Acquires semaphore, if necessary, then writes the data to PHY register
  *  at the offset.  Release any acquired semaphores before exiting.
  **/
-s32 igb_write_phy_reg_igp(struct e1000_hw *hw, u32 offset, u16 data)
+s32 igb_write_phy_reg_igp(struct e1000_hw * hw, u32 offset, u16 data)
 {
 	s32 ret_val = 0;
 
@@ -453,7 +452,7 @@ s32 igb_write_phy_reg_igp(struct e1000_hw *hw, u32 offset, u16 data)
 	if (offset > MAX_PHY_MULTI_PAGE_REG) {
 		ret_val = igb_write_phy_reg_mdic(hw,
 						 IGP01E1000_PHY_PAGE_SELECT,
-						 (u16)offset);
+						 (u16) offset);
 		if (ret_val) {
 			hw->phy.ops.release(hw);
 			goto out;
@@ -475,7 +474,7 @@ out:
  *
  *  Sets up Carrier-sense on Transmit and downshift values.
  **/
-s32 igb_copper_link_setup_82580(struct e1000_hw *hw)
+s32 igb_copper_link_setup_82580(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -542,7 +541,7 @@ out:
  *  Sets up MDI/MDI-X and polarity for m88 PHY's.  If necessary, transmit clock
  *  and downshift values are set also.
  **/
-s32 igb_copper_link_setup_m88(struct e1000_hw *hw)
+s32 igb_copper_link_setup_m88(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -646,7 +645,7 @@ out:
  *  Sets up MDI/MDI-X and polarity for i347-AT4, m88e1322 and m88e1112 PHY's.
  *  Also enables and sets the downshift parameters.
  **/
-s32 igb_copper_link_setup_m88_gen2(struct e1000_hw *hw)
+s32 igb_copper_link_setup_m88_gen2(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -741,7 +740,7 @@ s32 igb_copper_link_setup_m88_gen2(struct e1000_hw *hw)
  *  Sets up LPLU, MDI/MDI-X, polarity, Smartspeed and Master/Slave config for
  *  igp PHY's.
  **/
-s32 igb_copper_link_setup_igp(struct e1000_hw *hw)
+s32 igb_copper_link_setup_igp(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -843,10 +842,9 @@ s32 igb_copper_link_setup_igp(struct e1000_hw *hw)
 
 		/* load defaults for future use */
 		phy->original_ms_type = (data & CR_1000T_MS_ENABLE) ?
-			((data & CR_1000T_MS_VALUE) ?
-			e1000_ms_force_master :
-			e1000_ms_force_slave) :
-			e1000_ms_auto;
+		    ((data & CR_1000T_MS_VALUE) ?
+		     e1000_ms_force_master :
+		     e1000_ms_force_slave) : e1000_ms_auto;
 
 		switch (phy->ms_type) {
 		case e1000_ms_force_master:
@@ -977,8 +975,7 @@ static s32 igb_phy_setup_autoneg(struct e1000_hw *hw)
 	 */
 	mii_autoneg_adv_reg &= ~(NWAY_AR_100TX_FD_CAPS |
 				 NWAY_AR_100TX_HD_CAPS |
-				 NWAY_AR_10T_FD_CAPS   |
-				 NWAY_AR_10T_HD_CAPS);
+				 NWAY_AR_10T_FD_CAPS | NWAY_AR_10T_HD_CAPS);
 	mii_1000t_ctrl_reg &= ~(CR_1000T_HD_CAPS | CR_1000T_FD_CAPS);
 
 	hw_dbg("autoneg_advertised %x\n", phy->autoneg_advertised);
@@ -1099,7 +1096,7 @@ out:
  *  to configure collision distance and flow control are called.  If link is
  *  not established, we return -E1000_ERR_PHY (-2).
  **/
-s32 igb_setup_copper_link(struct e1000_hw *hw)
+s32 igb_setup_copper_link(struct e1000_hw * hw)
 {
 	s32 ret_val;
 	bool link;
@@ -1150,7 +1147,7 @@ out:
  *  auto-crossover to force MDI manually.  Waits for link and returns
  *  successful if link up is successful, else -E1000_ERR_PHY (-2).
  **/
-s32 igb_phy_force_speed_duplex_igp(struct e1000_hw *hw)
+s32 igb_phy_force_speed_duplex_igp(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -1215,7 +1212,7 @@ out:
  *  After reset, TX_CLK and CRS on TX must be set.  Return successful upon
  *  successful completion, else return corresponding error code.
  **/
-s32 igb_phy_force_speed_duplex_m88(struct e1000_hw *hw)
+s32 igb_phy_force_speed_duplex_m88(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -1284,8 +1281,8 @@ s32 igb_phy_force_speed_duplex_m88(struct e1000_hw *hw)
 				 * Reset the DSP and cross our fingers.
 				 */
 				ret_val = phy->ops.write_reg(hw,
-						M88E1000_PHY_PAGE_SELECT,
-						0x001d);
+							     M88E1000_PHY_PAGE_SELECT,
+							     0x001d);
 				if (ret_val)
 					goto out;
 				ret_val = igb_phy_reset_dsp(hw);
@@ -1295,16 +1292,14 @@ s32 igb_phy_force_speed_duplex_m88(struct e1000_hw *hw)
 		}
 
 		/* Try once more */
-		ret_val = igb_phy_has_link(hw, PHY_FORCE_LIMIT,
-					   100000, &link);
+		ret_val = igb_phy_has_link(hw, PHY_FORCE_LIMIT, 100000, &link);
 		if (ret_val)
 			goto out;
 	}
 
 	if (hw->phy.type != e1000_phy_m88 ||
 	    hw->phy.id == I347AT4_E_PHY_ID ||
-	    hw->phy.id == M88E1112_E_PHY_ID ||
-	    hw->phy.id == I210_I_PHY_ID)
+	    hw->phy.id == M88E1112_E_PHY_ID || hw->phy.id == I210_I_PHY_ID)
 		goto out;
 
 	ret_val = phy->ops.read_reg(hw, M88E1000_EXT_PHY_SPEC_CTRL, &phy_data);
@@ -1347,7 +1342,7 @@ out:
  *  take affect.
  **/
 static void igb_phy_force_speed_duplex_setup(struct e1000_hw *hw,
-					     u16 *phy_ctrl)
+					     u16 * phy_ctrl)
 {
 	struct e1000_mac_info *mac = &hw->mac;
 	u32 ctrl;
@@ -1448,8 +1443,8 @@ s32 igb_set_d3_lplu_state(struct e1000_hw *hw, bool active)
 				goto out;
 		} else if (phy->smart_speed == e1000_smart_speed_off) {
 			ret_val = phy->ops.read_reg(hw,
-						     IGP01E1000_PHY_PORT_CONFIG,
-						     &data);
+						    IGP01E1000_PHY_PORT_CONFIG,
+						    &data);
 			if (ret_val)
 				goto out;
 
@@ -1465,7 +1460,7 @@ s32 igb_set_d3_lplu_state(struct e1000_hw *hw, bool active)
 		   (phy->autoneg_advertised == E1000_ALL_10_SPEED)) {
 		data |= IGP02E1000_PM_D3_LPLU;
 		ret_val = phy->ops.write_reg(hw, IGP02E1000_PHY_POWER_MGMT,
-					      data);
+					     data);
 		if (ret_val)
 			goto out;
 
@@ -1492,7 +1487,7 @@ out:
  *
  *  A downshift is detected by querying the PHY link health.
  **/
-s32 igb_check_downshift(struct e1000_hw *hw)
+s32 igb_check_downshift(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -1502,14 +1497,14 @@ s32 igb_check_downshift(struct e1000_hw *hw)
 	case e1000_phy_i210:
 	case e1000_phy_m88:
 	case e1000_phy_gg82563:
-		offset	= M88E1000_PHY_SPEC_STATUS;
-		mask	= M88E1000_PSSR_DOWNSHIFT;
+		offset = M88E1000_PHY_SPEC_STATUS;
+		mask = M88E1000_PSSR_DOWNSHIFT;
 		break;
 	case e1000_phy_igp_2:
 	case e1000_phy_igp:
 	case e1000_phy_igp_3:
-		offset	= IGP01E1000_PHY_LINK_HEALTH;
-		mask	= IGP01E1000_PLHR_SS_DOWNGRADE;
+		offset = IGP01E1000_PHY_LINK_HEALTH;
+		mask = IGP01E1000_PLHR_SS_DOWNGRADE;
 		break;
 	default:
 		/* speed downshift not supported */
@@ -1535,7 +1530,7 @@ out:
  *
  *  Polarity is determined based on the PHY specific status register.
  **/
-s32 igb_check_polarity_m88(struct e1000_hw *hw)
+s32 igb_check_polarity_m88(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -1545,8 +1540,7 @@ s32 igb_check_polarity_m88(struct e1000_hw *hw)
 
 	if (!ret_val)
 		phy->cable_polarity = (data & M88E1000_PSSR_REV_POLARITY)
-				      ? e1000_rev_polarity_reversed
-				      : e1000_rev_polarity_normal;
+		    ? e1000_rev_polarity_reversed : e1000_rev_polarity_normal;
 
 	return ret_val;
 }
@@ -1575,22 +1569,21 @@ static s32 igb_check_polarity_igp(struct e1000_hw *hw)
 
 	if ((data & IGP01E1000_PSSR_SPEED_MASK) ==
 	    IGP01E1000_PSSR_SPEED_1000MBPS) {
-		offset	= IGP01E1000_PHY_PCS_INIT_REG;
-		mask	= IGP01E1000_PHY_POLARITY_MASK;
+		offset = IGP01E1000_PHY_PCS_INIT_REG;
+		mask = IGP01E1000_PHY_POLARITY_MASK;
 	} else {
 		/* This really only applies to 10Mbps since
 		 * there is no polarity for 100Mbps (always 0).
 		 */
-		offset	= IGP01E1000_PHY_PORT_STATUS;
-		mask	= IGP01E1000_PSSR_POLARITY_REVERSED;
+		offset = IGP01E1000_PHY_PORT_STATUS;
+		mask = IGP01E1000_PSSR_POLARITY_REVERSED;
 	}
 
 	ret_val = phy->ops.read_reg(hw, offset, &data);
 
 	if (!ret_val)
 		phy->cable_polarity = (data & mask)
-				      ? e1000_rev_polarity_reversed
-				      : e1000_rev_polarity_normal;
+		    ? e1000_rev_polarity_reversed : e1000_rev_polarity_normal;
 
 out:
 	return ret_val;
@@ -1636,8 +1629,8 @@ static s32 igb_wait_autoneg(struct e1000_hw *hw)
  *
  *  Polls the PHY status register for link, 'iterations' number of times.
  **/
-s32 igb_phy_has_link(struct e1000_hw *hw, u32 iterations,
-		     u32 usec_interval, bool *success)
+s32 igb_phy_has_link(struct e1000_hw * hw, u32 iterations,
+		     u32 usec_interval, bool * success)
 {
 	s32 ret_val = 0;
 	u16 i, phy_status;
@@ -1654,7 +1647,7 @@ s32 igb_phy_has_link(struct e1000_hw *hw, u32 iterations,
 			 * see if they have relinquished the resources yet.
 			 */
 			if (usec_interval >= 1000)
-				mdelay(usec_interval/1000);
+				mdelay(usec_interval / 1000);
 			else
 				udelay(usec_interval);
 		}
@@ -1664,7 +1657,7 @@ s32 igb_phy_has_link(struct e1000_hw *hw, u32 iterations,
 		if (phy_status & MII_SR_LINK_STATUS)
 			break;
 		if (usec_interval >= 1000)
-			mdelay(usec_interval/1000);
+			mdelay(usec_interval / 1000);
 		else
 			udelay(usec_interval);
 	}
@@ -1689,7 +1682,7 @@ s32 igb_phy_has_link(struct e1000_hw *hw, u32 iterations,
  *	3			110 - 140 meters
  *	4			> 140 meters
  **/
-s32 igb_get_cable_length_m88(struct e1000_hw *hw)
+s32 igb_get_cable_length_m88(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -1700,7 +1693,7 @@ s32 igb_get_cable_length_m88(struct e1000_hw *hw)
 		goto out;
 
 	index = (phy_data & M88E1000_PSSR_CABLE_LENGTH) >>
-		M88E1000_PSSR_CABLE_LENGTH_SHIFT;
+	    M88E1000_PSSR_CABLE_LENGTH_SHIFT;
 	if (index >= M88E1000_CABLE_LENGTH_TABLE_SIZE - 1) {
 		ret_val = -E1000_ERR_PHY;
 		goto out;
@@ -1715,7 +1708,7 @@ out:
 	return ret_val;
 }
 
-s32 igb_get_cable_length_m88_gen2(struct e1000_hw *hw)
+s32 igb_get_cable_length_m88_gen2(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -1796,7 +1789,7 @@ s32 igb_get_cable_length_m88_gen2(struct e1000_hw *hw)
 			goto out;
 
 		index = (phy_data & M88E1000_PSSR_CABLE_LENGTH) >>
-			M88E1000_PSSR_CABLE_LENGTH_SHIFT;
+		    M88E1000_PSSR_CABLE_LENGTH_SHIFT;
 		if (index >= M88E1000_CABLE_LENGTH_TABLE_SIZE - 1) {
 			ret_val = -E1000_ERR_PHY;
 			goto out;
@@ -1835,7 +1828,7 @@ out:
  *  into a lookup table to obtain the approximate cable length
  *  for each channel.
  **/
-s32 igb_get_cable_length_igp_2(struct e1000_hw *hw)
+s32 igb_get_cable_length_igp_2(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val = 0;
@@ -1861,7 +1854,7 @@ s32 igb_get_cable_length_igp_2(struct e1000_hw *hw)
 		 * approximate cable length.
 		 */
 		cur_agc_index = (phy_data >> IGP02E1000_AGC_LENGTH_SHIFT) &
-				IGP02E1000_AGC_LENGTH_MASK;
+		    IGP02E1000_AGC_LENGTH_MASK;
 
 		/* Array index bound check. */
 		if ((cur_agc_index >= IGP02E1000_CABLE_LENGTH_TABLE_SIZE) ||
@@ -1887,7 +1880,7 @@ s32 igb_get_cable_length_igp_2(struct e1000_hw *hw)
 
 	/* Calculate cable length with the error range of +/- 10 meters. */
 	phy->min_cable_length = ((agc_value - IGP02E1000_AGC_RANGE) > 0) ?
-				 (agc_value - IGP02E1000_AGC_RANGE) : 0;
+	    (agc_value - IGP02E1000_AGC_RANGE) : 0;
 	phy->max_cable_length = agc_value + IGP02E1000_AGC_RANGE;
 
 	phy->cable_length = (phy->min_cable_length + phy->max_cable_length) / 2;
@@ -1906,10 +1899,10 @@ out:
  *  special status register to determine MDI/MDIx and current speed.  If
  *  speed is 1000, then determine cable length, local and remote receiver.
  **/
-s32 igb_get_phy_info_m88(struct e1000_hw *hw)
+s32 igb_get_phy_info_m88(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
-	s32  ret_val;
+	s32 ret_val;
 	u16 phy_data;
 	bool link;
 
@@ -1934,7 +1927,7 @@ s32 igb_get_phy_info_m88(struct e1000_hw *hw)
 		goto out;
 
 	phy->polarity_correction = (phy_data & M88E1000_PSCR_POLARITY_REVERSAL)
-				   ? true : false;
+	    ? true : false;
 
 	ret_val = igb_check_polarity_m88(hw);
 	if (ret_val)
@@ -1956,12 +1949,10 @@ s32 igb_get_phy_info_m88(struct e1000_hw *hw)
 			goto out;
 
 		phy->local_rx = (phy_data & SR_1000T_LOCAL_RX_STATUS)
-				? e1000_1000t_rx_status_ok
-				: e1000_1000t_rx_status_not_ok;
+		    ? e1000_1000t_rx_status_ok : e1000_1000t_rx_status_not_ok;
 
 		phy->remote_rx = (phy_data & SR_1000T_REMOTE_RX_STATUS)
-				 ? e1000_1000t_rx_status_ok
-				 : e1000_1000t_rx_status_not_ok;
+		    ? e1000_1000t_rx_status_ok : e1000_1000t_rx_status_not_ok;
 	} else {
 		/* Set values to "undefined" */
 		phy->cable_length = E1000_CABLE_LENGTH_UNDEFINED;
@@ -1982,7 +1973,7 @@ out:
  *  PHY port status to determine MDI/MDIx and speed.  Based on the speed,
  *  determine on the cable length, local and remote receiver.
  **/
-s32 igb_get_phy_info_igp(struct e1000_hw *hw)
+s32 igb_get_phy_info_igp(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -2022,12 +2013,10 @@ s32 igb_get_phy_info_igp(struct e1000_hw *hw)
 			goto out;
 
 		phy->local_rx = (data & SR_1000T_LOCAL_RX_STATUS)
-				? e1000_1000t_rx_status_ok
-				: e1000_1000t_rx_status_not_ok;
+		    ? e1000_1000t_rx_status_ok : e1000_1000t_rx_status_not_ok;
 
 		phy->remote_rx = (data & SR_1000T_REMOTE_RX_STATUS)
-				 ? e1000_1000t_rx_status_ok
-				 : e1000_1000t_rx_status_not_ok;
+		    ? e1000_1000t_rx_status_ok : e1000_1000t_rx_status_not_ok;
 	} else {
 		phy->cable_length = E1000_CABLE_LENGTH_UNDEFINED;
 		phy->local_rx = e1000_1000t_rx_status_undefined;
@@ -2045,7 +2034,7 @@ out:
  *  Does a software reset of the PHY by reading the PHY control register and
  *  setting/write the control register reset bit to the PHY.
  **/
-s32 igb_phy_sw_reset(struct e1000_hw *hw)
+s32 igb_phy_sw_reset(struct e1000_hw * hw)
 {
 	s32 ret_val = 0;
 	u16 phy_ctrl;
@@ -2077,10 +2066,10 @@ out:
  *  bit in the PHY.  Wait the appropriate delay time for the device to
  *  reset and release the semaphore (if necessary).
  **/
-s32 igb_phy_hw_reset(struct e1000_hw *hw)
+s32 igb_phy_hw_reset(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
-	s32  ret_val;
+	s32 ret_val;
 	u32 ctrl;
 
 	ret_val = igb_check_reset_block(hw);
@@ -2118,7 +2107,7 @@ out:
  *
  *  Initializes a Intel Gigabit PHY3 when an EEPROM is not present.
  **/
-s32 igb_phy_init_script_igp3(struct e1000_hw *hw)
+s32 igb_phy_init_script_igp3(struct e1000_hw * hw)
 {
 	hw_dbg("Running IGP 3 PHY init script\n");
 
@@ -2244,13 +2233,11 @@ static s32 igb_check_polarity_82580(struct e1000_hw *hw)
 	s32 ret_val;
 	u16 data;
 
-
 	ret_val = phy->ops.read_reg(hw, I82580_PHY_STATUS_2, &data);
 
 	if (!ret_val)
 		phy->cable_polarity = (data & I82580_PHY_STATUS2_REV_POLARITY)
-				      ? e1000_rev_polarity_reversed
-				      : e1000_rev_polarity_normal;
+		    ? e1000_rev_polarity_reversed : e1000_rev_polarity_normal;
 
 	return ret_val;
 }
@@ -2263,7 +2250,7 @@ static s32 igb_check_polarity_82580(struct e1000_hw *hw)
  *  auto-crossover to force MDI manually.  Waits for link and returns
  *  successful if link up is successful, else -E1000_ERR_PHY (-2).
  **/
-s32 igb_phy_force_speed_duplex_82580(struct e1000_hw *hw)
+s32 igb_phy_force_speed_duplex_82580(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -2326,7 +2313,7 @@ out:
  *  PHY port status to determine MDI/MDIx and speed.  Based on the speed,
  *  determine on the cable length, local and remote receiver.
  **/
-s32 igb_get_phy_info_82580(struct e1000_hw *hw)
+s32 igb_get_phy_info_82580(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -2366,12 +2353,10 @@ s32 igb_get_phy_info_82580(struct e1000_hw *hw)
 			goto out;
 
 		phy->local_rx = (data & SR_1000T_LOCAL_RX_STATUS)
-				? e1000_1000t_rx_status_ok
-				: e1000_1000t_rx_status_not_ok;
+		    ? e1000_1000t_rx_status_ok : e1000_1000t_rx_status_not_ok;
 
 		phy->remote_rx = (data & SR_1000T_REMOTE_RX_STATUS)
-				 ? e1000_1000t_rx_status_ok
-				 : e1000_1000t_rx_status_not_ok;
+		    ? e1000_1000t_rx_status_ok : e1000_1000t_rx_status_not_ok;
 	} else {
 		phy->cable_length = E1000_CABLE_LENGTH_UNDEFINED;
 		phy->local_rx = e1000_1000t_rx_status_undefined;
@@ -2389,7 +2374,7 @@ out:
  * Reads the diagnostic status register and verifies result is valid before
  * placing it in the phy_cable_length field.
  **/
-s32 igb_get_cable_length_82580(struct e1000_hw *hw)
+s32 igb_get_cable_length_82580(struct e1000_hw * hw)
 {
 	struct e1000_phy_info *phy = &hw->phy;
 	s32 ret_val;
@@ -2400,7 +2385,7 @@ s32 igb_get_cable_length_82580(struct e1000_hw *hw)
 		goto out;
 
 	length = (phy_data & I82580_DSTATUS_CABLE_LENGTH) >>
-		 I82580_DSTATUS_CABLE_LENGTH_SHIFT;
+	    I82580_DSTATUS_CABLE_LENGTH_SHIFT;
 
 	if (length == E1000_CABLE_LENGTH_UNDEFINED)
 		ret_val = -E1000_ERR_PHY;
@@ -2421,7 +2406,7 @@ out:
  *  Acquires semaphore, if necessary, then writes the data to PHY register
  *  at the offset.  Release any acquired semaphores before exiting.
  **/
-s32 igb_write_phy_reg_gs40g(struct e1000_hw *hw, u32 offset, u16 data)
+s32 igb_write_phy_reg_gs40g(struct e1000_hw * hw, u32 offset, u16 data)
 {
 	s32 ret_val;
 	u16 page = offset >> GS40G_PAGE_SHIFT;
@@ -2451,7 +2436,7 @@ release:
  *  Acquires semaphore, if necessary, then reads the data in the PHY register
  *  at the offset.  Release any acquired semaphores before exiting.
  **/
-s32 igb_read_phy_reg_gs40g(struct e1000_hw *hw, u32 offset, u16 *data)
+s32 igb_read_phy_reg_gs40g(struct e1000_hw * hw, u32 offset, u16 * data)
 {
 	s32 ret_val;
 	u16 page = offset >> GS40G_PAGE_SHIFT;
@@ -2489,9 +2474,8 @@ static s32 igb_set_master_slave_mode(struct e1000_hw *hw)
 
 	/* load defaults for future use */
 	hw->phy.original_ms_type = (phy_data & CR_1000T_MS_ENABLE) ?
-				   ((phy_data & CR_1000T_MS_VALUE) ?
-				    e1000_ms_force_master :
-				    e1000_ms_force_slave) : e1000_ms_auto;
+	    ((phy_data & CR_1000T_MS_VALUE) ?
+	     e1000_ms_force_master : e1000_ms_force_slave) : e1000_ms_auto;
 
 	switch (hw->phy.ms_type) {
 	case e1000_ms_force_master:

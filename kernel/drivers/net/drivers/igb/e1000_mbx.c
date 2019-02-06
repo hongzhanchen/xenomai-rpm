@@ -32,7 +32,7 @@
  *
  *  returns SUCCESS if it successfully read message from buffer
  **/
-s32 igb_read_mbx(struct e1000_hw *hw, u32 *msg, u16 size, u16 mbx_id)
+s32 igb_read_mbx(struct e1000_hw *hw, u32 * msg, u16 size, u16 mbx_id)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
 	s32 ret_val = -E1000_ERR_MBX;
@@ -56,7 +56,7 @@ s32 igb_read_mbx(struct e1000_hw *hw, u32 *msg, u16 size, u16 mbx_id)
  *
  *  returns SUCCESS if it successfully copied message into the buffer
  **/
-s32 igb_write_mbx(struct e1000_hw *hw, u32 *msg, u16 size, u16 mbx_id)
+s32 igb_write_mbx(struct e1000_hw * hw, u32 * msg, u16 size, u16 mbx_id)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
 	s32 ret_val = 0;
@@ -77,7 +77,7 @@ s32 igb_write_mbx(struct e1000_hw *hw, u32 *msg, u16 size, u16 mbx_id)
  *
  *  returns SUCCESS if the Status bit was found or else ERR_MBX
  **/
-s32 igb_check_for_msg(struct e1000_hw *hw, u16 mbx_id)
+s32 igb_check_for_msg(struct e1000_hw * hw, u16 mbx_id)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
 	s32 ret_val = -E1000_ERR_MBX;
@@ -95,7 +95,7 @@ s32 igb_check_for_msg(struct e1000_hw *hw, u16 mbx_id)
  *
  *  returns SUCCESS if the Status bit was found or else ERR_MBX
  **/
-s32 igb_check_for_ack(struct e1000_hw *hw, u16 mbx_id)
+s32 igb_check_for_ack(struct e1000_hw * hw, u16 mbx_id)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
 	s32 ret_val = -E1000_ERR_MBX;
@@ -113,7 +113,7 @@ s32 igb_check_for_ack(struct e1000_hw *hw, u16 mbx_id)
  *
  *  returns SUCCESS if the Status bit was found or else ERR_MBX
  **/
-s32 igb_check_for_rst(struct e1000_hw *hw, u16 mbx_id)
+s32 igb_check_for_rst(struct e1000_hw * hw, u16 mbx_id)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
 	s32 ret_val = -E1000_ERR_MBX;
@@ -192,7 +192,7 @@ out:
  *  returns SUCCESS if it successfully received a message notification and
  *  copied it into the receive buffer.
  **/
-static s32 igb_read_posted_mbx(struct e1000_hw *hw, u32 *msg, u16 size,
+static s32 igb_read_posted_mbx(struct e1000_hw *hw, u32 * msg, u16 size,
 			       u16 mbx_id)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
@@ -219,7 +219,7 @@ out:
  *  returns SUCCESS if it successfully copied message into the buffer and
  *  received an ack to that message within delay * timeout period
  **/
-static s32 igb_write_posted_mbx(struct e1000_hw *hw, u32 *msg, u16 size,
+static s32 igb_write_posted_mbx(struct e1000_hw *hw, u32 * msg, u16 size,
 				u16 mbx_id)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
@@ -343,7 +343,7 @@ static s32 igb_obtain_mbx_lock_pf(struct e1000_hw *hw, u16 vf_number)
  *
  *  returns SUCCESS if it successfully copied message into the buffer
  **/
-static s32 igb_write_mbx_pf(struct e1000_hw *hw, u32 *msg, u16 size,
+static s32 igb_write_mbx_pf(struct e1000_hw *hw, u32 * msg, u16 size,
 			    u16 vf_number)
 {
 	s32 ret_val;
@@ -362,7 +362,7 @@ static s32 igb_write_mbx_pf(struct e1000_hw *hw, u32 *msg, u16 size,
 	for (i = 0; i < size; i++)
 		array_wr32(E1000_VMBMEM(vf_number), i, msg[i]);
 
-	/* Interrupt VF to tell it a message has been sent and release buffer*/
+	/* Interrupt VF to tell it a message has been sent and release buffer */
 	wr32(E1000_P2VMAILBOX(vf_number), E1000_P2VMAILBOX_STS);
 
 	/* update stats */
@@ -384,7 +384,7 @@ out_no_write:
  *  memory buffer.  The presumption is that the caller knows that there was
  *  a message due to a VF request so no polling for message is needed.
  **/
-static s32 igb_read_mbx_pf(struct e1000_hw *hw, u32 *msg, u16 size,
+static s32 igb_read_mbx_pf(struct e1000_hw *hw, u32 * msg, u16 size,
 			   u16 vf_number)
 {
 	s32 ret_val;
@@ -415,7 +415,7 @@ out_no_read:
  *
  *  Initializes the hw->mbx struct to correct values for pf mailbox
  */
-s32 igb_init_mbx_params_pf(struct e1000_hw *hw)
+s32 igb_init_mbx_params_pf(struct e1000_hw * hw)
 {
 	struct e1000_mbx_info *mbx = &hw->mbx;
 
@@ -440,4 +440,3 @@ s32 igb_init_mbx_params_pf(struct e1000_hw *hw)
 
 	return 0;
 }
-

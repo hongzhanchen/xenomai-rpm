@@ -1,6 +1,5 @@
 /*******************************************************************************
 
-
   Copyright(c) 1999 - 2006 Intel Corporation. All rights reserved.
 
   This program is free software; you can redistribute it and/or modify it
@@ -74,7 +73,6 @@
 #undef CONFIG_E1000_DISABLE_PACKET_SPLIT
 #define CONFIG_E1000_DISABLE_PACKET_SPLIT 1
 
-
 #ifdef DISABLE_PCI_MSI
 #undef CONFIG_PCI_MSI
 #endif
@@ -118,12 +116,12 @@
 #define ethtool_drvinfo k_ethtool_drvinfo
 struct k_ethtool_drvinfo {
 	uint32_t cmd;
-	char	 driver[32];
-	char	 version[32];
-	char	 fw_version[32];
-	char	 bus_info[32];
-	char	 reserved1[32];
-	char	 reserved2[16];
+	char driver[32];
+	char version[32];
+	char fw_version[32];
+	char bus_info[32];
+	char reserved1[32];
+	char reserved2[16];
 	uint32_t n_stats;
 	uint32_t testinfo_len;
 	uint32_t eedump_len;
@@ -141,20 +139,20 @@ struct ethtool_stats {
 #ifndef ETHTOOL_GSTRINGS
 #define ETHTOOL_GSTRINGS 0x1b
 enum ethtool_stringset {
-	ETH_SS_TEST             = 0,
+	ETH_SS_TEST = 0,
 	ETH_SS_STATS,
 };
 struct ethtool_gstrings {
-	u32     cmd;            /* ETHTOOL_GSTRINGS */
-	u32     string_set;     /* string set id e.c. ETH_SS_TEST, etc*/
-	u32     len;            /* number of strings in the string set */
-	u8      data[0];
+	u32 cmd;		/* ETHTOOL_GSTRINGS */
+	u32 string_set;		/* string set id e.c. ETH_SS_TEST, etc */
+	u32 len;		/* number of strings in the string set */
+	u8 data[0];
 };
 #ifndef ETHTOOL_TEST
 #define ETHTOOL_TEST 0x1a
 enum ethtool_test_flags {
-	ETH_TEST_FL_OFFLINE	= (1 << 0),
-	ETH_TEST_FL_FAILED	= (1 << 1),
+	ETH_TEST_FL_OFFLINE = (1 << 0),
+	ETH_TEST_FL_FAILED = (1 << 1),
 };
 struct ethtool_test {
 	uint32_t cmd;
@@ -171,7 +169,7 @@ struct ethtool_eeprom {
 	uint32_t magic;
 	uint32_t offset;
 	uint32_t len;
-	uint8_t	 data[0];
+	uint8_t data[0];
 };
 
 struct ethtool_value {
@@ -189,46 +187,46 @@ struct ethtool_value {
 #endif /* Ethtool version without statistics support */
 
 #ifndef ETHTOOL_GREGS
-#define ETHTOOL_GREGS		0x00000004 /* Get NIC registers */
+#define ETHTOOL_GREGS		0x00000004	/* Get NIC registers */
 #define ethtool_regs _kc_ethtool_regs
 /* for passing big chunks of data */
 struct _kc_ethtool_regs {
-	u32	cmd;
-	u32	version; /* driver-specific, indicates different chips/revs */
-	u32	len; /* bytes */
-	u8	data[0];
+	u32 cmd;
+	u32 version;		/* driver-specific, indicates different chips/revs */
+	u32 len;		/* bytes */
+	u8 data[0];
 };
 #endif
 #ifndef ETHTOOL_GMSGLVL
-#define ETHTOOL_GMSGLVL		0x00000007 /* Get driver message level */
+#define ETHTOOL_GMSGLVL		0x00000007	/* Get driver message level */
 #endif
 #ifndef ETHTOOL_SMSGLVL
-#define ETHTOOL_SMSGLVL		0x00000008 /* Set driver msg level, priv. */
+#define ETHTOOL_SMSGLVL		0x00000008	/* Set driver msg level, priv. */
 #endif
 #ifndef ETHTOOL_NWAY_RST
-#define ETHTOOL_NWAY_RST	0x00000009 /* Restart autonegotiation, priv */
+#define ETHTOOL_NWAY_RST	0x00000009	/* Restart autonegotiation, priv */
 #endif
 #ifndef ETHTOOL_GLINK
-#define ETHTOOL_GLINK		0x0000000a /* Get link status */
+#define ETHTOOL_GLINK		0x0000000a	/* Get link status */
 #endif
 #ifndef ETHTOOL_GEEPROM
-#define ETHTOOL_GEEPROM		0x0000000b /* Get EEPROM data */
+#define ETHTOOL_GEEPROM		0x0000000b	/* Get EEPROM data */
 #endif
 #ifndef ETHTOOL_SEEPROM
-#define ETHTOOL_SEEPROM		0x0000000c /* Set EEPROM data */
+#define ETHTOOL_SEEPROM		0x0000000c	/* Set EEPROM data */
 #endif
 #ifndef ETHTOOL_GCOALESCE
-#define ETHTOOL_GCOALESCE	0x0000000e /* Get coalesce config */
+#define ETHTOOL_GCOALESCE	0x0000000e	/* Get coalesce config */
 /* for configuring coalescing parameters of chip */
 #define ethtool_coalesce _kc_ethtool_coalesce
 struct _kc_ethtool_coalesce {
-	u32	cmd;	/* ETHTOOL_{G,S}COALESCE */
+	u32 cmd;		/* ETHTOOL_{G,S}COALESCE */
 
 	/* How many usecs to delay an RX interrupt after
 	 * a packet arrives.  If 0, only rx_max_coalesced_frames
 	 * is used.
 	 */
-	u32	rx_coalesce_usecs;
+	u32 rx_coalesce_usecs;
 
 	/* How many packets to delay an RX interrupt after
 	 * a packet arrives.  If 0, only rx_coalesce_usecs is
@@ -236,21 +234,21 @@ struct _kc_ethtool_coalesce {
 	 * to zero as this would cause RX interrupts to never be
 	 * generated.
 	 */
-	u32	rx_max_coalesced_frames;
+	u32 rx_max_coalesced_frames;
 
 	/* Same as above two parameters, except that these values
 	 * apply while an IRQ is being serviced by the host.  Not
 	 * all cards support this feature and the values are ignored
 	 * in that case.
 	 */
-	u32	rx_coalesce_usecs_irq;
-	u32	rx_max_coalesced_frames_irq;
+	u32 rx_coalesce_usecs_irq;
+	u32 rx_max_coalesced_frames_irq;
 
 	/* How many usecs to delay a TX interrupt after
 	 * a packet is sent.  If 0, only tx_max_coalesced_frames
 	 * is used.
 	 */
-	u32	tx_coalesce_usecs;
+	u32 tx_coalesce_usecs;
 
 	/* How many packets to delay a TX interrupt after
 	 * a packet is sent.  If 0, only tx_coalesce_usecs is
@@ -258,22 +256,22 @@ struct _kc_ethtool_coalesce {
 	 * to zero as this would cause TX interrupts to never be
 	 * generated.
 	 */
-	u32	tx_max_coalesced_frames;
+	u32 tx_max_coalesced_frames;
 
 	/* Same as above two parameters, except that these values
 	 * apply while an IRQ is being serviced by the host.  Not
 	 * all cards support this feature and the values are ignored
 	 * in that case.
 	 */
-	u32	tx_coalesce_usecs_irq;
-	u32	tx_max_coalesced_frames_irq;
+	u32 tx_coalesce_usecs_irq;
+	u32 tx_max_coalesced_frames_irq;
 
 	/* How many usecs to delay in-memory statistics
 	 * block updates.  Some drivers do not have an in-memory
 	 * statistic block, and in such cases this value is ignored.
 	 * This value must not be zero.
 	 */
-	u32	stats_block_coalesce_usecs;
+	u32 stats_block_coalesce_usecs;
 
 	/* Adaptive RX/TX coalescing is an algorithm implemented by
 	 * some drivers to improve latency under low packet rates and
@@ -282,18 +280,18 @@ struct _kc_ethtool_coalesce {
 	 * not implemented by the driver causes these values to be
 	 * silently ignored.
 	 */
-	u32	use_adaptive_rx_coalesce;
-	u32	use_adaptive_tx_coalesce;
+	u32 use_adaptive_rx_coalesce;
+	u32 use_adaptive_tx_coalesce;
 
 	/* When the packet rate (measured in packets per second)
 	 * is below pkt_rate_low, the {rx,tx}_*_low parameters are
 	 * used.
 	 */
-	u32	pkt_rate_low;
-	u32	rx_coalesce_usecs_low;
-	u32	rx_max_coalesced_frames_low;
-	u32	tx_coalesce_usecs_low;
-	u32	tx_max_coalesced_frames_low;
+	u32 pkt_rate_low;
+	u32 rx_coalesce_usecs_low;
+	u32 rx_max_coalesced_frames_low;
+	u32 tx_coalesce_usecs_low;
+	u32 tx_max_coalesced_frames_low;
 
 	/* When the packet rate is below pkt_rate_high but above
 	 * pkt_rate_low (both measured in packets per second) the
@@ -304,55 +302,55 @@ struct _kc_ethtool_coalesce {
 	 * is above pkt_rate_high, the {rx,tx}_*_high parameters are
 	 * used.
 	 */
-	u32	pkt_rate_high;
-	u32	rx_coalesce_usecs_high;
-	u32	rx_max_coalesced_frames_high;
-	u32	tx_coalesce_usecs_high;
-	u32	tx_max_coalesced_frames_high;
+	u32 pkt_rate_high;
+	u32 rx_coalesce_usecs_high;
+	u32 rx_max_coalesced_frames_high;
+	u32 tx_coalesce_usecs_high;
+	u32 tx_max_coalesced_frames_high;
 
 	/* How often to do adaptive coalescing packet rate sampling,
 	 * measured in seconds.  Must not be zero.
 	 */
-	u32	rate_sample_interval;
+	u32 rate_sample_interval;
 };
 #endif
 #ifndef ETHTOOL_SCOALESCE
-#define ETHTOOL_SCOALESCE	0x0000000f /* Set coalesce config. */
+#define ETHTOOL_SCOALESCE	0x0000000f	/* Set coalesce config. */
 #endif
 #ifndef ETHTOOL_GRINGPARAM
-#define ETHTOOL_GRINGPARAM	0x00000010 /* Get ring parameters */
+#define ETHTOOL_GRINGPARAM	0x00000010	/* Get ring parameters */
 /* for configuring RX/TX ring parameters */
 #define ethtool_ringparam _kc_ethtool_ringparam
 struct _kc_ethtool_ringparam {
-	u32	cmd;	/* ETHTOOL_{G,S}RINGPARAM */
+	u32 cmd;		/* ETHTOOL_{G,S}RINGPARAM */
 
 	/* Read only attributes.  These indicate the maximum number
 	 * of pending RX/TX ring entries the driver will allow the
 	 * user to set.
 	 */
-	u32	rx_max_pending;
-	u32	rx_mini_max_pending;
-	u32	rx_jumbo_max_pending;
-	u32	tx_max_pending;
+	u32 rx_max_pending;
+	u32 rx_mini_max_pending;
+	u32 rx_jumbo_max_pending;
+	u32 tx_max_pending;
 
 	/* Values changeable by the user.  The valid values are
 	 * in the range 1 to the "*_max_pending" counterpart above.
 	 */
-	u32	rx_pending;
-	u32	rx_mini_pending;
-	u32	rx_jumbo_pending;
-	u32	tx_pending;
+	u32 rx_pending;
+	u32 rx_mini_pending;
+	u32 rx_jumbo_pending;
+	u32 tx_pending;
 };
 #endif
 #ifndef ETHTOOL_SRINGPARAM
-#define ETHTOOL_SRINGPARAM	0x00000011 /* Set ring parameters, priv. */
+#define ETHTOOL_SRINGPARAM	0x00000011	/* Set ring parameters, priv. */
 #endif
 #ifndef ETHTOOL_GPAUSEPARAM
-#define ETHTOOL_GPAUSEPARAM	0x00000012 /* Get pause parameters */
+#define ETHTOOL_GPAUSEPARAM	0x00000012	/* Get pause parameters */
 /* for configuring link flow control parameters */
 #define ethtool_pauseparam _kc_ethtool_pauseparam
 struct _kc_ethtool_pauseparam {
-	u32	cmd;	/* ETHTOOL_{G,S}PAUSEPARAM */
+	u32 cmd;		/* ETHTOOL_{G,S}PAUSEPARAM */
 
 	/* If the link is being auto-negotiated (via ethtool_cmd.autoneg
 	 * being true) the user may set 'autonet' here non-zero to have the
@@ -364,51 +362,51 @@ struct _kc_ethtool_pauseparam {
 	 * then {rx,tx}_pause force the driver to use/not-use pause
 	 * flow control.
 	 */
-	u32	autoneg;
-	u32	rx_pause;
-	u32	tx_pause;
+	u32 autoneg;
+	u32 rx_pause;
+	u32 tx_pause;
 };
 #endif
 #ifndef ETHTOOL_SPAUSEPARAM
-#define ETHTOOL_SPAUSEPARAM	0x00000013 /* Set pause parameters. */
+#define ETHTOOL_SPAUSEPARAM	0x00000013	/* Set pause parameters. */
 #endif
 #ifndef ETHTOOL_GRXCSUM
-#define ETHTOOL_GRXCSUM		0x00000014 /* Get RX hw csum enable (ethtool_value) */
+#define ETHTOOL_GRXCSUM		0x00000014	/* Get RX hw csum enable (ethtool_value) */
 #endif
 #ifndef ETHTOOL_SRXCSUM
-#define ETHTOOL_SRXCSUM		0x00000015 /* Set RX hw csum enable (ethtool_value) */
+#define ETHTOOL_SRXCSUM		0x00000015	/* Set RX hw csum enable (ethtool_value) */
 #endif
 #ifndef ETHTOOL_GTXCSUM
-#define ETHTOOL_GTXCSUM		0x00000016 /* Get TX hw csum enable (ethtool_value) */
+#define ETHTOOL_GTXCSUM		0x00000016	/* Get TX hw csum enable (ethtool_value) */
 #endif
 #ifndef ETHTOOL_STXCSUM
-#define ETHTOOL_STXCSUM		0x00000017 /* Set TX hw csum enable (ethtool_value) */
+#define ETHTOOL_STXCSUM		0x00000017	/* Set TX hw csum enable (ethtool_value) */
 #endif
 #ifndef ETHTOOL_GSG
-#define ETHTOOL_GSG		0x00000018 /* Get scatter-gather enable
-					    * (ethtool_value) */
+#define ETHTOOL_GSG		0x00000018	/* Get scatter-gather enable
+						 * (ethtool_value) */
 #endif
 #ifndef ETHTOOL_SSG
-#define ETHTOOL_SSG		0x00000019 /* Set scatter-gather enable
-					    * (ethtool_value). */
+#define ETHTOOL_SSG		0x00000019	/* Set scatter-gather enable
+						 * (ethtool_value). */
 #endif
 #ifndef ETHTOOL_TEST
-#define ETHTOOL_TEST		0x0000001a /* execute NIC self-test, priv. */
+#define ETHTOOL_TEST		0x0000001a	/* execute NIC self-test, priv. */
 #endif
 #ifndef ETHTOOL_GSTRINGS
-#define ETHTOOL_GSTRINGS	0x0000001b /* get specified string set */
+#define ETHTOOL_GSTRINGS	0x0000001b	/* get specified string set */
 #endif
 #ifndef ETHTOOL_PHYS_ID
-#define ETHTOOL_PHYS_ID		0x0000001c /* identify the NIC */
+#define ETHTOOL_PHYS_ID		0x0000001c	/* identify the NIC */
 #endif
 #ifndef ETHTOOL_GSTATS
-#define ETHTOOL_GSTATS		0x0000001d /* get NIC-specific statistics */
+#define ETHTOOL_GSTATS		0x0000001d	/* get NIC-specific statistics */
 #endif
 #ifndef ETHTOOL_GTSO
-#define ETHTOOL_GTSO		0x0000001e /* Get TSO enable (ethtool_value) */
+#define ETHTOOL_GTSO		0x0000001e	/* Get TSO enable (ethtool_value) */
 #endif
 #ifndef ETHTOOL_STSO
-#define ETHTOOL_STSO		0x0000001f /* Set TSO enable (ethtool_value) */
+#define ETHTOOL_STSO		0x0000001f	/* Set TSO enable (ethtool_value) */
 #endif
 
 #ifndef NET_IP_ALIGN
@@ -416,15 +414,15 @@ struct _kc_ethtool_pauseparam {
 #endif
 
 #ifndef NETDEV_TX_OK
-#define NETDEV_TX_OK 0 /* driver took care of the packet */
+#define NETDEV_TX_OK 0		/* driver took care of the packet */
 #endif
 
 #ifndef NETDEV_TX_BUSY
-#define NETDEV_TX_BUSY 1 /* driver tx path was busy */
+#define NETDEV_TX_BUSY 1	/* driver tx path was busy */
 #endif
 
 #ifndef NETDEV_TX_LOCKED
-#define NETDEV_TX_LOCKED -1 /* driver tx lock was already taken */
+#define NETDEV_TX_LOCKED -1	/* driver tx lock was already taken */
 #endif
 
 /* if we do not have the infrastructure to detect if skb_header is cloned *

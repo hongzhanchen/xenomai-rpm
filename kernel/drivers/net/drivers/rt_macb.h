@@ -17,8 +17,8 @@
 #define MACB_NCR				0x0000
 #define MACB_NCFGR				0x0004
 #define MACB_NSR				0x0008
-#define MACB_TAR				0x000c /* AT91RM9200 only */
-#define MACB_TCR				0x0010 /* AT91RM9200 only */
+#define MACB_TAR				0x000c	/* AT91RM9200 only */
+#define MACB_TCR				0x0010	/* AT91RM9200 only */
 #define MACB_TSR				0x0014
 #define MACB_RBQP				0x0018
 #define MACB_TBQP				0x001c
@@ -144,8 +144,8 @@
 #define MACB_RTY_SIZE				1
 #define MACB_PAE_OFFSET				13
 #define MACB_PAE_SIZE				1
-#define MACB_RM9200_RMII_OFFSET			13 /* AT91RM9200 only */
-#define MACB_RM9200_RMII_SIZE			1  /* AT91RM9200 only */
+#define MACB_RM9200_RMII_OFFSET			13	/* AT91RM9200 only */
+#define MACB_RM9200_RMII_SIZE			1	/* AT91RM9200 only */
 #define MACB_RBOF_OFFSET			14
 #define MACB_RBOF_SIZE				2
 #define MACB_RLCE_OFFSET			16
@@ -186,7 +186,6 @@
 #define GEM_DDRP_OFFSET				24
 #define GEM_DDRP_SIZE				1
 
-
 /* Bitfields in NSR */
 #define MACB_NSR_LINK_OFFSET			0
 #define MACB_NSR_LINK_SIZE			1
@@ -206,8 +205,8 @@
 #define MACB_TGO_SIZE				1
 #define MACB_BEX_OFFSET				4
 #define MACB_BEX_SIZE				1
-#define MACB_RM9200_BNQ_OFFSET			4 /* AT91RM9200 only */
-#define MACB_RM9200_BNQ_SIZE			1 /* AT91RM9200 only */
+#define MACB_RM9200_BNQ_OFFSET			4	/* AT91RM9200 only */
+#define MACB_RM9200_BNQ_SIZE			1	/* AT91RM9200 only */
 #define MACB_COMP_OFFSET			5
 #define MACB_COMP_SIZE				1
 #define MACB_UND_OFFSET				6
@@ -395,9 +394,9 @@
  */
 struct macb_dma_desc {
 	/** DMA address of data buffer */
-	u32	addr;
+	u32 addr;
 	/** Control and status bits */
-	u32	ctrl;
+	u32 ctrl;
 };
 
 /* DMA descriptor bitfields */
@@ -466,9 +465,9 @@ struct macb_dma_desc {
  */
 struct macb_tx_skb {
 	/** skb currently being transmitted */
-	struct rtskb		*skb;
+	struct rtskb *skb;
 	/** DMA address of the skb's data buffer */
-	dma_addr_t		mapping;
+	dma_addr_t mapping;
 };
 
 /*
@@ -476,136 +475,136 @@ struct macb_tx_skb {
  * device stats by a periodic timer.
  */
 struct macb_stats {
-	u32	rx_pause_frames;
-	u32	tx_ok;
-	u32	tx_single_cols;
-	u32	tx_multiple_cols;
-	u32	rx_ok;
-	u32	rx_fcs_errors;
-	u32	rx_align_errors;
-	u32	tx_deferred;
-	u32	tx_late_cols;
-	u32	tx_excessive_cols;
-	u32	tx_underruns;
-	u32	tx_carrier_errors;
-	u32	rx_resource_errors;
-	u32	rx_overruns;
-	u32	rx_symbol_errors;
-	u32	rx_oversize_pkts;
-	u32	rx_jabbers;
-	u32	rx_undersize_pkts;
-	u32	sqe_test_errors;
-	u32	rx_length_mismatch;
-	u32	tx_pause_frames;
+	u32 rx_pause_frames;
+	u32 tx_ok;
+	u32 tx_single_cols;
+	u32 tx_multiple_cols;
+	u32 rx_ok;
+	u32 rx_fcs_errors;
+	u32 rx_align_errors;
+	u32 tx_deferred;
+	u32 tx_late_cols;
+	u32 tx_excessive_cols;
+	u32 tx_underruns;
+	u32 tx_carrier_errors;
+	u32 rx_resource_errors;
+	u32 rx_overruns;
+	u32 rx_symbol_errors;
+	u32 rx_oversize_pkts;
+	u32 rx_jabbers;
+	u32 rx_undersize_pkts;
+	u32 sqe_test_errors;
+	u32 rx_length_mismatch;
+	u32 tx_pause_frames;
 };
 
 struct gem_stats {
-	u32	tx_octets_31_0;
-	u32	tx_octets_47_32;
-	u32	tx_frames;
-	u32	tx_broadcast_frames;
-	u32	tx_multicast_frames;
-	u32	tx_pause_frames;
-	u32	tx_64_byte_frames;
-	u32	tx_65_127_byte_frames;
-	u32	tx_128_255_byte_frames;
-	u32	tx_256_511_byte_frames;
-	u32	tx_512_1023_byte_frames;
-	u32	tx_1024_1518_byte_frames;
-	u32	tx_greater_than_1518_byte_frames;
-	u32	tx_underrun;
-	u32	tx_single_collision_frames;
-	u32	tx_multiple_collision_frames;
-	u32	tx_excessive_collisions;
-	u32	tx_late_collisions;
-	u32	tx_deferred_frames;
-	u32	tx_carrier_sense_errors;
-	u32	rx_octets_31_0;
-	u32	rx_octets_47_32;
-	u32	rx_frames;
-	u32	rx_broadcast_frames;
-	u32	rx_multicast_frames;
-	u32	rx_pause_frames;
-	u32	rx_64_byte_frames;
-	u32	rx_65_127_byte_frames;
-	u32	rx_128_255_byte_frames;
-	u32	rx_256_511_byte_frames;
-	u32	rx_512_1023_byte_frames;
-	u32	rx_1024_1518_byte_frames;
-	u32	rx_greater_than_1518_byte_frames;
-	u32	rx_undersized_frames;
-	u32	rx_oversize_frames;
-	u32	rx_jabbers;
-	u32	rx_frame_check_sequence_errors;
-	u32	rx_length_field_frame_errors;
-	u32	rx_symbol_errors;
-	u32	rx_alignment_errors;
-	u32	rx_resource_errors;
-	u32	rx_overruns;
-	u32	rx_ip_header_checksum_errors;
-	u32	rx_tcp_checksum_errors;
-	u32	rx_udp_checksum_errors;
+	u32 tx_octets_31_0;
+	u32 tx_octets_47_32;
+	u32 tx_frames;
+	u32 tx_broadcast_frames;
+	u32 tx_multicast_frames;
+	u32 tx_pause_frames;
+	u32 tx_64_byte_frames;
+	u32 tx_65_127_byte_frames;
+	u32 tx_128_255_byte_frames;
+	u32 tx_256_511_byte_frames;
+	u32 tx_512_1023_byte_frames;
+	u32 tx_1024_1518_byte_frames;
+	u32 tx_greater_than_1518_byte_frames;
+	u32 tx_underrun;
+	u32 tx_single_collision_frames;
+	u32 tx_multiple_collision_frames;
+	u32 tx_excessive_collisions;
+	u32 tx_late_collisions;
+	u32 tx_deferred_frames;
+	u32 tx_carrier_sense_errors;
+	u32 rx_octets_31_0;
+	u32 rx_octets_47_32;
+	u32 rx_frames;
+	u32 rx_broadcast_frames;
+	u32 rx_multicast_frames;
+	u32 rx_pause_frames;
+	u32 rx_64_byte_frames;
+	u32 rx_65_127_byte_frames;
+	u32 rx_128_255_byte_frames;
+	u32 rx_256_511_byte_frames;
+	u32 rx_512_1023_byte_frames;
+	u32 rx_1024_1518_byte_frames;
+	u32 rx_greater_than_1518_byte_frames;
+	u32 rx_undersized_frames;
+	u32 rx_oversize_frames;
+	u32 rx_jabbers;
+	u32 rx_frame_check_sequence_errors;
+	u32 rx_length_field_frame_errors;
+	u32 rx_symbol_errors;
+	u32 rx_alignment_errors;
+	u32 rx_resource_errors;
+	u32 rx_overruns;
+	u32 rx_ip_header_checksum_errors;
+	u32 rx_tcp_checksum_errors;
+	u32 rx_udp_checksum_errors;
 };
 
 struct macb;
 
 struct macb_or_gem_ops {
-	int	(*mog_alloc_rx_buffers)(struct macb *bp);
-	void	(*mog_free_rx_buffers)(struct macb *bp);
-	void	(*mog_init_rings)(struct macb *bp);
-	int	(*mog_rx)(struct macb *bp, int budget, nanosecs_abs_t *ts);
+	int (*mog_alloc_rx_buffers) (struct macb * bp);
+	void (*mog_free_rx_buffers) (struct macb * bp);
+	void (*mog_init_rings) (struct macb * bp);
+	int (*mog_rx) (struct macb * bp, int budget, nanosecs_abs_t * ts);
 };
 
 struct macb {
-	void __iomem		*regs;
+	void __iomem *regs;
 
-	unsigned int		rx_tail;
-	unsigned int		rx_prepared_head;
-	struct macb_dma_desc	*rx_ring;
-	struct rtskb		**rx_skbuff;
-	void			*rx_buffers;
-	size_t			rx_buffer_size;
+	unsigned int rx_tail;
+	unsigned int rx_prepared_head;
+	struct macb_dma_desc *rx_ring;
+	struct rtskb **rx_skbuff;
+	void *rx_buffers;
+	size_t rx_buffer_size;
 
-	unsigned int		tx_head, tx_tail;
-	struct macb_dma_desc	*tx_ring;
-	struct macb_tx_skb	*tx_skb;
+	unsigned int tx_head, tx_tail;
+	struct macb_dma_desc *tx_ring;
+	struct macb_tx_skb *tx_skb;
 
-	rtdm_lock_t		lock;
-	struct platform_device	*pdev;
-	struct clk		*pclk;
-	struct clk		*hclk;
-	struct clk		*tx_clk;
-	struct rtnet_device	*dev;
-	struct work_struct	tx_error_task;
-	struct net_device_stats	stats;
+	rtdm_lock_t lock;
+	struct platform_device *pdev;
+	struct clk *pclk;
+	struct clk *hclk;
+	struct clk *tx_clk;
+	struct rtnet_device *dev;
+	struct work_struct tx_error_task;
+	struct net_device_stats stats;
 	union {
-		struct macb_stats	macb;
-		struct gem_stats	gem;
-	}			hw_stats;
+		struct macb_stats macb;
+		struct gem_stats gem;
+	} hw_stats;
 
-	dma_addr_t		rx_ring_dma;
-	dma_addr_t		tx_ring_dma;
-	dma_addr_t		rx_buffers_dma;
+	dma_addr_t rx_ring_dma;
+	dma_addr_t tx_ring_dma;
+	dma_addr_t rx_buffers_dma;
 
-	struct macb_or_gem_ops	macbgem_ops;
+	struct macb_or_gem_ops macbgem_ops;
 
-	struct mii_bus		*mii_bus;
-	struct phy_device	*phy_dev;
-	unsigned int		link;
-	unsigned int		speed;
-	unsigned int		duplex;
+	struct mii_bus *mii_bus;
+	struct phy_device *phy_dev;
+	unsigned int link;
+	unsigned int speed;
+	unsigned int duplex;
 
-	u32			caps;
+	u32 caps;
 
-	phy_interface_t		phy_interface;
+	phy_interface_t phy_interface;
 
-	struct net_device	*phy_phony_net_device;
-	rtdm_irq_t		irq_handle;
+	struct net_device *phy_phony_net_device;
+	rtdm_irq_t irq_handle;
 
 	/* AT91RM9200 transmit */
-	struct rtskb *skb;			/* holds skb until xmit interrupt completes */
-	dma_addr_t skb_physaddr;		/* phys addr from pci_map_single */
-	int skb_length;				/* saved skb length for pci_unmap_single */
+	struct rtskb *skb;	/* holds skb until xmit interrupt completes */
+	dma_addr_t skb_physaddr;	/* phys addr from pci_map_single */
+	int skb_length;		/* saved skb length for pci_unmap_single */
 };
 
 extern const struct ethtool_ops macb_ethtool_ops;

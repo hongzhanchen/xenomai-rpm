@@ -52,9 +52,7 @@ s32 igb_get_bus_info_pcie(struct e1000_hw *hw)
 
 	bus->type = e1000_bus_type_pci_express;
 
-	ret_val = igb_read_pcie_cap_reg(hw,
-					PCI_EXP_LNKSTA,
-					&pcie_link_status);
+	ret_val = igb_read_pcie_cap_reg(hw, PCI_EXP_LNKSTA, &pcie_link_status);
 	if (ret_val) {
 		bus->width = e1000_bus_width_unknown;
 		bus->speed = e1000_bus_speed_unknown;
@@ -73,7 +71,7 @@ s32 igb_get_bus_info_pcie(struct e1000_hw *hw)
 
 		bus->width = (enum e1000_bus_width)((pcie_link_status &
 						     PCI_EXP_LNKSTA_NLW) >>
-						     PCI_EXP_LNKSTA_NLW_SHIFT);
+						    PCI_EXP_LNKSTA_NLW_SHIFT);
 	}
 
 	reg = rd32(E1000_STATUS);
@@ -170,7 +168,7 @@ static void igb_write_vfta_i350(struct e1000_hw *hw, u32 offset, u32 value)
 void igb_init_rx_addrs(struct e1000_hw *hw, u16 rar_count)
 {
 	u32 i;
-	u8 mac_addr[ETH_ALEN] = {0};
+	u8 mac_addr[ETH_ALEN] = { 0 };
 
 	/* Setup the receive address */
 	hw_dbg("Programming MAC Address into RAR[0]\n");
@@ -178,7 +176,7 @@ void igb_init_rx_addrs(struct e1000_hw *hw, u16 rar_count)
 	hw->mac.ops.rar_set(hw, hw->mac.addr, 0);
 
 	/* Zero out the other (rar_entry_count - 1) receive addresses */
-	hw_dbg("Clearing RAR[1-%u]\n", rar_count-1);
+	hw_dbg("Clearing RAR[1-%u]\n", rar_count - 1);
 	for (i = 1; i < rar_count; i++)
 		hw->mac.ops.rar_set(hw, mac_addr, i);
 }
@@ -203,7 +201,7 @@ s32 igb_vfta_set(struct e1000_hw *hw, u32 vid, bool add)
 	vfta = adapter->shadow_vfta[index];
 
 	/* bit was set/cleared before we started */
-	if ((!!(vfta & mask)) == add) {
+	if ((! !(vfta & mask)) == add) {
 		ret_val = -E1000_ERR_CONFIG;
 	} else {
 		if (add)
@@ -231,7 +229,7 @@ s32 igb_vfta_set(struct e1000_hw *hw, u32 vid, bool add)
  *  programmed into RAR0 and the function returns success, otherwise the
  *  function returns an error.
  **/
-s32 igb_check_alt_mac_addr(struct e1000_hw *hw)
+s32 igb_check_alt_mac_addr(struct e1000_hw * hw)
 {
 	u32 i;
 	s32 ret_val = 0;
@@ -245,7 +243,7 @@ s32 igb_check_alt_mac_addr(struct e1000_hw *hw)
 		goto out;
 
 	ret_val = hw->nvm.ops.read(hw, NVM_ALT_MAC_ADDR_PTR, 1,
-				 &nvm_alt_mac_addr_offset);
+				   &nvm_alt_mac_addr_offset);
 	if (ret_val) {
 		hw_dbg("NVM Read Error\n");
 		goto out;
@@ -271,8 +269,8 @@ s32 igb_check_alt_mac_addr(struct e1000_hw *hw)
 			goto out;
 		}
 
-		alt_mac_addr[i] = (u8)(nvm_data & 0xFF);
-		alt_mac_addr[i + 1] = (u8)(nvm_data >> 8);
+		alt_mac_addr[i] = (u8) (nvm_data & 0xFF);
+		alt_mac_addr[i + 1] = (u8) (nvm_data >> 8);
 	}
 
 	/* if multicast bit is set, the alternate address will not be used */
@@ -300,7 +298,7 @@ out:
  *  Sets the receive address array register at index to the address passed
  *  in by addr.
  **/
-void igb_rar_set(struct e1000_hw *hw, u8 *addr, u32 index)
+void igb_rar_set(struct e1000_hw *hw, u8 * addr, u32 index)
 {
 	u32 rar_low, rar_high;
 
@@ -309,7 +307,7 @@ void igb_rar_set(struct e1000_hw *hw, u8 *addr, u32 index)
 	 */
 	rar_low = ((u32) addr[0] |
 		   ((u32) addr[1] << 8) |
-		    ((u32) addr[2] << 16) | ((u32) addr[3] << 24));
+		   ((u32) addr[2] << 16) | ((u32) addr[3] << 24));
 
 	rar_high = ((u32) addr[4] | ((u32) addr[5] << 8));
 
@@ -370,7 +368,7 @@ void igb_mta_set(struct e1000_hw *hw, u32 hash_value)
  *  the multicast filter table array address and new table value.  See
  *  igb_mta_set()
  **/
-static u32 igb_hash_mc_addr(struct e1000_hw *hw, u8 *mc_addr)
+static u32 igb_hash_mc_addr(struct e1000_hw *hw, u8 * mc_addr)
 {
 	u32 hash_value, hash_mask;
 	u8 bit_shift = 0;
@@ -425,7 +423,7 @@ static u32 igb_hash_mc_addr(struct e1000_hw *hw, u8 *mc_addr)
 	}
 
 	hash_value = hash_mask & (((mc_addr[4] >> (8 - bit_shift)) |
-				  (((u16) mc_addr[5]) << bit_shift)));
+				   (((u16) mc_addr[5]) << bit_shift)));
 
 	return hash_value;
 }
@@ -440,7 +438,7 @@ static u32 igb_hash_mc_addr(struct e1000_hw *hw, u8 *mc_addr)
  *  The caller must have a packed mc_addr_list of multicast addresses.
  **/
 void igb_update_mc_addr_list(struct e1000_hw *hw,
-			     u8 *mc_addr_list, u32 mc_addr_count)
+			     u8 * mc_addr_list, u32 mc_addr_count)
 {
 	u32 hash_value, hash_bit, hash_reg;
 	int i;
@@ -545,7 +543,7 @@ s32 igb_check_for_copper_link(struct e1000_hw *hw)
 		goto out;
 
 	if (!link)
-		goto out; /* No link detected */
+		goto out;	/* No link detected */
 
 	mac->get_link_status = false;
 
@@ -591,7 +589,7 @@ out:
  *  should be established.  Assumes the hardware has previously been reset
  *  and the transmitter and receiver are not enabled.
  **/
-s32 igb_setup_link(struct e1000_hw *hw)
+s32 igb_setup_link(struct e1000_hw * hw)
 {
 	s32 ret_val = 0;
 
@@ -724,10 +722,10 @@ static s32 igb_set_default_fc(struct e1000_hw *hw)
 		lan_offset = NVM_82580_LAN_FUNC_OFFSET(hw->bus.func);
 		ret_val = hw->nvm.ops.read(hw, NVM_INIT_CONTROL2_REG
 					   + lan_offset, 1, &nvm_data);
-	 } else {
+	} else {
 		ret_val = hw->nvm.ops.read(hw, NVM_INIT_CONTROL2_REG,
 					   1, &nvm_data);
-	 }
+	}
 
 	if (ret_val) {
 		hw_dbg("NVM Read Error\n");
@@ -736,8 +734,7 @@ static s32 igb_set_default_fc(struct e1000_hw *hw)
 
 	if ((nvm_data & NVM_WORD0F_PAUSE_MASK) == 0)
 		hw->fc.requested_mode = e1000_fc_none;
-	else if ((nvm_data & NVM_WORD0F_PAUSE_MASK) ==
-		 NVM_WORD0F_ASM_DIR)
+	else if ((nvm_data & NVM_WORD0F_PAUSE_MASK) == NVM_WORD0F_ASM_DIR)
 		hw->fc.requested_mode = e1000_fc_tx_pause;
 	else
 		hw->fc.requested_mode = e1000_fc_full;
@@ -756,7 +753,7 @@ out:
  *  autonegotiation is managed by the PHY rather than the MAC.  Software must
  *  also configure these bits when link is forced on a fiber connection.
  **/
-s32 igb_force_mac_fc(struct e1000_hw *hw)
+s32 igb_force_mac_fc(struct e1000_hw * hw)
 {
 	u32 ctrl;
 	s32 ret_val = 0;
@@ -819,7 +816,7 @@ out:
  *  and did not fail, then we configure flow control based on our link
  *  partner.
  **/
-s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
+s32 igb_config_fc_after_link_up(struct e1000_hw * hw)
 {
 	struct e1000_mac_info *mac = &hw->mac;
 	s32 ret_val = 0;
@@ -854,12 +851,10 @@ s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
 		 * has completed.  We read this twice because this reg has
 		 * some "sticky" (latched) bits.
 		 */
-		ret_val = hw->phy.ops.read_reg(hw, PHY_STATUS,
-						   &mii_status_reg);
+		ret_val = hw->phy.ops.read_reg(hw, PHY_STATUS, &mii_status_reg);
 		if (ret_val)
 			goto out;
-		ret_val = hw->phy.ops.read_reg(hw, PHY_STATUS,
-						   &mii_status_reg);
+		ret_val = hw->phy.ops.read_reg(hw, PHY_STATUS, &mii_status_reg);
 		if (ret_val)
 			goto out;
 
@@ -875,11 +870,11 @@ s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
 		 * flow control was negotiated.
 		 */
 		ret_val = hw->phy.ops.read_reg(hw, PHY_AUTONEG_ADV,
-					    &mii_nway_adv_reg);
+					       &mii_nway_adv_reg);
 		if (ret_val)
 			goto out;
 		ret_val = hw->phy.ops.read_reg(hw, PHY_LP_ABILITY,
-					    &mii_nway_lp_ability_reg);
+					       &mii_nway_lp_ability_reg);
 		if (ret_val)
 			goto out;
 
@@ -929,7 +924,8 @@ s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
 				hw_dbg("Flow Control = FULL.\n");
 			} else {
 				hw->fc.current_mode = e1000_fc_rx_pause;
-				hw_dbg("Flow Control = RX PAUSE frames only.\n");
+				hw_dbg
+				    ("Flow Control = RX PAUSE frames only.\n");
 			}
 		}
 		/* For receiving PAUSE frames ONLY.
@@ -940,9 +936,9 @@ s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
 		 *   0   |    1    |   1   |    1    | e1000_fc_tx_pause
 		 */
 		else if (!(mii_nway_adv_reg & NWAY_AR_PAUSE) &&
-			  (mii_nway_adv_reg & NWAY_AR_ASM_DIR) &&
-			  (mii_nway_lp_ability_reg & NWAY_LPAR_PAUSE) &&
-			  (mii_nway_lp_ability_reg & NWAY_LPAR_ASM_DIR)) {
+			 (mii_nway_adv_reg & NWAY_AR_ASM_DIR) &&
+			 (mii_nway_lp_ability_reg & NWAY_LPAR_PAUSE) &&
+			 (mii_nway_lp_ability_reg & NWAY_LPAR_ASM_DIR)) {
 			hw->fc.current_mode = e1000_fc_tx_pause;
 			hw_dbg("Flow Control = TX PAUSE frames only.\n");
 		}
@@ -1018,7 +1014,7 @@ s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
 	 * flow control configured.
 	 */
 	if ((hw->phy.media_type == e1000_media_type_internal_serdes)
-		&& mac->autoneg) {
+	    && mac->autoneg) {
 		/* Read the PCS_LSTS and check to see if AutoNeg
 		 * has completed.
 		 */
@@ -1084,7 +1080,8 @@ s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
 				hw_dbg("Flow Control = FULL.\n");
 			} else {
 				hw->fc.current_mode = e1000_fc_rx_pause;
-				hw_dbg("Flow Control = Rx PAUSE frames only.\n");
+				hw_dbg
+				    ("Flow Control = Rx PAUSE frames only.\n");
 			}
 		}
 		/* For receiving PAUSE frames ONLY.
@@ -1095,9 +1092,9 @@ s32 igb_config_fc_after_link_up(struct e1000_hw *hw)
 		 *   0   |    1    |   1   |    1    | e1000_fc_tx_pause
 		 */
 		else if (!(pcs_adv_reg & E1000_TXCW_PAUSE) &&
-			  (pcs_adv_reg & E1000_TXCW_ASM_DIR) &&
-			  (pcs_lp_ability_reg & E1000_TXCW_PAUSE) &&
-			  (pcs_lp_ability_reg & E1000_TXCW_ASM_DIR)) {
+			 (pcs_adv_reg & E1000_TXCW_ASM_DIR) &&
+			 (pcs_lp_ability_reg & E1000_TXCW_PAUSE) &&
+			 (pcs_lp_ability_reg & E1000_TXCW_ASM_DIR)) {
 			hw->fc.current_mode = e1000_fc_tx_pause;
 			hw_dbg("Flow Control = Tx PAUSE frames only.\n");
 		}
@@ -1149,8 +1146,8 @@ out:
  *  Read the status register for the current speed/duplex and store the current
  *  speed and duplex for copper connections.
  **/
-s32 igb_get_speed_and_duplex_copper(struct e1000_hw *hw, u16 *speed,
-				      u16 *duplex)
+s32 igb_get_speed_and_duplex_copper(struct e1000_hw * hw, u16 * speed,
+				    u16 * duplex)
 {
 	u32 status;
 
@@ -1183,7 +1180,7 @@ s32 igb_get_speed_and_duplex_copper(struct e1000_hw *hw, u16 *speed,
  *
  *  Acquire the HW semaphore to access the PHY or NVM
  **/
-s32 igb_get_hw_semaphore(struct e1000_hw *hw)
+s32 igb_get_hw_semaphore(struct e1000_hw * hw)
 {
 	u32 swsm;
 	s32 ret_val = 0;
@@ -1258,7 +1255,6 @@ s32 igb_get_auto_rd_done(struct e1000_hw *hw)
 	s32 i = 0;
 	s32 ret_val = 0;
 
-
 	while (i < AUTO_READ_DONE_TIMEOUT) {
 		if (rd32(E1000_EECD) & E1000_EECD_AUTO_RD)
 			break;
@@ -1284,7 +1280,7 @@ out:
  *  Read the EEPROM for the current default LED configuration.  If the
  *  LED configuration is not valid, set to a valid LED configuration.
  **/
-static s32 igb_valid_led_default(struct e1000_hw *hw, u16 *data)
+static s32 igb_valid_led_default(struct e1000_hw *hw, u16 * data)
 {
 	s32 ret_val;
 
@@ -1314,7 +1310,7 @@ out:
  *  @hw: pointer to the HW structure
  *
  **/
-s32 igb_id_led_init(struct e1000_hw *hw)
+s32 igb_id_led_init(struct e1000_hw * hw)
 {
 	struct e1000_mac_info *mac = &hw->mac;
 	s32 ret_val;
@@ -1325,8 +1321,7 @@ s32 igb_id_led_init(struct e1000_hw *hw)
 	const u16 led_mask = 0x0F;
 
 	/* i210 and i211 devices have different LED mechanism */
-	if ((hw->mac.type == e1000_i210) ||
-	    (hw->mac.type == e1000_i211))
+	if ((hw->mac.type == e1000_i210) || (hw->mac.type == e1000_i211))
 		ret_val = igb_valid_led_default_i210(hw, &data);
 	else
 		ret_val = igb_valid_led_default(hw, &data);
@@ -1387,7 +1382,7 @@ out:
  *  Remove the current LED configuration and set the LED configuration
  *  to the default value, saved from the EEPROM.
  **/
-s32 igb_cleanup_led(struct e1000_hw *hw)
+s32 igb_cleanup_led(struct e1000_hw * hw)
 {
 	wr32(E1000_LEDCTL, hw->mac.ledctl_default);
 	return 0;
@@ -1399,7 +1394,7 @@ s32 igb_cleanup_led(struct e1000_hw *hw)
  *
  *  Blink the led's which are set to be on.
  **/
-s32 igb_blink_led(struct e1000_hw *hw)
+s32 igb_blink_led(struct e1000_hw * hw)
 {
 	u32 ledctl_blink = 0;
 	u32 i;
@@ -1407,7 +1402,7 @@ s32 igb_blink_led(struct e1000_hw *hw)
 	if (hw->phy.media_type == e1000_media_type_fiber) {
 		/* always blink LED0 for PCI-E fiber */
 		ledctl_blink = E1000_LEDCTL_LED0_BLINK |
-		     (E1000_LEDCTL_MODE_LED_ON << E1000_LEDCTL_LED0_MODE_SHIFT);
+		    (E1000_LEDCTL_MODE_LED_ON << E1000_LEDCTL_LED0_MODE_SHIFT);
 	} else {
 		/* Set the blink bit for each LED that's "on" (0x0E)
 		 * (or "off" if inverted) in ledctl_mode2.  The blink
@@ -1444,7 +1439,7 @@ s32 igb_blink_led(struct e1000_hw *hw)
  *
  *  Turn LED off.
  **/
-s32 igb_led_off(struct e1000_hw *hw)
+s32 igb_led_off(struct e1000_hw * hw)
 {
 	switch (hw->phy.media_type) {
 	case e1000_media_type_copper:
@@ -1468,7 +1463,7 @@ s32 igb_led_off(struct e1000_hw *hw)
  *  Disables PCI-Express master access and verifies there are no pending
  *  requests.
  **/
-s32 igb_disable_pcie_master(struct e1000_hw *hw)
+s32 igb_disable_pcie_master(struct e1000_hw * hw)
 {
 	u32 ctrl;
 	s32 timeout = MASTER_DISABLE_TIMEOUT;
@@ -1482,8 +1477,7 @@ s32 igb_disable_pcie_master(struct e1000_hw *hw)
 	wr32(E1000_CTRL, ctrl);
 
 	while (timeout) {
-		if (!(rd32(E1000_STATUS) &
-		      E1000_STATUS_GIO_MASTER_ENABLE))
+		if (!(rd32(E1000_STATUS) & E1000_STATUS_GIO_MASTER_ENABLE))
 			break;
 		udelay(100);
 		timeout--;
@@ -1506,7 +1500,7 @@ out:
  *  Verify that when not using auto-negotitation that MDI/MDIx is correctly
  *  set, which is forced to MDI mode only.
  **/
-s32 igb_validate_mdi_setting(struct e1000_hw *hw)
+s32 igb_validate_mdi_setting(struct e1000_hw * hw)
 {
 	s32 ret_val = 0;
 
@@ -1536,14 +1530,13 @@ out:
  *  and they all have the format address << 8 | data and bit 31 is polled for
  *  completion.
  **/
-s32 igb_write_8bit_ctrl_reg(struct e1000_hw *hw, u32 reg,
-			      u32 offset, u8 data)
+s32 igb_write_8bit_ctrl_reg(struct e1000_hw * hw, u32 reg, u32 offset, u8 data)
 {
 	u32 i, regvalue = 0;
 	s32 ret_val = 0;
 
 	/* Set up the address and data */
-	regvalue = ((u32)data) | (offset << E1000_GEN_CTL_ADDRESS_SHIFT);
+	regvalue = ((u32) data) | (offset << E1000_GEN_CTL_ADDRESS_SHIFT);
 	wr32(reg, regvalue);
 
 	/* Poll the ready bit to see if the MDI read completed */
@@ -1570,7 +1563,7 @@ out:
  *  Verifies the hardware needs to leave interface enabled so that frames can
  *  be directed to and from the management interface.
  **/
-bool igb_enable_mng_pass_thru(struct e1000_hw *hw)
+bool igb_enable_mng_pass_thru(struct e1000_hw * hw)
 {
 	u32 manc;
 	u32 fwsm, factps;
@@ -1595,8 +1588,7 @@ bool igb_enable_mng_pass_thru(struct e1000_hw *hw)
 			goto out;
 		}
 	} else {
-		if ((manc & E1000_MANC_SMBUS_EN) &&
-		    !(manc & E1000_MANC_ASF_EN)) {
+		if ((manc & E1000_MANC_SMBUS_EN) && !(manc & E1000_MANC_ASF_EN)) {
 			ret_val = true;
 			goto out;
 		}

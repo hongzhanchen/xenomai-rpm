@@ -35,7 +35,7 @@
  *
  *  Enable/Raise the EEPROM clock bit.
  **/
-static void igb_raise_eec_clk(struct e1000_hw *hw, u32 *eecd)
+static void igb_raise_eec_clk(struct e1000_hw *hw, u32 * eecd)
 {
 	*eecd = *eecd | E1000_EECD_SK;
 	wr32(E1000_EECD, *eecd);
@@ -50,7 +50,7 @@ static void igb_raise_eec_clk(struct e1000_hw *hw, u32 *eecd)
  *
  *  Clear/Lower the EEPROM clock bit.
  **/
-static void igb_lower_eec_clk(struct e1000_hw *hw, u32 *eecd)
+static void igb_lower_eec_clk(struct e1000_hw *hw, u32 * eecd)
 {
 	*eecd = *eecd & ~E1000_EECD_SK;
 	wr32(E1000_EECD, *eecd);
@@ -176,12 +176,11 @@ static s32 igb_poll_eerd_eewr_done(struct e1000_hw *hw, int ee_reg)
  *  Return successful if access grant bit set, else clear the request for
  *  EEPROM access and return -E1000_ERR_NVM (-1).
  **/
-s32 igb_acquire_nvm(struct e1000_hw *hw)
+s32 igb_acquire_nvm(struct e1000_hw * hw)
 {
 	u32 eecd = rd32(E1000_EECD);
 	s32 timeout = E1000_NVM_GRANT_ATTEMPTS;
 	s32 ret_val = 0;
-
 
 	wr32(E1000_EECD, eecd | E1000_EECD_REQ);
 	eecd = rd32(E1000_EECD);
@@ -277,7 +276,6 @@ static s32 igb_ready_nvm_eeprom(struct e1000_hw *hw)
 	u16 timeout = 0;
 	u8 spi_stat_reg;
 
-
 	if (nvm->type == e1000_nvm_eeprom_spi) {
 		/* Clear SK and CS */
 		eecd &= ~(E1000_EECD_CS | E1000_EECD_SK);
@@ -294,7 +292,7 @@ static s32 igb_ready_nvm_eeprom(struct e1000_hw *hw)
 		while (timeout) {
 			igb_shift_out_eec_bits(hw, NVM_RDSR_OPCODE_SPI,
 					       hw->nvm.opcode_bits);
-			spi_stat_reg = (u8)igb_shift_in_eec_bits(hw, 8);
+			spi_stat_reg = (u8) igb_shift_in_eec_bits(hw, 8);
 			if (!(spi_stat_reg & NVM_STATUS_RDY_SPI))
 				break;
 
@@ -323,7 +321,7 @@ out:
  *
  *  Reads a 16 bit word from the EEPROM.
  **/
-s32 igb_read_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
+s32 igb_read_nvm_spi(struct e1000_hw * hw, u16 offset, u16 words, u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
 	u32 i = 0;
@@ -356,7 +354,7 @@ s32 igb_read_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 
 	/* Send the READ command (opcode + addr) */
 	igb_shift_out_eec_bits(hw, read_opcode, nvm->opcode_bits);
-	igb_shift_out_eec_bits(hw, (u16)(offset*2), nvm->address_bits);
+	igb_shift_out_eec_bits(hw, (u16) (offset * 2), nvm->address_bits);
 
 	/* Read the data.  SPI NVMs increment the address with each byte
 	 * read and will roll over if reading beyond the end.  This allows
@@ -383,7 +381,7 @@ out:
  *
  *  Reads a 16 bit word from the EEPROM using the EERD register.
  **/
-s32 igb_read_nvm_eerd(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
+s32 igb_read_nvm_eerd(struct e1000_hw * hw, u16 offset, u16 words, u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
 	u32 i, eerd = 0;
@@ -400,16 +398,15 @@ s32 igb_read_nvm_eerd(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 	}
 
 	for (i = 0; i < words; i++) {
-		eerd = ((offset+i) << E1000_NVM_RW_ADDR_SHIFT) +
-			E1000_NVM_RW_REG_START;
+		eerd = ((offset + i) << E1000_NVM_RW_ADDR_SHIFT) +
+		    E1000_NVM_RW_REG_START;
 
 		wr32(E1000_EERD, eerd);
 		ret_val = igb_poll_eerd_eewr_done(hw, E1000_NVM_POLL_READ);
 		if (ret_val)
 			break;
 
-		data[i] = (rd32(E1000_EERD) >>
-			E1000_NVM_RW_REG_DATA);
+		data[i] = (rd32(E1000_EERD) >> E1000_NVM_RW_REG_DATA);
 	}
 
 out:
@@ -428,7 +425,7 @@ out:
  *  If e1000_update_nvm_checksum is not called after this function , the
  *  EEPROM will most likley contain an invalid checksum.
  **/
-s32 igb_write_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
+s32 igb_write_nvm_spi(struct e1000_hw * hw, u16 offset, u16 words, u16 * data)
 {
 	struct e1000_nvm_info *nvm = &hw->nvm;
 	s32 ret_val = -E1000_ERR_NVM;
@@ -460,7 +457,7 @@ s32 igb_write_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 
 		/* Send the WRITE ENABLE command (8 bit opcode) */
 		igb_shift_out_eec_bits(hw, NVM_WREN_OPCODE_SPI,
-					 nvm->opcode_bits);
+				       nvm->opcode_bits);
 
 		igb_standby_nvm(hw);
 
@@ -472,8 +469,8 @@ s32 igb_write_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
 
 		/* Send the Write command (8-bit opcode + addr) */
 		igb_shift_out_eec_bits(hw, write_opcode, nvm->opcode_bits);
-		igb_shift_out_eec_bits(hw, (u16)((offset + widx) * 2),
-					 nvm->address_bits);
+		igb_shift_out_eec_bits(hw, (u16) ((offset + widx) * 2),
+				       nvm->address_bits);
 
 		/* Loop to allow for up to whole page write of eeprom */
 		while (widx < words) {
@@ -504,7 +501,7 @@ s32 igb_write_nvm_spi(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)
  *  Reads the product board assembly (PBA) number from the EEPROM and stores
  *  the value in part_num.
  **/
-s32 igb_read_part_string(struct e1000_hw *hw, u8 *part_num, u32 part_num_size)
+s32 igb_read_part_string(struct e1000_hw * hw, u8 * part_num, u32 part_num_size)
 {
 	s32 ret_val;
 	u16 nvm_data;
@@ -581,7 +578,7 @@ s32 igb_read_part_string(struct e1000_hw *hw, u8 *part_num, u32 part_num_size)
 		goto out;
 	}
 	/* check if part_num buffer is big enough */
-	if (part_num_size < (((u32)length * 2) - 1)) {
+	if (part_num_size < (((u32) length * 2) - 1)) {
 		hw_dbg("PBA string buffer too small\n");
 		ret_val = E1000_ERR_NO_SPACE;
 		goto out;
@@ -597,8 +594,8 @@ s32 igb_read_part_string(struct e1000_hw *hw, u8 *part_num, u32 part_num_size)
 			hw_dbg("NVM Read Error\n");
 			goto out;
 		}
-		part_num[offset * 2] = (u8)(nvm_data >> 8);
-		part_num[(offset * 2) + 1] = (u8)(nvm_data & 0xFF);
+		part_num[offset * 2] = (u8) (nvm_data >> 8);
+		part_num[(offset * 2) + 1] = (u8) (nvm_data & 0xFF);
 	}
 	part_num[offset * 2] = '\0';
 
@@ -614,7 +611,7 @@ out:
  *  Since devices with two ports use the same EEPROM, we increment the
  *  last bit in the MAC address for the second port.
  **/
-s32 igb_read_mac_addr(struct e1000_hw *hw)
+s32 igb_read_mac_addr(struct e1000_hw * hw)
 {
 	u32 rar_high;
 	u32 rar_low;
@@ -624,10 +621,10 @@ s32 igb_read_mac_addr(struct e1000_hw *hw)
 	rar_low = rd32(E1000_RAL(0));
 
 	for (i = 0; i < E1000_RAL_MAC_ADDR_LEN; i++)
-		hw->mac.perm_addr[i] = (u8)(rar_low >> (i*8));
+		hw->mac.perm_addr[i] = (u8) (rar_low >> (i * 8));
 
 	for (i = 0; i < E1000_RAH_MAC_ADDR_LEN; i++)
-		hw->mac.perm_addr[i+4] = (u8)(rar_high >> (i*8));
+		hw->mac.perm_addr[i + 4] = (u8) (rar_high >> (i * 8));
 
 	for (i = 0; i < ETH_ALEN; i++)
 		hw->mac.addr[i] = hw->mac.perm_addr[i];
@@ -642,7 +639,7 @@ s32 igb_read_mac_addr(struct e1000_hw *hw)
  *  Calculates the EEPROM checksum by reading/adding each word of the EEPROM
  *  and then verifies that the sum of the EEPROM is equal to 0xBABA.
  **/
-s32 igb_validate_nvm_checksum(struct e1000_hw *hw)
+s32 igb_validate_nvm_checksum(struct e1000_hw * hw)
 {
 	s32 ret_val = 0;
 	u16 checksum = 0;
@@ -675,9 +672,9 @@ out:
  *  up to the checksum.  Then calculates the EEPROM checksum and writes the
  *  value to the EEPROM.
  **/
-s32 igb_update_nvm_checksum(struct e1000_hw *hw)
+s32 igb_update_nvm_checksum(struct e1000_hw * hw)
 {
-	s32  ret_val;
+	s32 ret_val;
 	u16 checksum = 0;
 	u16 i, nvm_data;
 
@@ -727,12 +724,12 @@ void igb_get_fw_version(struct e1000_hw *hw, struct e1000_fw_version *fw_vers)
 		/* Use this format, unless EETRACK ID exists,
 		 * then use alternate format
 		 */
-		if ((etrack_test &  NVM_MAJOR_MASK) != NVM_ETRACK_VALID) {
+		if ((etrack_test & NVM_MAJOR_MASK) != NVM_ETRACK_VALID) {
 			hw->nvm.ops.read(hw, NVM_VERSION, 1, &fw_version);
 			fw_vers->eep_major = (fw_version & NVM_MAJOR_MASK)
-					      >> NVM_MAJOR_SHIFT;
+			    >> NVM_MAJOR_SHIFT;
 			fw_vers->eep_minor = (fw_version & NVM_MINOR_MASK)
-					      >> NVM_MINOR_SHIFT;
+			    >> NVM_MINOR_SHIFT;
 			fw_vers->eep_build = (fw_version & NVM_IMAGE_ID_MASK);
 			goto etrack_id;
 		}
@@ -746,11 +743,10 @@ void igb_get_fw_version(struct e1000_hw *hw, struct e1000_fw_version *fw_vers)
 	case e1000_i350:
 		/* find combo image version */
 		hw->nvm.ops.read(hw, NVM_COMB_VER_PTR, 1, &comb_offset);
-		if ((comb_offset != 0x0) &&
-		    (comb_offset != NVM_VER_INVALID)) {
+		if ((comb_offset != 0x0) && (comb_offset != NVM_VER_INVALID)) {
 
 			hw->nvm.ops.read(hw, (NVM_COMB_VER_OFF + comb_offset
-					 + 1), 1, &comb_verh);
+					      + 1), 1, &comb_verh);
 			hw->nvm.ops.read(hw, (NVM_COMB_VER_OFF + comb_offset),
 					 1, &comb_verl);
 
@@ -761,12 +757,12 @@ void igb_get_fw_version(struct e1000_hw *hw, struct e1000_fw_version *fw_vers)
 
 				fw_vers->or_valid = true;
 				fw_vers->or_major =
-					comb_verl >> NVM_COMB_VER_SHFT;
+				    comb_verl >> NVM_COMB_VER_SHFT;
 				fw_vers->or_build =
-					(comb_verl << NVM_COMB_VER_SHFT)
-					| (comb_verh >> NVM_COMB_VER_SHFT);
+				    (comb_verl << NVM_COMB_VER_SHFT)
+				    | (comb_verh >> NVM_COMB_VER_SHFT);
 				fw_vers->or_patch =
-					comb_verh & NVM_COMB_VER_MASK;
+				    comb_verh & NVM_COMB_VER_MASK;
 			}
 		}
 		break;
@@ -775,14 +771,14 @@ void igb_get_fw_version(struct e1000_hw *hw, struct e1000_fw_version *fw_vers)
 	}
 	hw->nvm.ops.read(hw, NVM_VERSION, 1, &fw_version);
 	fw_vers->eep_major = (fw_version & NVM_MAJOR_MASK)
-			      >> NVM_MAJOR_SHIFT;
+	    >> NVM_MAJOR_SHIFT;
 
-	/* check for old style version format in newer images*/
+	/* check for old style version format in newer images */
 	if ((fw_version & NVM_NEW_DEC_MASK) == 0x0) {
 		eeprom_verl = (fw_version & NVM_COMB_VER_MASK);
 	} else {
 		eeprom_verl = (fw_version & NVM_MINOR_MASK)
-				>> NVM_MINOR_SHIFT;
+		    >> NVM_MINOR_SHIFT;
 	}
 	/* Convert minor value to hex before assigning to output struct
 	 * Val to be converted will not be higher than 99, per tool output
@@ -794,10 +790,10 @@ void igb_get_fw_version(struct e1000_hw *hw, struct e1000_fw_version *fw_vers)
 	fw_vers->eep_minor = result;
 
 etrack_id:
-	if ((etrack_test &  NVM_MAJOR_MASK) == NVM_ETRACK_VALID) {
+	if ((etrack_test & NVM_MAJOR_MASK) == NVM_ETRACK_VALID) {
 		hw->nvm.ops.read(hw, NVM_ETRACK_WORD, 1, &eeprom_verl);
 		hw->nvm.ops.read(hw, (NVM_ETRACK_WORD + 1), 1, &eeprom_verh);
 		fw_vers->etrack_id = (eeprom_verh << NVM_ETRACK_SHIFT)
-			| eeprom_verl;
+		    | eeprom_verl;
 	}
 }

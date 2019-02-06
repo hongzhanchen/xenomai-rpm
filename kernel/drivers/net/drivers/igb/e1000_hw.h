@@ -93,7 +93,7 @@ enum e1000_mac_type {
 	e1000_i354,
 	e1000_i210,
 	e1000_i211,
-	e1000_num_macs  /* List is 1-based, so subtract 1 for true count. */
+	e1000_num_macs		/* List is 1-based, so subtract 1 for true count. */
 };
 
 enum e1000_media_type {
@@ -269,13 +269,13 @@ struct e1000_hw_stats {
 
 struct e1000_host_mng_dhcp_cookie {
 	u32 signature;
-	u8  status;
-	u8  reserved0;
+	u8 status;
+	u8 reserved0;
 	u16 vlan_id;
 	u32 reserved1;
 	u16 reserved2;
-	u8  reserved3;
-	u8  checksum;
+	u8 reserved3;
+	u8 checksum;
 };
 
 /* Host Interface "Rev 1" */
@@ -294,8 +294,8 @@ struct e1000_host_command_info {
 
 /* Host Interface "Rev 2" */
 struct e1000_host_mng_command_header {
-	u8  command_id;
-	u8  checksum;
+	u8 command_id;
+	u8 checksum;
 	u16 reserved1;
 	u16 reserved2;
 	u16 command_length;
@@ -313,49 +313,49 @@ struct e1000_host_mng_command_info {
 #include "e1000_mbx.h"
 
 struct e1000_mac_operations {
-	s32 (*check_for_link)(struct e1000_hw *);
-	s32 (*reset_hw)(struct e1000_hw *);
-	s32 (*init_hw)(struct e1000_hw *);
-	bool (*check_mng_mode)(struct e1000_hw *);
-	s32 (*setup_physical_interface)(struct e1000_hw *);
-	void (*rar_set)(struct e1000_hw *, u8 *, u32);
-	s32 (*read_mac_addr)(struct e1000_hw *);
-	s32 (*get_speed_and_duplex)(struct e1000_hw *, u16 *, u16 *);
-	s32 (*acquire_swfw_sync)(struct e1000_hw *, u16);
-	void (*release_swfw_sync)(struct e1000_hw *, u16);
+	s32(*check_for_link) (struct e1000_hw *);
+	s32(*reset_hw) (struct e1000_hw *);
+	s32(*init_hw) (struct e1000_hw *);
+	bool(*check_mng_mode) (struct e1000_hw *);
+	s32(*setup_physical_interface) (struct e1000_hw *);
+	void (*rar_set) (struct e1000_hw *, u8 *, u32);
+	 s32(*read_mac_addr) (struct e1000_hw *);
+	 s32(*get_speed_and_duplex) (struct e1000_hw *, u16 *, u16 *);
+	 s32(*acquire_swfw_sync) (struct e1000_hw *, u16);
+	void (*release_swfw_sync) (struct e1000_hw *, u16);
 #ifdef CONFIG_IGB_HWMON
-	s32 (*get_thermal_sensor_data)(struct e1000_hw *);
-	s32 (*init_thermal_sensor_thresh)(struct e1000_hw *);
+	 s32(*get_thermal_sensor_data) (struct e1000_hw *);
+	 s32(*init_thermal_sensor_thresh) (struct e1000_hw *);
 #endif
 
 };
 
 struct e1000_phy_operations {
-	s32 (*acquire)(struct e1000_hw *);
-	s32 (*check_polarity)(struct e1000_hw *);
-	s32 (*check_reset_block)(struct e1000_hw *);
-	s32 (*force_speed_duplex)(struct e1000_hw *);
-	s32 (*get_cfg_done)(struct e1000_hw *hw);
-	s32 (*get_cable_length)(struct e1000_hw *);
-	s32 (*get_phy_info)(struct e1000_hw *);
-	s32 (*read_reg)(struct e1000_hw *, u32, u16 *);
-	void (*release)(struct e1000_hw *);
-	s32 (*reset)(struct e1000_hw *);
-	s32 (*set_d0_lplu_state)(struct e1000_hw *, bool);
-	s32 (*set_d3_lplu_state)(struct e1000_hw *, bool);
-	s32 (*write_reg)(struct e1000_hw *, u32, u16);
-	s32 (*read_i2c_byte)(struct e1000_hw *, u8, u8, u8 *);
-	s32 (*write_i2c_byte)(struct e1000_hw *, u8, u8, u8);
+	s32(*acquire) (struct e1000_hw *);
+	s32(*check_polarity) (struct e1000_hw *);
+	s32(*check_reset_block) (struct e1000_hw *);
+	s32(*force_speed_duplex) (struct e1000_hw *);
+	s32(*get_cfg_done) (struct e1000_hw * hw);
+	s32(*get_cable_length) (struct e1000_hw *);
+	s32(*get_phy_info) (struct e1000_hw *);
+	s32(*read_reg) (struct e1000_hw *, u32, u16 *);
+	void (*release) (struct e1000_hw *);
+	 s32(*reset) (struct e1000_hw *);
+	 s32(*set_d0_lplu_state) (struct e1000_hw *, bool);
+	 s32(*set_d3_lplu_state) (struct e1000_hw *, bool);
+	 s32(*write_reg) (struct e1000_hw *, u32, u16);
+	 s32(*read_i2c_byte) (struct e1000_hw *, u8, u8, u8 *);
+	 s32(*write_i2c_byte) (struct e1000_hw *, u8, u8, u8);
 };
 
 struct e1000_nvm_operations {
-	s32 (*acquire)(struct e1000_hw *);
-	s32 (*read)(struct e1000_hw *, u16, u16, u16 *);
-	void (*release)(struct e1000_hw *);
-	s32 (*write)(struct e1000_hw *, u16, u16, u16 *);
-	s32 (*update)(struct e1000_hw *);
-	s32 (*validate)(struct e1000_hw *);
-	s32 (*valid_led_default)(struct e1000_hw *, u16 *);
+	s32(*acquire) (struct e1000_hw *);
+	s32(*read) (struct e1000_hw *, u16, u16, u16 *);
+	void (*release) (struct e1000_hw *);
+	 s32(*write) (struct e1000_hw *, u16, u16, u16 *);
+	 s32(*update) (struct e1000_hw *);
+	 s32(*validate) (struct e1000_hw *);
+	 s32(*valid_led_default) (struct e1000_hw *, u16 *);
 };
 
 #define E1000_MAX_SENSORS		3
@@ -372,7 +372,7 @@ struct e1000_thermal_sensor_data {
 };
 
 struct e1000_info {
-	s32 (*get_invariants)(struct e1000_hw *);
+	s32(*get_invariants) (struct e1000_hw *);
 	struct e1000_mac_operations *mac_ops;
 	struct e1000_phy_operations *phy_ops;
 	struct e1000_nvm_operations *nvm_ops;
@@ -398,11 +398,11 @@ struct e1000_mac_info {
 	u16 uta_reg_count;
 
 	/* Maximum size of the MTA register table in all supported adapters */
-	#define MAX_MTA_REG 128
+#define MAX_MTA_REG 128
 	u32 mta_shadow[MAX_MTA_REG];
 	u16 rar_entry_count;
 
-	u8  forced_speed_duplex;
+	u8 forced_speed_duplex;
 
 	bool adaptive_ifs;
 	bool arc_subsystem_valid;
@@ -433,7 +433,7 @@ struct e1000_phy_info {
 
 	u32 addr;
 	u32 id;
-	u32 reset_delay_us; /* in usec */
+	u32 reset_delay_us;	/* in usec */
 	u32 revision;
 
 	enum e1000_media_type media_type;
@@ -481,24 +481,24 @@ struct e1000_bus_info {
 };
 
 struct e1000_fc_info {
-	u32 high_water;     /* Flow control high-water mark */
-	u32 low_water;      /* Flow control low-water mark */
-	u16 pause_time;     /* Flow control pause timer */
-	bool send_xon;      /* Flow control send XON */
-	bool strict_ieee;   /* Strict IEEE mode */
-	enum e1000_fc_mode current_mode; /* Type of flow control */
+	u32 high_water;		/* Flow control high-water mark */
+	u32 low_water;		/* Flow control low-water mark */
+	u16 pause_time;		/* Flow control pause timer */
+	bool send_xon;		/* Flow control send XON */
+	bool strict_ieee;	/* Strict IEEE mode */
+	enum e1000_fc_mode current_mode;	/* Type of flow control */
 	enum e1000_fc_mode requested_mode;
 };
 
 struct e1000_mbx_operations {
-	s32 (*init_params)(struct e1000_hw *hw);
-	s32 (*read)(struct e1000_hw *, u32 *, u16,  u16);
-	s32 (*write)(struct e1000_hw *, u32 *, u16, u16);
-	s32 (*read_posted)(struct e1000_hw *, u32 *, u16,  u16);
-	s32 (*write_posted)(struct e1000_hw *, u32 *, u16, u16);
-	s32 (*check_for_msg)(struct e1000_hw *, u16);
-	s32 (*check_for_ack)(struct e1000_hw *, u16);
-	s32 (*check_for_rst)(struct e1000_hw *, u16);
+	s32(*init_params) (struct e1000_hw * hw);
+	s32(*read) (struct e1000_hw *, u32 *, u16, u16);
+	s32(*write) (struct e1000_hw *, u32 *, u16, u16);
+	s32(*read_posted) (struct e1000_hw *, u32 *, u16, u16);
+	s32(*write_posted) (struct e1000_hw *, u32 *, u16, u16);
+	s32(*check_for_msg) (struct e1000_hw *, u16);
+	s32(*check_for_ack) (struct e1000_hw *, u16);
+	s32(*check_for_rst) (struct e1000_hw *, u16);
 };
 
 struct e1000_mbx_stats {
@@ -537,16 +537,16 @@ struct e1000_hw {
 	u8 __iomem *flash_address;
 	unsigned long io_base;
 
-	struct e1000_mac_info  mac;
-	struct e1000_fc_info   fc;
-	struct e1000_phy_info  phy;
-	struct e1000_nvm_info  nvm;
-	struct e1000_bus_info  bus;
+	struct e1000_mac_info mac;
+	struct e1000_fc_info fc;
+	struct e1000_phy_info phy;
+	struct e1000_nvm_info nvm;
+	struct e1000_bus_info bus;
 	struct e1000_mbx_info mbx;
 	struct e1000_host_mng_dhcp_cookie mng_cookie;
 
 	union {
-		struct e1000_dev_spec_82575	_82575;
+		struct e1000_dev_spec_82575 _82575;
 	} dev_spec;
 
 	u16 device_id;
@@ -554,7 +554,7 @@ struct e1000_hw {
 	u16 subsystem_device_id;
 	u16 vendor_id;
 
-	u8  revision_id;
+	u8 revision_id;
 };
 
 struct rtnet_device *igb_get_hw_dev(struct e1000_hw *hw);
@@ -562,9 +562,9 @@ struct rtnet_device *igb_get_hw_dev(struct e1000_hw *hw);
 	rtdev_dbg(igb_get_hw_dev(hw), format, ##arg)
 
 /* These functions must be implemented by drivers */
-s32 igb_read_pcie_cap_reg(struct e1000_hw *hw, u32 reg, u16 *value);
-s32 igb_write_pcie_cap_reg(struct e1000_hw *hw, u32 reg, u16 *value);
+s32 igb_read_pcie_cap_reg(struct e1000_hw *hw, u32 reg, u16 * value);
+s32 igb_write_pcie_cap_reg(struct e1000_hw *hw, u32 reg, u16 * value);
 
-void igb_read_pci_cfg(struct e1000_hw *hw, u32 reg, u16 *value);
-void igb_write_pci_cfg(struct e1000_hw *hw, u32 reg, u16 *value);
+void igb_read_pci_cfg(struct e1000_hw *hw, u32 reg, u16 * value);
+void igb_write_pci_cfg(struct e1000_hw *hw, u32 reg, u16 * value);
 #endif /* _E1000_HW_H_ */

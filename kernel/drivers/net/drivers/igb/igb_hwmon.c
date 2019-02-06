@@ -41,18 +41,15 @@ static struct i2c_board_info i350_sensor_info = {
 
 /* hwmon callback functions */
 static ssize_t igb_hwmon_show_location(struct device *dev,
-				       struct device_attribute *attr,
-				       char *buf)
+				       struct device_attribute *attr, char *buf)
 {
 	struct hwmon_attr *igb_attr = container_of(attr, struct hwmon_attr,
 						   dev_attr);
-	return sprintf(buf, "loc%u\n",
-		       igb_attr->sensor->location);
+	return sprintf(buf, "loc%u\n", igb_attr->sensor->location);
 }
 
 static ssize_t igb_hwmon_show_temp(struct device *dev,
-				   struct device_attribute *attr,
-				   char *buf)
+				   struct device_attribute *attr, char *buf)
 {
 	struct hwmon_attr *igb_attr = container_of(attr, struct hwmon_attr,
 						   dev_attr);
@@ -143,8 +140,7 @@ static int igb_add_hwmon_attr(struct igb_adapter *adapter,
 	}
 
 	/* These always the same regardless of type */
-	igb_attr->sensor =
-		&adapter->hw.mac.thermal_sensor_data.sensor[offset];
+	igb_attr->sensor = &adapter->hw.mac.thermal_sensor_data.sensor[offset];
 	igb_attr->hw = &adapter->hw;
 	igb_attr->dev_attr.store = NULL;
 	igb_attr->dev_attr.attr.mode = S_IRUGO;

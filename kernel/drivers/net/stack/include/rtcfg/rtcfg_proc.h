@@ -31,24 +31,22 @@
 
 extern struct mutex nrt_proc_lock;
 
-
 void rtcfg_update_conn_proc_entries(int ifindex);
 void rtcfg_remove_conn_proc_entries(int ifindex);
 
 int rtcfg_init_proc(void);
 void rtcfg_cleanup_proc(void);
 
-
 static inline void rtcfg_lockwr_proc(int ifindex)
 {
-    mutex_lock(&nrt_proc_lock);
-    rtcfg_remove_conn_proc_entries(ifindex);
+	mutex_lock(&nrt_proc_lock);
+	rtcfg_remove_conn_proc_entries(ifindex);
 }
 
 static inline void rtcfg_unlockwr_proc(int ifindex)
 {
-    rtcfg_update_conn_proc_entries(ifindex);
-    mutex_unlock(&nrt_proc_lock);
+	rtcfg_update_conn_proc_entries(ifindex);
+	mutex_unlock(&nrt_proc_lock);
 }
 
 #else

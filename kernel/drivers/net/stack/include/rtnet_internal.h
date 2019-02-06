@@ -49,7 +49,6 @@
     RTDM_TASK_HIGHEST_PRIORITY + RTDM_TASK_LOWER_PRIORITY
 /*#define RTNET_RTDEV_PRIORITY        5*/
 
-
 struct rtnet_device;
 
 /*struct rtnet_msg {
@@ -57,19 +56,16 @@ struct rtnet_device;
     struct rtnet_device *rtdev;
 };*/
 
-
 struct rtnet_mgr {
-    rtdm_task_t     task;
+	rtdm_task_t task;
 /*    MBX     mbx;*/
-    rtdm_event_t    event;
+	rtdm_event_t event;
 };
-
 
 extern struct rtnet_mgr STACK_manager;
 extern struct rtnet_mgr RTDEV_manager;
 
 extern const char rtnet_rtdm_provider_name[];
-
 
 #ifdef CONFIG_XENO_OPT_VFILE
 extern struct xnvfile_directory rtnet_proc_root;

@@ -20,7 +20,6 @@
 	Support information and updates available at
 	http://www.scyld.com/network/netsemi.html
 
-
 	Linux kernel modifications:
 
 	Version 1.0.1:
@@ -177,7 +176,8 @@
 #define MAX_UNITS 8		/* More are supported, limit only on options */
 #define DEFAULT_RX_POOL_SIZE    16
 
-static int cards[MAX_UNITS] = { [0 ... (MAX_UNITS-1)] = 1 };
+static int cards[MAX_UNITS] = {[0 ... (MAX_UNITS - 1)] = 1 };
+
 module_param_array(cards, int, NULL, 0444);
 MODULE_PARM_DESC(cards, "array of cards to be supported (e.g. 1,0,1)");
 /*** RTnet ***/
@@ -224,7 +224,7 @@ static int full_duplex[MAX_UNITS];
    bonding and packet priority.
    There are no ill effects from too-large receive rings. */
 #define TX_RING_SIZE	16
-#define TX_QUEUE_LEN	10 /* Limit ring entries actually used, min 4. */
+#define TX_QUEUE_LEN	10	/* Limit ring entries actually used, min 4. */
 #define RX_RING_SIZE	8 /*** RTnet ***/
 
 /* Operational parameters that usually are not changed. */
@@ -238,23 +238,24 @@ static int full_duplex[MAX_UNITS];
 #define NATSEMI_PG1_NREGS	4
 #define NATSEMI_NREGS		(NATSEMI_PG0_NREGS + NATSEMI_RFDR_NREGS + \
 				 NATSEMI_PG1_NREGS)
-#define NATSEMI_REGS_VER	1 /* v1 added RFDR registers */
+#define NATSEMI_REGS_VER	1	/* v1 added RFDR registers */
 #define NATSEMI_REGS_SIZE	(NATSEMI_NREGS * sizeof(u32))
-#define NATSEMI_EEPROM_SIZE	24 /* 12 16-bit values */
+#define NATSEMI_EEPROM_SIZE	24	/* 12 16-bit values */
 
-#define PKT_BUF_SZ		1536 /* Size of each temporary Rx buffer. */
+#define PKT_BUF_SZ		1536	/* Size of each temporary Rx buffer. */
 
 /* These identify the driver base version and may not be removed. */
 static char version[] =
-  KERN_INFO DRV_NAME " dp8381x driver, version "
-      DRV_VERSION ", " DRV_RELDATE "\n"
-  KERN_INFO "  originally by Donald Becker <becker@scyld.com>\n"
-  KERN_INFO "  http://www.scyld.com/network/natsemi.html\n"
-  KERN_INFO "  2.4.x kernel port by Jeff Garzik, Tjeerd Mulder\n"
-  KERN_INFO "  RTnet port by Erik Buit\n";
+    KERN_INFO DRV_NAME " dp8381x driver, version "
+    DRV_VERSION ", " DRV_RELDATE "\n"
+    KERN_INFO "  originally by Donald Becker <becker@scyld.com>\n"
+    KERN_INFO "  http://www.scyld.com/network/natsemi.html\n"
+    KERN_INFO "  2.4.x kernel port by Jeff Garzik, Tjeerd Mulder\n"
+    KERN_INFO "  RTnet port by Erik Buit\n";
 
 MODULE_AUTHOR("Erik Buit");
-MODULE_DESCRIPTION("RTnet National Semiconductor DP8381x series PCI Ethernet driver");
+MODULE_DESCRIPTION
+    ("RTnet National Semiconductor DP8381x series PCI Ethernet driver");
 MODULE_LICENSE("GPL");
 
 module_param(max_interrupt_work, int, 0444);
@@ -266,7 +267,7 @@ MODULE_PARM(rx_copybreak, "i");
 module_param_array(options, int, NULL, 0444);
 module_param_array(full_duplex, int, NULL, 0444);
 MODULE_PARM_DESC(max_interrupt_work,
-	"DP8381x maximum events handled per interrupt");
+		 "DP8381x maximum events handled per interrupt");
 MODULE_PARM_DESC(mtu, "DP8381x MTU (all boards)");
 MODULE_PARM_DESC(debug, "DP8381x default debug level");
 /*** RTnet ***
@@ -356,8 +357,6 @@ IVc. Errata
 None characterised.
 */
 
-
-
 enum pcistuff {
 	PCI_USES_IO = 0x01,
 	PCI_USES_MEM = 0x02,
@@ -369,19 +368,19 @@ enum pcistuff {
 /* MMIO operations required */
 #define PCI_IOTYPE (PCI_USES_MASTER | PCI_USES_MEM | PCI_ADDR1)
 
-
 /* array of board data directly indexed by pci_tbl[x].driver_data */
 static struct {
 	const char *name;
 	unsigned long flags;
 } natsemi_pci_info[] = {
-	{ "NatSemi DP8381[56]", PCI_IOTYPE },
-};
+	{
+"NatSemi DP8381[56]", PCI_IOTYPE},};
 
 static struct pci_device_id natsemi_pci_tbl[] = {
-	{ PCI_VENDOR_ID_NS, PCI_DEVICE_ID_NS_83815, PCI_ANY_ID, PCI_ANY_ID, },
-	{ 0, },
+	{PCI_VENDOR_ID_NS, PCI_DEVICE_ID_NS_83815, PCI_ANY_ID, PCI_ANY_ID,},
+	{0,},
 };
+
 MODULE_DEVICE_TABLE(pci, natsemi_pci_tbl);
 
 /* Offsets to the device registers.
@@ -390,47 +389,47 @@ MODULE_DEVICE_TABLE(pci, natsemi_pci_tbl);
    device.
 */
 enum register_offsets {
-	ChipCmd			= 0x00,
-	ChipConfig		= 0x04,
-	EECtrl			= 0x08,
-	PCIBusCfg		= 0x0C,
-	IntrStatus		= 0x10,
-	IntrMask		= 0x14,
-	IntrEnable		= 0x18,
-	IntrHoldoff		= 0x16, /* DP83816 only */
-	TxRingPtr		= 0x20,
-	TxConfig		= 0x24,
-	RxRingPtr		= 0x30,
-	RxConfig		= 0x34,
-	ClkRun			= 0x3C,
-	WOLCmd			= 0x40,
-	PauseCmd		= 0x44,
-	RxFilterAddr		= 0x48,
-	RxFilterData		= 0x4C,
-	BootRomAddr		= 0x50,
-	BootRomData		= 0x54,
-	SiliconRev		= 0x58,
-	StatsCtrl		= 0x5C,
-	StatsData		= 0x60,
-	RxPktErrs		= 0x60,
-	RxMissed		= 0x68,
-	RxCRCErrs		= 0x64,
-	BasicControl		= 0x80,
-	BasicStatus		= 0x84,
-	AnegAdv			= 0x90,
-	AnegPeer		= 0x94,
-	PhyStatus		= 0xC0,
-	MIntrCtrl		= 0xC4,
-	MIntrStatus		= 0xC8,
-	PhyCtrl			= 0xE4,
+	ChipCmd = 0x00,
+	ChipConfig = 0x04,
+	EECtrl = 0x08,
+	PCIBusCfg = 0x0C,
+	IntrStatus = 0x10,
+	IntrMask = 0x14,
+	IntrEnable = 0x18,
+	IntrHoldoff = 0x16,	/* DP83816 only */
+	TxRingPtr = 0x20,
+	TxConfig = 0x24,
+	RxRingPtr = 0x30,
+	RxConfig = 0x34,
+	ClkRun = 0x3C,
+	WOLCmd = 0x40,
+	PauseCmd = 0x44,
+	RxFilterAddr = 0x48,
+	RxFilterData = 0x4C,
+	BootRomAddr = 0x50,
+	BootRomData = 0x54,
+	SiliconRev = 0x58,
+	StatsCtrl = 0x5C,
+	StatsData = 0x60,
+	RxPktErrs = 0x60,
+	RxMissed = 0x68,
+	RxCRCErrs = 0x64,
+	BasicControl = 0x80,
+	BasicStatus = 0x84,
+	AnegAdv = 0x90,
+	AnegPeer = 0x94,
+	PhyStatus = 0xC0,
+	MIntrCtrl = 0xC4,
+	MIntrStatus = 0xC8,
+	PhyCtrl = 0xE4,
 
 	/* These are from the spec, around page 78... on a separate table.
 	 * The meaning of these registers depend on the value of PGSEL. */
-	PGSEL			= 0xCC,
-	PMDCSR			= 0xE4,
-	TSTDAT			= 0xFC,
-	DSPCFG			= 0xF4,
-	SDCFG			= 0xF8
+	PGSEL = 0xCC,
+	PMDCSR = 0xE4,
+	TSTDAT = 0xFC,
+	DSPCFG = 0xF4,
+	SDCFG = 0xF8
 };
 /* the values for the 'magic' registers above (PGSEL=1) */
 #define PMDCSR_VAL	0x189c	/* enable preferred adaptation circuitry */
@@ -442,66 +441,66 @@ enum register_offsets {
 
 /* misc PCI space registers */
 enum pci_register_offsets {
-	PCIPM			= 0x44,
+	PCIPM = 0x44,
 };
 
 enum ChipCmd_bits {
-	ChipReset		= 0x100,
-	RxReset			= 0x20,
-	TxReset			= 0x10,
-	RxOff			= 0x08,
-	RxOn			= 0x04,
-	TxOff			= 0x02,
-	TxOn			= 0x01,
+	ChipReset = 0x100,
+	RxReset = 0x20,
+	TxReset = 0x10,
+	RxOff = 0x08,
+	RxOn = 0x04,
+	TxOff = 0x02,
+	TxOn = 0x01,
 };
 
 enum ChipConfig_bits {
-	CfgPhyDis		= 0x200,
-	CfgPhyRst		= 0x400,
-	CfgExtPhy		= 0x1000,
-	CfgAnegEnable		= 0x2000,
-	CfgAneg100		= 0x4000,
-	CfgAnegFull		= 0x8000,
-	CfgAnegDone		= 0x8000000,
-	CfgFullDuplex		= 0x20000000,
-	CfgSpeed100		= 0x40000000,
-	CfgLink			= 0x80000000,
+	CfgPhyDis = 0x200,
+	CfgPhyRst = 0x400,
+	CfgExtPhy = 0x1000,
+	CfgAnegEnable = 0x2000,
+	CfgAneg100 = 0x4000,
+	CfgAnegFull = 0x8000,
+	CfgAnegDone = 0x8000000,
+	CfgFullDuplex = 0x20000000,
+	CfgSpeed100 = 0x40000000,
+	CfgLink = 0x80000000,
 };
 
 enum EECtrl_bits {
-	EE_ShiftClk		= 0x04,
-	EE_DataIn		= 0x01,
-	EE_ChipSelect		= 0x08,
-	EE_DataOut		= 0x02,
+	EE_ShiftClk = 0x04,
+	EE_DataIn = 0x01,
+	EE_ChipSelect = 0x08,
+	EE_DataOut = 0x02,
 };
 
 enum PCIBusCfg_bits {
-	EepromReload		= 0x4,
+	EepromReload = 0x4,
 };
 
 /* Bits in the interrupt status/mask registers. */
 enum IntrStatus_bits {
-	IntrRxDone		= 0x0001,
-	IntrRxIntr		= 0x0002,
-	IntrRxErr		= 0x0004,
-	IntrRxEarly		= 0x0008,
-	IntrRxIdle		= 0x0010,
-	IntrRxOverrun		= 0x0020,
-	IntrTxDone		= 0x0040,
-	IntrTxIntr		= 0x0080,
-	IntrTxErr		= 0x0100,
-	IntrTxIdle		= 0x0200,
-	IntrTxUnderrun		= 0x0400,
-	StatsMax		= 0x0800,
-	SWInt			= 0x1000,
-	WOLPkt			= 0x2000,
-	LinkChange		= 0x4000,
-	IntrHighBits		= 0x8000,
-	RxStatusFIFOOver	= 0x10000,
-	IntrPCIErr		= 0xf00000,
-	RxResetDone		= 0x1000000,
-	TxResetDone		= 0x2000000,
-	IntrAbnormalSummary	= 0xCD20,
+	IntrRxDone = 0x0001,
+	IntrRxIntr = 0x0002,
+	IntrRxErr = 0x0004,
+	IntrRxEarly = 0x0008,
+	IntrRxIdle = 0x0010,
+	IntrRxOverrun = 0x0020,
+	IntrTxDone = 0x0040,
+	IntrTxIntr = 0x0080,
+	IntrTxErr = 0x0100,
+	IntrTxIdle = 0x0200,
+	IntrTxUnderrun = 0x0400,
+	StatsMax = 0x0800,
+	SWInt = 0x1000,
+	WOLPkt = 0x2000,
+	LinkChange = 0x4000,
+	IntrHighBits = 0x8000,
+	RxStatusFIFOOver = 0x10000,
+	IntrPCIErr = 0xf00000,
+	RxResetDone = 0x1000000,
+	TxResetDone = 0x2000000,
+	IntrAbnormalSummary = 0xCD20,
 };
 
 /*
@@ -516,95 +515,95 @@ enum IntrStatus_bits {
 #define DEFAULT_INTR 0x00f1cd65
 
 enum TxConfig_bits {
-	TxDrthMask		= 0x3f,
-	TxFlthMask		= 0x3f00,
-	TxMxdmaMask		= 0x700000,
-	TxMxdma_512		= 0x0,
-	TxMxdma_4		= 0x100000,
-	TxMxdma_8		= 0x200000,
-	TxMxdma_16		= 0x300000,
-	TxMxdma_32		= 0x400000,
-	TxMxdma_64		= 0x500000,
-	TxMxdma_128		= 0x600000,
-	TxMxdma_256		= 0x700000,
-	TxCollRetry		= 0x800000,
-	TxAutoPad		= 0x10000000,
-	TxMacLoop		= 0x20000000,
-	TxHeartIgn		= 0x40000000,
-	TxCarrierIgn		= 0x80000000
+	TxDrthMask = 0x3f,
+	TxFlthMask = 0x3f00,
+	TxMxdmaMask = 0x700000,
+	TxMxdma_512 = 0x0,
+	TxMxdma_4 = 0x100000,
+	TxMxdma_8 = 0x200000,
+	TxMxdma_16 = 0x300000,
+	TxMxdma_32 = 0x400000,
+	TxMxdma_64 = 0x500000,
+	TxMxdma_128 = 0x600000,
+	TxMxdma_256 = 0x700000,
+	TxCollRetry = 0x800000,
+	TxAutoPad = 0x10000000,
+	TxMacLoop = 0x20000000,
+	TxHeartIgn = 0x40000000,
+	TxCarrierIgn = 0x80000000
 };
 
 enum RxConfig_bits {
-	RxDrthMask		= 0x3e,
-	RxMxdmaMask		= 0x700000,
-	RxMxdma_512		= 0x0,
-	RxMxdma_4		= 0x100000,
-	RxMxdma_8		= 0x200000,
-	RxMxdma_16		= 0x300000,
-	RxMxdma_32		= 0x400000,
-	RxMxdma_64		= 0x500000,
-	RxMxdma_128		= 0x600000,
-	RxMxdma_256		= 0x700000,
-	RxAcceptLong		= 0x8000000,
-	RxAcceptTx		= 0x10000000,
-	RxAcceptRunt		= 0x40000000,
-	RxAcceptErr		= 0x80000000
+	RxDrthMask = 0x3e,
+	RxMxdmaMask = 0x700000,
+	RxMxdma_512 = 0x0,
+	RxMxdma_4 = 0x100000,
+	RxMxdma_8 = 0x200000,
+	RxMxdma_16 = 0x300000,
+	RxMxdma_32 = 0x400000,
+	RxMxdma_64 = 0x500000,
+	RxMxdma_128 = 0x600000,
+	RxMxdma_256 = 0x700000,
+	RxAcceptLong = 0x8000000,
+	RxAcceptTx = 0x10000000,
+	RxAcceptRunt = 0x40000000,
+	RxAcceptErr = 0x80000000
 };
 
 enum ClkRun_bits {
-	PMEEnable		= 0x100,
-	PMEStatus		= 0x8000,
+	PMEEnable = 0x100,
+	PMEStatus = 0x8000,
 };
 
 enum WolCmd_bits {
-	WakePhy			= 0x1,
-	WakeUnicast		= 0x2,
-	WakeMulticast		= 0x4,
-	WakeBroadcast		= 0x8,
-	WakeArp			= 0x10,
-	WakePMatch0		= 0x20,
-	WakePMatch1		= 0x40,
-	WakePMatch2		= 0x80,
-	WakePMatch3		= 0x100,
-	WakeMagic		= 0x200,
-	WakeMagicSecure		= 0x400,
-	SecureHack		= 0x100000,
-	WokePhy			= 0x400000,
-	WokeUnicast		= 0x800000,
-	WokeMulticast		= 0x1000000,
-	WokeBroadcast		= 0x2000000,
-	WokeArp			= 0x4000000,
-	WokePMatch0		= 0x8000000,
-	WokePMatch1		= 0x10000000,
-	WokePMatch2		= 0x20000000,
-	WokePMatch3		= 0x40000000,
-	WokeMagic		= 0x80000000,
-	WakeOptsSummary		= 0x7ff
+	WakePhy = 0x1,
+	WakeUnicast = 0x2,
+	WakeMulticast = 0x4,
+	WakeBroadcast = 0x8,
+	WakeArp = 0x10,
+	WakePMatch0 = 0x20,
+	WakePMatch1 = 0x40,
+	WakePMatch2 = 0x80,
+	WakePMatch3 = 0x100,
+	WakeMagic = 0x200,
+	WakeMagicSecure = 0x400,
+	SecureHack = 0x100000,
+	WokePhy = 0x400000,
+	WokeUnicast = 0x800000,
+	WokeMulticast = 0x1000000,
+	WokeBroadcast = 0x2000000,
+	WokeArp = 0x4000000,
+	WokePMatch0 = 0x8000000,
+	WokePMatch1 = 0x10000000,
+	WokePMatch2 = 0x20000000,
+	WokePMatch3 = 0x40000000,
+	WokeMagic = 0x80000000,
+	WakeOptsSummary = 0x7ff
 };
 
 enum RxFilterAddr_bits {
-	RFCRAddressMask		= 0x3ff,
-	AcceptMulticast		= 0x00200000,
-	AcceptMyPhys		= 0x08000000,
-	AcceptAllPhys		= 0x10000000,
-	AcceptAllMulticast	= 0x20000000,
-	AcceptBroadcast		= 0x40000000,
-	RxFilterEnable		= 0x80000000
+	RFCRAddressMask = 0x3ff,
+	AcceptMulticast = 0x00200000,
+	AcceptMyPhys = 0x08000000,
+	AcceptAllPhys = 0x10000000,
+	AcceptAllMulticast = 0x20000000,
+	AcceptBroadcast = 0x40000000,
+	RxFilterEnable = 0x80000000
 };
 
 enum StatsCtrl_bits {
-	StatsWarn		= 0x1,
-	StatsFreeze		= 0x2,
-	StatsClear		= 0x4,
-	StatsStrobe		= 0x8,
+	StatsWarn = 0x1,
+	StatsFreeze = 0x2,
+	StatsClear = 0x4,
+	StatsStrobe = 0x8,
 };
 
 enum MIntrCtrl_bits {
-	MICRIntEn		= 0x2,
+	MICRIntEn = 0x2,
 };
 
 enum PhyCtrl_bits {
-	PhyAddrMask		= 0xf,
+	PhyAddrMask = 0xf,
 };
 
 /* values we might find in the silicon revision register */
@@ -625,20 +624,20 @@ struct netdev_desc {
 
 /* Bits in network_desc.status */
 enum desc_status_bits {
-	DescOwn=0x80000000, DescMore=0x40000000, DescIntr=0x20000000,
-	DescNoCRC=0x10000000, DescPktOK=0x08000000,
-	DescSizeMask=0xfff,
+	DescOwn = 0x80000000, DescMore = 0x40000000, DescIntr = 0x20000000,
+	DescNoCRC = 0x10000000, DescPktOK = 0x08000000,
+	DescSizeMask = 0xfff,
 
-	DescTxAbort=0x04000000, DescTxFIFO=0x02000000,
-	DescTxCarrier=0x01000000, DescTxDefer=0x00800000,
-	DescTxExcDefer=0x00400000, DescTxOOWCol=0x00200000,
-	DescTxExcColl=0x00100000, DescTxCollCount=0x000f0000,
+	DescTxAbort = 0x04000000, DescTxFIFO = 0x02000000,
+	DescTxCarrier = 0x01000000, DescTxDefer = 0x00800000,
+	DescTxExcDefer = 0x00400000, DescTxOOWCol = 0x00200000,
+	DescTxExcColl = 0x00100000, DescTxCollCount = 0x000f0000,
 
-	DescRxAbort=0x04000000, DescRxOver=0x02000000,
-	DescRxDest=0x01800000, DescRxLong=0x00400000,
-	DescRxRunt=0x00200000, DescRxInvalid=0x00100000,
-	DescRxCRC=0x00080000, DescRxAlign=0x00040000,
-	DescRxLoop=0x00020000, DesRxColl=0x00010000,
+	DescRxAbort = 0x04000000, DescRxOver = 0x02000000,
+	DescRxDest = 0x01800000, DescRxLong = 0x00400000,
+	DescRxRunt = 0x00200000, DescRxInvalid = 0x00100000,
+	DescRxCRC = 0x00080000, DescRxAlign = 0x00040000,
+	DescRxLoop = 0x00020000, DesRxColl = 0x00010000,
 };
 
 struct netdev_private {
@@ -710,9 +709,9 @@ static void free_ring(struct rtnet_device *dev);
 /*static void reinit_ring(struct rtnet_device *dev);*/
 static void init_registers(struct rtnet_device *dev);
 static int start_tx(struct rtskb *skb, struct rtnet_device *dev);
-static int intr_handler(rtdm_irq_t *irq_handle);
+static int intr_handler(rtdm_irq_t * irq_handle);
 static void netdev_error(struct rtnet_device *dev, int intr_status);
-static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp);
+static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t * time_stamp);
 static void netdev_tx_done(struct rtnet_device *dev);
 static void __set_rx_mode(struct rtnet_device *dev);
 /*static void set_rx_mode(struct rtnet_device *dev);*/
@@ -730,16 +729,14 @@ static int netdev_close(struct rtnet_device *dev);
 /*static int netdev_get_regs(struct rtnet_device *dev, u8 *buf);
 static int netdev_get_eeprom(struct rtnet_device *dev, u8 *buf);*/
 
-
-static int natsemi_probe1 (struct pci_dev *pdev,
-	const struct pci_device_id *ent)
+static int natsemi_probe1(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	struct rtnet_device *dev; /*** RTnet ***/
 	struct netdev_private *np;
 	int i, option, irq, chip_idx = ent->driver_data;
 	static int find_cnt = -1;
 	unsigned long ioaddr, iosize;
-	const int pcibar = 1; /* PCI base address register */
+	const int pcibar = 1;	/* PCI base address register */
 	int prev_eedata;
 	u32 tmp;
 
@@ -751,7 +748,8 @@ static int natsemi_probe1 (struct pci_dev *pdev,
 #endif
 
 	i = pci_enable_device(pdev);
-	if (i) return i;
+	if (i)
+		return i;
 
 	/* natsemi has a non-standard PM control register
 	 * in PCI config space.  Some boards apparently need
@@ -781,7 +779,8 @@ static int natsemi_probe1 (struct pci_dev *pdev,
 	dev = rt_alloc_etherdev(sizeof(struct netdev_private),
 				RX_RING_SIZE * 2 + TX_RING_SIZE);
 	if (dev == NULL) {
-		rtdm_printk(KERN_ERR "init_ethernet failed for card #%d\n", find_cnt);
+		rtdm_printk(KERN_ERR "init_ethernet failed for card #%d\n",
+			    find_cnt);
 		goto err_out;
 	}
 	rtdev_alloc_name(dev, "rteth%d");
@@ -800,7 +799,7 @@ static int natsemi_probe1 (struct pci_dev *pdev,
 	}
 
 	{
-		void *mmio = ioremap (ioaddr, iosize);
+		void *mmio = ioremap(ioaddr, iosize);
 		if (!mmio) {
 			pci_release_regions(pdev);
 /*** RTnet ***/
@@ -809,15 +808,15 @@ static int natsemi_probe1 (struct pci_dev *pdev,
 /*** RTnet ***/
 			return -ENOMEM;
 		}
-		ioaddr = (unsigned long) mmio;
+		ioaddr = (unsigned long)mmio;
 	}
 
 	/* Work around the dropped serial bit. */
 	prev_eedata = eeprom_read(ioaddr, 6);
 	for (i = 0; i < 3; i++) {
 		int eedata = eeprom_read(ioaddr, i + 7);
-		dev->dev_addr[i*2] = (eedata << 1) + (prev_eedata >> 15);
-		dev->dev_addr[i*2+1] = eedata >> 7;
+		dev->dev_addr[i * 2] = (eedata << 1) + (prev_eedata >> 15);
+		dev->dev_addr[i * 2 + 1] = eedata >> 7;
 		prev_eedata = eedata;
 	}
 
@@ -830,7 +829,8 @@ static int natsemi_probe1 (struct pci_dev *pdev,
 	pci_set_drvdata(pdev, dev);
 	np->iosize = iosize;
 	rtdm_lock_init(&np->lock);
-	np->msg_enable = (local_debug >= 0) ? (1<<local_debug)-1 : NATSEMI_DEF_MSG;
+	np->msg_enable =
+	    (local_debug >= 0) ? (1 << local_debug) - 1 : NATSEMI_DEF_MSG;
 	np->hands_off = 0;
 
 	/* Reset the chip to erase previous misconfiguration. */
@@ -847,10 +847,10 @@ static int natsemi_probe1 (struct pci_dev *pdev,
 			np->full_duplex = 1;
 		if (option & 15)
 			rtdm_printk(KERN_INFO
-				"%s: ignoring user supplied media type %d",
-				dev->name, option & 15);
+				    "%s: ignoring user supplied media type %d",
+				    dev->name, option & 15);
 	}
-	if (find_cnt < MAX_UNITS  &&  full_duplex[find_cnt])
+	if (find_cnt < MAX_UNITS && full_duplex[find_cnt])
 		np->full_duplex = 1;
 
 	/* The chip-specific entries in the device structure. */
@@ -879,36 +879,35 @@ static int natsemi_probe1 (struct pci_dev *pdev,
 
 	if (netif_msg_drv(np)) {
 		rtdm_printk(KERN_INFO "%s: %s at %#08lx, ",
-			dev->name, natsemi_pci_info[chip_idx].name, ioaddr);
-		for (i = 0; i < ETH_ALEN-1; i++)
-				rtdm_printk("%02x:", dev->dev_addr[i]);
+			    dev->name, natsemi_pci_info[chip_idx].name, ioaddr);
+		for (i = 0; i < ETH_ALEN - 1; i++)
+			rtdm_printk("%02x:", dev->dev_addr[i]);
 		rtdm_printk("%02x, IRQ %d.\n", dev->dev_addr[i], irq);
 	}
 
 	np->advertising = mdio_read(dev, 1, MII_ADVERTISE);
 	if ((readl((void *)(ioaddr + ChipConfig)) & 0xe000) != 0xe000
-	 && netif_msg_probe(np)) {
+	    && netif_msg_probe(np)) {
 		u32 chip_config = readl((void *)(ioaddr + ChipConfig));
-		rtdm_printk(KERN_INFO "%s: Transceiver default autonegotiation %s "
-			"10%s %s duplex.\n",
-			dev->name,
-			chip_config & CfgAnegEnable ?
-			  "enabled, advertise" : "disabled, force",
-			chip_config & CfgAneg100 ? "0" : "",
-			chip_config & CfgAnegFull ? "full" : "half");
+		rtdm_printk(KERN_INFO
+			    "%s: Transceiver default autonegotiation %s "
+			    "10%s %s duplex.\n", dev->name,
+			    chip_config & CfgAnegEnable ? "enabled, advertise" :
+			    "disabled, force",
+			    chip_config & CfgAneg100 ? "0" : "",
+			    chip_config & CfgAnegFull ? "full" : "half");
 	}
 	if (netif_msg_probe(np))
 		rtdm_printk(KERN_INFO
-			"%s: Transceiver status %#04x advertising %#04x.\n",
-			dev->name, mdio_read(dev, 1, MII_BMSR),
-			np->advertising);
+			    "%s: Transceiver status %#04x advertising %#04x.\n",
+			    dev->name, mdio_read(dev, 1, MII_BMSR),
+			    np->advertising);
 
 	/* save the silicon revision for later querying */
 	np->srr = readl((void *)(ioaddr + SiliconRev));
 	if (netif_msg_hw(np))
 		rtdm_printk(KERN_INFO "%s: silicon revision %#04x.\n",
-				dev->name, np->srr);
-
+			    dev->name, np->srr);
 
 	return 0;
 
@@ -928,7 +927,6 @@ err_out:
 
 }
 
-
 /* Read the EEPROM and MII Management Data I/O (MDIO) interfaces.
    The EEPROM code is for the common 93c06/46 EEPROMs with 6 bit addresses. */
 
@@ -946,7 +944,7 @@ err_out:
 
 /* The EEPROM commands include the alway-set leading bit. */
 enum EEPROM_Cmds {
-	EE_WriteCmd=(5 << 6), EE_ReadCmd=(6 << 6), EE_EraseCmd=(7 << 6),
+	EE_WriteCmd = (5 << 6), EE_ReadCmd = (6 << 6), EE_EraseCmd = (7 << 6),
 };
 
 static int eeprom_read(long addr, int location)
@@ -989,10 +987,13 @@ static int eeprom_read(long addr, int location)
 static int mdio_read(struct rtnet_device *dev, int phy_id, int reg)
 {
 	if (phy_id == 1 && reg < 32)
-		return readl((void *)(dev->base_addr+BasicControl+(reg<<2)))&0xffff;
+		return
+		    readl((void *)(dev->base_addr + BasicControl +
+				   (reg << 2))) & 0xffff;
 	else
 		return 0xffff;
 }
+
 /*** RTnet
 static void mdio_write(struct rtnet_device *dev, int phy_id, int reg, u16 data)
 {
@@ -1038,28 +1039,29 @@ static void natsemi_reset(struct rtnet_device *dev)
 	rfcr = readl((void *)(dev->base_addr + RxFilterAddr)) & RFCR_RESET_SAVE;
 	/* PMATCH */
 	for (i = 0; i < 3; i++) {
-		writel(i*2, (void *)(dev->base_addr + RxFilterAddr));
+		writel(i * 2, (void *)(dev->base_addr + RxFilterAddr));
 		pmatch[i] = readw((void *)(dev->base_addr + RxFilterData));
 	}
 	/* SOPAS */
 	for (i = 0; i < 3; i++) {
-		writel(0xa+(i*2), (void *)(dev->base_addr + RxFilterAddr));
+		writel(0xa + (i * 2), (void *)(dev->base_addr + RxFilterAddr));
 		sopass[i] = readw((void *)(dev->base_addr + RxFilterData));
 	}
 
 	/* now whack the chip */
 	writel(ChipReset, (void *)(dev->base_addr + ChipCmd));
-	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
+	for (i = 0; i < NATSEMI_HW_TIMEOUT; i++) {
 		if (!(readl((void *)(dev->base_addr + ChipCmd)) & ChipReset))
 			break;
 		udelay(5);
 	}
-	if (i==NATSEMI_HW_TIMEOUT) {
-		rtdm_printk(KERN_WARNING "%s: reset did not complete in %d usec.\n",
-			dev->name, i*5);
+	if (i == NATSEMI_HW_TIMEOUT) {
+		rtdm_printk(KERN_WARNING
+			    "%s: reset did not complete in %d usec.\n",
+			    dev->name, i * 5);
 	} else if (netif_msg_hw(np)) {
 		rtdm_printk(KERN_DEBUG "%s: reset completed in %d usec.\n",
-			dev->name, i*5);
+			    dev->name, i * 5);
 	}
 
 	/* restore CFG */
@@ -1069,14 +1071,15 @@ static void natsemi_reset(struct rtnet_device *dev)
 	wcsr |= readl((void *)(dev->base_addr + WOLCmd)) & ~WCSR_RESET_SAVE;
 	writel(wcsr, (void *)(dev->base_addr + WOLCmd));
 	/* read RFCR */
-	rfcr |= readl((void *)(dev->base_addr + RxFilterAddr)) & ~RFCR_RESET_SAVE;
+	rfcr |=
+	    readl((void *)(dev->base_addr + RxFilterAddr)) & ~RFCR_RESET_SAVE;
 	/* restore PMATCH */
 	for (i = 0; i < 3; i++) {
-		writel(i*2, (void *)(dev->base_addr + RxFilterAddr));
+		writel(i * 2, (void *)(dev->base_addr + RxFilterAddr));
 		writew(pmatch[i], (void *)(dev->base_addr + RxFilterData));
 	}
 	for (i = 0; i < 3; i++) {
-		writel(0xa+(i*2), (void *)(dev->base_addr + RxFilterAddr));
+		writel(0xa + (i * 2), (void *)(dev->base_addr + RxFilterAddr));
 		writew(sopass[i], (void *)(dev->base_addr + RxFilterData));
 	}
 	/* restore RFCR */
@@ -1089,17 +1092,20 @@ static void natsemi_reload_eeprom(struct rtnet_device *dev)
 	int i;
 
 	writel(EepromReload, (void *)(dev->base_addr + PCIBusCfg));
-	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
+	for (i = 0; i < NATSEMI_HW_TIMEOUT; i++) {
 		udelay(50);
-		if (!(readl((void *)(dev->base_addr + PCIBusCfg)) & EepromReload))
+		if (!
+		    (readl((void *)(dev->base_addr + PCIBusCfg)) &
+		     EepromReload))
 			break;
 	}
-	if (i==NATSEMI_HW_TIMEOUT) {
-		rtdm_printk(KERN_WARNING "%s: EEPROM did not reload in %d usec.\n",
-			dev->name, i*50);
+	if (i == NATSEMI_HW_TIMEOUT) {
+		rtdm_printk(KERN_WARNING
+			    "%s: EEPROM did not reload in %d usec.\n",
+			    dev->name, i * 50);
 	} else if (netif_msg_hw(np)) {
 		rtdm_printk(KERN_DEBUG "%s: EEPROM reloaded in %d usec.\n",
-			dev->name, i*50);
+			    dev->name, i * 50);
 	}
 }
 
@@ -1110,17 +1116,19 @@ static void natsemi_stop_rxtx(struct rtnet_device *dev)
 	int i;
 
 	writel(RxOff | TxOff, (void *)(ioaddr + ChipCmd));
-	for(i=0;i< NATSEMI_HW_TIMEOUT;i++) {
-		if ((readl((void *)(ioaddr + ChipCmd)) & (TxOn|RxOn)) == 0)
+	for (i = 0; i < NATSEMI_HW_TIMEOUT; i++) {
+		if ((readl((void *)(ioaddr + ChipCmd)) & (TxOn | RxOn)) == 0)
 			break;
 		udelay(5);
 	}
-	if (i==NATSEMI_HW_TIMEOUT) {
-		rtdm_printk(KERN_WARNING "%s: Tx/Rx process did not stop in %d usec.\n",
-			dev->name, i*5);
+	if (i == NATSEMI_HW_TIMEOUT) {
+		rtdm_printk(KERN_WARNING
+			    "%s: Tx/Rx process did not stop in %d usec.\n",
+			    dev->name, i * 5);
 	} else if (netif_msg_hw(np)) {
-		rtdm_printk(KERN_DEBUG "%s: Tx/Rx process stopped in %d usec.\n",
-			dev->name, i*5);
+		rtdm_printk(KERN_DEBUG
+			    "%s: Tx/Rx process stopped in %d usec.\n",
+			    dev->name, i * 5);
 	}
 }
 
@@ -1145,7 +1153,7 @@ static int netdev_open(struct rtnet_device *dev)
 
 	if (netif_msg_ifup(np))
 		rtdm_printk(KERN_DEBUG "%s: netdev_open() irq %d.\n",
-			dev->name, dev->irq);
+			    dev->name, dev->irq);
 	i = alloc_ring(dev);
 	if (i < 0) {
 		rtdm_irq_free(&np->irq_handle);
@@ -1155,9 +1163,10 @@ static int netdev_open(struct rtnet_device *dev)
 	init_registers(dev);
 	/* now set the MAC address according to dev->dev_addr */
 	for (i = 0; i < 3; i++) {
-		u16 mac = (dev->dev_addr[2*i+1]<<8) + dev->dev_addr[2*i];
+		u16 mac =
+		    (dev->dev_addr[2 * i + 1] << 8) + dev->dev_addr[2 * i];
 
-		writel(i*2, (void *)(ioaddr + RxFilterAddr));
+		writel(i * 2, (void *)(ioaddr + RxFilterAddr));
 		writew(mac, (void *)(ioaddr + RxFilterData));
 	}
 	writel(np->cur_rx_mode, (void *)(ioaddr + RxFilterAddr));
@@ -1165,8 +1174,9 @@ static int netdev_open(struct rtnet_device *dev)
 	rtnetif_start_queue(dev); /*** RTnet ***/
 
 	if (netif_msg_ifup(np))
-		rtdm_printk(KERN_DEBUG "%s: Done netdev_open(), status: %#08x.\n",
-			dev->name, (int)readl((void *)(ioaddr + ChipCmd)));
+		rtdm_printk(KERN_DEBUG
+			    "%s: Done netdev_open(), status: %#08x.\n",
+			    dev->name, (int)readl((void *)(ioaddr + ChipCmd)));
 
 /*** RTnet ***/
 	/* Set the timer to check for link beat. */
@@ -1242,7 +1252,7 @@ static void check_link(struct rtnet_device *dev)
 		if (rtnetif_carrier_ok(dev)) {
 			if (netif_msg_link(np))
 				rtdm_printk(KERN_NOTICE "%s: link down.\n",
-					dev->name);
+					    dev->name);
 			rtnetif_carrier_off(dev);
 			undo_cable_magic(dev);
 		}
@@ -1258,12 +1268,12 @@ static void check_link(struct rtnet_device *dev)
 	duplex = np->full_duplex || (chipcfg & CfgFullDuplex ? 1 : 0);
 
 	/* if duplex is set then bit 28 must be set, too */
-	if (duplex ^ !!(np->rx_config & RxAcceptTx)) {
+	if (duplex ^ ! !(np->rx_config & RxAcceptTx)) {
 		if (netif_msg_link(np))
 			rtdm_printk(KERN_INFO
-				"%s: Setting %s-duplex based on negotiated "
-				"link capability.\n", dev->name,
-				duplex ? "full" : "half");
+				    "%s: Setting %s-duplex based on negotiated "
+				    "link capability.\n", dev->name,
+				    duplex ? "full" : "half");
 		if (duplex) {
 			np->rx_config |= RxAcceptTx;
 			np->tx_config |= TxCarrierIgn | TxHeartIgn;
@@ -1282,15 +1292,15 @@ static void init_registers(struct rtnet_device *dev)
 	long ioaddr = dev->base_addr;
 	int i;
 
-	for (i=0;i<NATSEMI_HW_TIMEOUT;i++) {
+	for (i = 0; i < NATSEMI_HW_TIMEOUT; i++) {
 		if (readl((void *)(dev->base_addr + ChipConfig)) & CfgAnegDone)
 			break;
 		udelay(10);
 	}
-	if (i==NATSEMI_HW_TIMEOUT && netif_msg_link(np)) {
+	if (i == NATSEMI_HW_TIMEOUT && netif_msg_link(np)) {
 		rtdm_printk(KERN_INFO
-			"%s: autonegotiation did not complete in %d usec.\n",
-			dev->name, i*10);
+			    "%s: autonegotiation did not complete in %d usec.\n",
+			    dev->name, i * 10);
 	}
 
 	/* On page 78 of the spec, they recommend some settings for "optimum
@@ -1299,7 +1309,7 @@ static void init_registers(struct rtnet_device *dev)
 	   do this for rev C of the chip, but engineers at NSC (Bradley
 	   Kennedy) recommends always setting them.  If you don't, you get
 	   errors on some autonegotiations that make the device unusable.
-	*/
+	 */
 	writew(1, (void *)(ioaddr + PGSEL));
 	writew(PMDCSR_VAL, (void *)(ioaddr + PMDCSR));
 	writew(TSTDAT_VAL, (void *)(ioaddr + TSTDAT));
@@ -1311,7 +1321,7 @@ static void init_registers(struct rtnet_device *dev)
 	/* Enable PHY Specific event based interrupts.  Link state change
 	   and Auto-Negotiation Completion are among the affected.
 	   Read the intr status to clear it (needed for wake events).
-	*/
+	 */
 	readw((void *)(ioaddr + MIntrStatus));
 	writew(MICRIntEn, (void *)(ioaddr + MIntrCtrl));
 
@@ -1320,7 +1330,7 @@ static void init_registers(struct rtnet_device *dev)
 
 	writel(np->ring_dma, (void *)(ioaddr + RxRingPtr));
 	writel(np->ring_dma + RX_RING_SIZE * sizeof(struct netdev_desc),
-		(void *)(ioaddr + TxRingPtr));
+	       (void *)(ioaddr + TxRingPtr));
 
 	/* Initialize other registers.
 	 * Configure the PCI bus bursts and FIFO thresholds.
@@ -1332,7 +1342,7 @@ static void init_registers(struct rtnet_device *dev)
 	/* DRTH: 2: start tx if 64 bytes are in the fifo
 	 * FLTH: 0x10: refill with next packet if 512 bytes are free
 	 * MXDMA: 0: up to 256 byte bursts.
-	 *	MXDMA must be <= FLTH
+	 *      MXDMA must be <= FLTH
 	 * ECRETRY=1
 	 * ATP=1
 	 */
@@ -1355,7 +1365,7 @@ static void init_registers(struct rtnet_device *dev)
 	writel(np->SavedClkRun & ~PMEEnable, (void *)(ioaddr + ClkRun));
 	if (np->SavedClkRun & PMEStatus && netif_msg_wol(np)) {
 		rtdm_printk(KERN_NOTICE "%s: Wake-up event %#08x\n",
-			dev->name, readl((void *)(ioaddr + WOLCmd)));
+			    dev->name, readl((void *)(ioaddr + WOLCmd)));
 	}
 
 	check_link(dev);
@@ -1366,7 +1376,7 @@ static void init_registers(struct rtnet_device *dev)
 	writel(1, (void *)(ioaddr + IntrEnable));
 
 	writel(RxOn | TxOn, (void *)(ioaddr + ChipCmd));
-	writel(StatsClear, (void *)(ioaddr + StatsCtrl)); /* Clear Stats */
+	writel(StatsClear, (void *)(ioaddr + StatsCtrl));	/* Clear Stats */
 }
 
 /*
@@ -1392,17 +1402,19 @@ static void dump_ring(struct rtnet_device *dev)
 		int i;
 		rtdm_printk(KERN_DEBUG "  Tx ring at %p:\n", np->tx_ring);
 		for (i = 0; i < TX_RING_SIZE; i++) {
-			rtdm_printk(KERN_DEBUG " #%d desc. %#08x %#08x %#08x.\n",
-				i, np->tx_ring[i].next_desc,
-				np->tx_ring[i].cmd_status,
-				np->tx_ring[i].addr);
+			rtdm_printk(KERN_DEBUG
+				    " #%d desc. %#08x %#08x %#08x.\n", i,
+				    np->tx_ring[i].next_desc,
+				    np->tx_ring[i].cmd_status,
+				    np->tx_ring[i].addr);
 		}
 		rtdm_printk(KERN_DEBUG "  Rx ring %p:\n", np->rx_ring);
 		for (i = 0; i < RX_RING_SIZE; i++) {
-			rtdm_printk(KERN_DEBUG " #%d desc. %#08x %#08x %#08x.\n",
-				i, np->rx_ring[i].next_desc,
-				np->rx_ring[i].cmd_status,
-				np->rx_ring[i].addr);
+			rtdm_printk(KERN_DEBUG
+				    " #%d desc. %#08x %#08x %#08x.\n", i,
+				    np->rx_ring[i].next_desc,
+				    np->rx_ring[i].cmd_status,
+				    np->rx_ring[i].addr);
 		}
 	}
 }
@@ -1414,8 +1426,9 @@ static int alloc_ring(struct rtnet_device *dev)
 {
 	struct netdev_private *np = dev->priv;
 	np->rx_ring = pci_alloc_consistent(np->pci_dev,
-		sizeof(struct netdev_desc) * (RX_RING_SIZE+TX_RING_SIZE),
-		&np->ring_dma);
+					   sizeof(struct netdev_desc) *
+					   (RX_RING_SIZE + TX_RING_SIZE),
+					   &np->ring_dma);
 	if (!np->rx_ring)
 		return -ENOMEM;
 	np->tx_ring = &np->rx_ring[RX_RING_SIZE];
@@ -1434,10 +1447,13 @@ static void refill_rx(struct rtnet_device *dev)
 			skb = rtnetdev_alloc_rtskb(dev, np->rx_buf_sz);
 			np->rx_skbuff[entry] = skb;
 			if (skb == NULL)
-				break; /* Better luck next round. */
+				break;	/* Better luck next round. */
 			np->rx_dma[entry] = pci_map_single(np->pci_dev,
-				skb->data, np->rx_buf_sz, PCI_DMA_FROMDEVICE);
-			np->rx_ring[entry].addr = cpu_to_le32(np->rx_dma[entry]);
+							   skb->data,
+							   np->rx_buf_sz,
+							   PCI_DMA_FROMDEVICE);
+			np->rx_ring[entry].addr =
+			    cpu_to_le32(np->rx_dma[entry]);
 		}
 		np->rx_ring[entry].cmd_status = cpu_to_le32(np->rx_buf_sz);
 	}
@@ -1459,8 +1475,12 @@ static void init_ring(struct rtnet_device *dev)
 	for (i = 0; i < TX_RING_SIZE; i++) {
 		np->tx_skbuff[i] = NULL;
 		np->tx_ring[i].next_desc = cpu_to_le32(np->ring_dma
-			+sizeof(struct netdev_desc)
-			*((i+1)%TX_RING_SIZE+RX_RING_SIZE));
+						       +
+						       sizeof(struct
+							      netdev_desc)
+						       * ((i + 1) %
+							  TX_RING_SIZE +
+							  RX_RING_SIZE));
 		np->tx_ring[i].cmd_status = 0;
 	}
 
@@ -1477,8 +1497,11 @@ static void init_ring(struct rtnet_device *dev)
 	/* Initialize all Rx descriptors. */
 	for (i = 0; i < RX_RING_SIZE; i++) {
 		np->rx_ring[i].next_desc = cpu_to_le32(np->ring_dma
-				+sizeof(struct netdev_desc)
-				*((i+1)%RX_RING_SIZE));
+						       +
+						       sizeof(struct
+							      netdev_desc)
+						       * ((i + 1) %
+							  RX_RING_SIZE));
 		np->rx_ring[i].cmd_status = cpu_to_le32(DescOwn);
 		np->rx_skbuff[i] = NULL;
 	}
@@ -1494,8 +1517,8 @@ static void drain_tx(struct rtnet_device *dev)
 	for (i = 0; i < TX_RING_SIZE; i++) {
 		if (np->tx_skbuff[i]) {
 			pci_unmap_single(np->pci_dev,
-				np->rx_dma[i], np->tx_skbuff[i]->len,
-				PCI_DMA_TODEVICE);
+					 np->rx_dma[i], np->tx_skbuff[i]->len,
+					 PCI_DMA_TODEVICE);
 			dev_kfree_rtskb(np->tx_skbuff[i]);
 			np->stats.tx_dropped++;
 		}
@@ -1511,11 +1534,11 @@ static void drain_ring(struct rtnet_device *dev)
 	/* Free all the skbuffs in the Rx queue. */
 	for (i = 0; i < RX_RING_SIZE; i++) {
 		np->rx_ring[i].cmd_status = 0;
-		np->rx_ring[i].addr = 0xBADF00D0; /* An invalid address. */
+		np->rx_ring[i].addr = 0xBADF00D0;	/* An invalid address. */
 		if (np->rx_skbuff[i]) {
 			pci_unmap_single(np->pci_dev,
-				np->rx_dma[i], np->rx_skbuff[i]->len,
-				PCI_DMA_FROMDEVICE);
+					 np->rx_dma[i], np->rx_skbuff[i]->len,
+					 PCI_DMA_FROMDEVICE);
 			dev_kfree_rtskb(np->rx_skbuff[i]);
 		}
 		np->rx_skbuff[i] = NULL;
@@ -1527,12 +1550,14 @@ static void free_ring(struct rtnet_device *dev)
 {
 	struct netdev_private *np = dev->priv;
 	pci_free_consistent(np->pci_dev,
-		sizeof(struct netdev_desc) * (RX_RING_SIZE+TX_RING_SIZE),
-		np->rx_ring, np->ring_dma);
+			    sizeof(struct netdev_desc) * (RX_RING_SIZE +
+							  TX_RING_SIZE),
+			    np->rx_ring, np->ring_dma);
 }
 
-static int start_tx(struct rtskb *skb, struct rtnet_device *dev) /*** RTnet ***/
+static int start_tx(struct rtskb *skb, struct rtnet_device *dev)
 {
+/*** RTnet ***/
 	struct netdev_private *np = dev->priv;
 	unsigned entry;
 /*** RTnet ***/
@@ -1547,7 +1572,8 @@ static int start_tx(struct rtskb *skb, struct rtnet_device *dev) /*** RTnet ***/
 
 	np->tx_skbuff[entry] = skb;
 	np->tx_dma[entry] = pci_map_single(np->pci_dev,
-				skb->data,skb->len, PCI_DMA_TODEVICE);
+					   skb->data, skb->len,
+					   PCI_DMA_TODEVICE);
 
 	np->tx_ring[entry].addr = cpu_to_le32(np->tx_dma[entry]);
 
@@ -1560,7 +1586,7 @@ static int start_tx(struct rtskb *skb, struct rtnet_device *dev) /*** RTnet ***/
 		/* get and patch time stamp just before the transmission */
 		if (skb->xmit_stamp)
 			*skb->xmit_stamp = cpu_to_be64(rtdm_clock_read() +
-				*skb->xmit_stamp);
+						       *skb->xmit_stamp);
 		np->tx_ring[entry].cmd_status = cpu_to_le32(DescOwn | skb->len);
 		/* StrongARM: Explicitly cache flush np->tx_ring and
 		 * skb->data,skb->len. */
@@ -1586,8 +1612,9 @@ static int start_tx(struct rtskb *skb, struct rtnet_device *dev) /*** RTnet ***/
 /*	dev->trans_start = jiffies;*/
 
 	if (netif_msg_tx_queued(np)) {
-		rtdm_printk(KERN_DEBUG "%s: Transmit frame #%d queued in slot %d.\n",
-			dev->name, np->cur_tx, entry);
+		rtdm_printk(KERN_DEBUG
+			    "%s: Transmit frame #%d queued in slot %d.\n",
+			    dev->name, np->cur_tx, entry);
 	}
 	return 0;
 }
@@ -1602,16 +1629,16 @@ static void netdev_tx_done(struct rtnet_device *dev)
 			break;
 		if (netif_msg_tx_done(np))
 			rtdm_printk(KERN_DEBUG
-				"%s: tx frame #%d finished, status %#08x.\n",
-					dev->name, np->dirty_tx,
-					le32_to_cpu(np->tx_ring[entry].cmd_status));
+				    "%s: tx frame #%d finished, status %#08x.\n",
+				    dev->name, np->dirty_tx,
+				    le32_to_cpu(np->tx_ring[entry].cmd_status));
 		if (np->tx_ring[entry].cmd_status & cpu_to_le32(DescPktOK)) {
 			np->stats.tx_packets++;
 			np->stats.tx_bytes += np->tx_skbuff[entry]->len;
-		} else { /* Various Tx errors */
+		} else {	/* Various Tx errors */
 			int tx_status =
-				le32_to_cpu(np->tx_ring[entry].cmd_status);
-			if (tx_status & (DescTxAbort|DescTxExcColl))
+			    le32_to_cpu(np->tx_ring[entry].cmd_status);
+			if (tx_status & (DescTxAbort | DescTxExcColl))
 				np->stats.tx_aborted_errors++;
 			if (tx_status & DescTxFIFO)
 				np->stats.tx_fifo_errors++;
@@ -1621,16 +1648,15 @@ static void netdev_tx_done(struct rtnet_device *dev)
 				np->stats.tx_window_errors++;
 			np->stats.tx_errors++;
 		}
-		pci_unmap_single(np->pci_dev,np->tx_dma[entry],
-					np->tx_skbuff[entry]->len,
-					PCI_DMA_TODEVICE);
+		pci_unmap_single(np->pci_dev, np->tx_dma[entry],
+				 np->tx_skbuff[entry]->len, PCI_DMA_TODEVICE);
 		/* Free the original skb. */
 		dev_kfree_rtskb(np->tx_skbuff[entry]); /*** RTnet ***/
 /*		dev_kfree_skb_irq(np->tx_skbuff[entry]);*/
 		np->tx_skbuff[entry] = NULL;
 	}
 	if (rtnetif_queue_stopped(dev)
-		&& np->cur_tx - np->dirty_tx < TX_QUEUE_LEN - 4) {
+	    && np->cur_tx - np->dirty_tx < TX_QUEUE_LEN - 4) {
 		/* The ring is no longer full, wake queue. */
 		rtnetif_wake_queue(dev);
 	}
@@ -1638,11 +1664,11 @@ static void netdev_tx_done(struct rtnet_device *dev)
 
 /* The interrupt handler does all of the Rx thread work and cleans up
    after the Tx thread. */
-static int intr_handler(rtdm_irq_t *irq_handle)
+static int intr_handler(rtdm_irq_t * irq_handle)
 {
 	nanosecs_abs_t time_stamp = rtdm_clock_read(); /*** RTnet ***/
-	struct rtnet_device *dev =
-	    rtdm_irq_get_arg(irq_handle, struct rtnet_device); /*** RTnet ***/
+	struct rtnet_device *dev = rtdm_irq_get_arg(irq_handle, struct rtnet_device);
+							       /*** RTnet ***/
 	struct netdev_private *np = dev->priv;
 	unsigned int old_packet_cnt = np->stats.rx_packets; /*** RTnet ***/
 	long ioaddr = dev->base_addr;
@@ -1657,9 +1683,9 @@ static int intr_handler(rtdm_irq_t *irq_handle)
 
 		if (netif_msg_intr(np))
 			rtdm_printk(KERN_DEBUG
-				"%s: Interrupt, status %#08x, mask %#08x.\n",
-				dev->name, intr_status,
-				readl((void *)(ioaddr + IntrMask)));
+				    "%s: Interrupt, status %#08x, mask %#08x.\n",
+				    dev->name, intr_status,
+				    readl((void *)(ioaddr + IntrMask)));
 
 		if (intr_status == 0)
 			break;
@@ -1667,13 +1693,13 @@ static int intr_handler(rtdm_irq_t *irq_handle)
 		ret = RTDM_IRQ_HANDLED;
 
 		if (intr_status &
-		   (IntrRxDone | IntrRxIntr | RxStatusFIFOOver |
-		    IntrRxErr | IntrRxOverrun)) {
+		    (IntrRxDone | IntrRxIntr | RxStatusFIFOOver |
+		     IntrRxErr | IntrRxOverrun)) {
 			netdev_rx(dev, &time_stamp);
 		}
 
 		if (intr_status &
-		   (IntrTxDone | IntrTxIntr | IntrTxIdle | IntrTxErr)) {
+		    (IntrTxDone | IntrTxIntr | IntrTxIdle | IntrTxErr)) {
 			rtdm_lock_get(&np->lock);
 			netdev_tx_done(dev);
 			rtdm_lock_put(&np->lock);
@@ -1686,9 +1712,9 @@ static int intr_handler(rtdm_irq_t *irq_handle)
 		if (--boguscnt < 0) {
 			if (netif_msg_intr(np))
 				rtdm_printk(KERN_WARNING
-					"%s: Too much work at interrupt, "
-					"status=%#08x.\n",
-					dev->name, intr_status);
+					    "%s: Too much work at interrupt, "
+					    "status=%#08x.\n",
+					    dev->name, intr_status);
 			break;
 		}
 	} while (1);
@@ -1704,7 +1730,7 @@ static int intr_handler(rtdm_irq_t *irq_handle)
 
 /* This routine is logically part of the interrupt handler, but separated
    for clarity and better register allocation. */
-static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp)
+static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t * time_stamp)
 {
 	struct netdev_private *np = dev->priv;
 	int entry = np->cur_rx % RX_RING_SIZE;
@@ -1712,31 +1738,33 @@ static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp)
 	s32 desc_status = le32_to_cpu(np->rx_head_desc->cmd_status);
 
 	/* If the driver owns the next entry it's a new packet. Send it up. */
-	while (desc_status < 0) { /* e.g. & DescOwn */
+	while (desc_status < 0) {	/* e.g. & DescOwn */
 		if (netif_msg_rx_status(np))
 			rtdm_printk(KERN_DEBUG
-				"  netdev_rx() entry %d status was %#08x.\n",
-				entry, desc_status);
+				    "  netdev_rx() entry %d status was %#08x.\n",
+				    entry, desc_status);
 		if (--boguscnt < 0)
 			break;
-		if ((desc_status&(DescMore|DescPktOK|DescRxLong)) != DescPktOK){
+		if ((desc_status & (DescMore | DescPktOK | DescRxLong)) !=
+		    DescPktOK) {
 			if (desc_status & DescMore) {
 				if (netif_msg_rx_err(np))
 					rtdm_printk(KERN_WARNING
-						"%s: Oversized(?) Ethernet "
-						"frame spanned multiple "
-						"buffers, entry %#08x "
-						"status %#08x.\n", dev->name,
-						np->cur_rx, desc_status);
+						    "%s: Oversized(?) Ethernet "
+						    "frame spanned multiple "
+						    "buffers, entry %#08x "
+						    "status %#08x.\n",
+						    dev->name, np->cur_rx,
+						    desc_status);
 				np->stats.rx_length_errors++;
 			} else {
 				/* There was an error. */
 				np->stats.rx_errors++;
-				if (desc_status & (DescRxAbort|DescRxOver))
+				if (desc_status & (DescRxAbort | DescRxOver))
 					np->stats.rx_over_errors++;
-				if (desc_status & (DescRxLong|DescRxRunt))
+				if (desc_status & (DescRxLong | DescRxRunt))
 					np->stats.rx_length_errors++;
-				if (desc_status & (DescRxInvalid|DescRxAlign))
+				if (desc_status & (DescRxInvalid | DescRxAlign))
 					np->stats.rx_frame_errors++;
 				if (desc_status & DescRxCRC)
 					np->stats.rx_crc_errors++;
@@ -1751,8 +1779,8 @@ static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp)
 			{
 				skb = np->rx_skbuff[entry];
 				pci_unmap_single(np->pci_dev, np->rx_dma[entry],
-					np->rx_skbuff[entry]->len,
-					PCI_DMA_FROMDEVICE);
+						 np->rx_skbuff[entry]->len,
+						 PCI_DMA_FROMDEVICE);
 				rtskb_put(skb, pkt_len);
 				np->rx_skbuff[entry] = NULL;
 			}
@@ -1760,7 +1788,7 @@ static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp)
 			skb->protocol = rt_eth_type_trans(skb, dev);
 			skb->time_stamp = *time_stamp;
 			rtnetif_rx(skb);
-			/*dev->last_rx = jiffies;*/
+			/*dev->last_rx = jiffies; */
 /*** RTnet ***/
 			np->stats.rx_packets++;
 			np->stats.rx_bytes += pkt_len;
@@ -1772,8 +1800,7 @@ static void netdev_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp)
 	refill_rx(dev);
 
 	/* Restart Rx engine if stopped. */
-	if (np->oom)
-		;
+	if (np->oom) ;
 /*		mod_timer(&np->timer, jiffies + 1);*/
 	else
 		writel(RxOn, (void *)(dev->base_addr + ChipCmd));
@@ -1789,11 +1816,11 @@ static void netdev_error(struct rtnet_device *dev, int intr_status)
 		u16 adv = mdio_read(dev, 1, MII_ADVERTISE);
 		u16 lpa = mdio_read(dev, 1, MII_LPA);
 		if (mdio_read(dev, 1, MII_BMCR) & BMCR_ANENABLE
-		 && netif_msg_link(np)) {
+		    && netif_msg_link(np)) {
 			rtdm_printk(KERN_INFO
-				"%s: Autonegotiation advertising"
-				" %#04x  partner %#04x.\n", dev->name,
-				adv, lpa);
+				    "%s: Autonegotiation advertising"
+				    " %#04x  partner %#04x.\n", dev->name,
+				    adv, lpa);
 		}
 
 		/* read MII int status to clear the flag */
@@ -1808,26 +1835,26 @@ static void netdev_error(struct rtnet_device *dev, int intr_status)
 			np->tx_config += 2;
 		if (netif_msg_tx_err(np))
 			rtdm_printk(KERN_NOTICE
-				"%s: increased Tx threshold, txcfg %#08x.\n",
-				dev->name, np->tx_config);
+				    "%s: increased Tx threshold, txcfg %#08x.\n",
+				    dev->name, np->tx_config);
 		writel(np->tx_config, (void *)(ioaddr + TxConfig));
 	}
 	if (intr_status & WOLPkt && netif_msg_wol(np)) {
 		int wol_status = readl((void *)(ioaddr + WOLCmd));
 		rtdm_printk(KERN_NOTICE "%s: Link wake-up event %#08x\n",
-			dev->name, wol_status);
+			    dev->name, wol_status);
 	}
 	if (intr_status & RxStatusFIFOOver) {
 		if (netif_msg_rx_err(np) && netif_msg_intr(np)) {
 			rtdm_printk(KERN_NOTICE "%s: Rx status FIFO overrun\n",
-				dev->name);
+				    dev->name);
 		}
 		np->stats.rx_fifo_errors++;
 	}
 	/* Hmmmmm, it's not clear how to recover from PCI faults. */
 	if (intr_status & IntrPCIErr) {
 		rtdm_printk(KERN_NOTICE "%s: PCI error %#08x\n", dev->name,
-			intr_status & IntrPCIErr);
+			    intr_status & IntrPCIErr);
 		np->stats.tx_fifo_errors++;
 		np->stats.rx_fifo_errors++;
 	}
@@ -1840,7 +1867,7 @@ static void __get_stats(struct rtnet_device *dev)
 	struct netdev_private *np = dev->priv;
 
 	/* The chip only need report frame silently dropped. */
-	np->stats.rx_crc_errors	+= readl((void *)(ioaddr + RxCRCErrs));
+	np->stats.rx_crc_errors += readl((void *)(ioaddr + RxCRCErrs));
 	np->stats.rx_missed_errors += readl((void *)(ioaddr + RxMissed));
 }
 
@@ -1863,33 +1890,34 @@ static void __set_rx_mode(struct rtnet_device *dev)
 {
 	long ioaddr = dev->base_addr;
 	struct netdev_private *np = dev->priv;
-	u8 mc_filter[64]; /* Multicast hash filter */
+	u8 mc_filter[64];	/* Multicast hash filter */
 	u32 rx_mode;
 
-	if (dev->flags & IFF_PROMISC) { /* Set promiscuous. */
+	if (dev->flags & IFF_PROMISC) {	/* Set promiscuous. */
 		/* Unconditionally log net taps. */
 		rtdm_printk(KERN_NOTICE "%s: Promiscuous mode enabled.\n",
-			dev->name);
+			    dev->name);
 		rx_mode = RxFilterEnable | AcceptBroadcast
-			| AcceptAllMulticast | AcceptAllPhys | AcceptMyPhys;
+		    | AcceptAllMulticast | AcceptAllPhys | AcceptMyPhys;
 	} else if (dev->flags & IFF_ALLMULTI) {
 		rx_mode = RxFilterEnable | AcceptBroadcast
-			| AcceptAllMulticast | AcceptMyPhys;
+		    | AcceptAllMulticast | AcceptMyPhys;
 	} else {
 		int i;
 
 		memset(mc_filter, 0, sizeof(mc_filter));
 		rx_mode = RxFilterEnable | AcceptBroadcast
-			| AcceptMulticast | AcceptMyPhys;
+		    | AcceptMulticast | AcceptMyPhys;
 		for (i = 0; i < 64; i += 2) {
 			writew(HASH_TABLE + i, (void *)(ioaddr + RxFilterAddr));
-			writew((mc_filter[i+1]<<8) + mc_filter[i],
-				(void *)(ioaddr + RxFilterData));
+			writew((mc_filter[i + 1] << 8) + mc_filter[i],
+			       (void *)(ioaddr + RxFilterData));
 		}
 	}
 	writel(rx_mode, (void *)(ioaddr + RxFilterAddr));
 	np->cur_rx_mode = rx_mode;
 }
+
 /*** RTnet
 static void set_rx_mode(struct rtnet_device *dev)
 {
@@ -1910,7 +1938,7 @@ static void enable_wol_mode(struct rtnet_device *dev, int enable_intr)
 
 	if (netif_msg_wol(np))
 		rtdm_printk(KERN_INFO "%s: remaining active for wake-on-lan\n",
-			dev->name);
+			    dev->name);
 
 	/* For WOL we must restart the rx process in silent mode.
 	 * Write NULL to the RxRingPtr. Only possible if
@@ -1922,7 +1950,8 @@ static void enable_wol_mode(struct rtnet_device *dev, int enable_intr)
 	readl((void *)(ioaddr + WOLCmd));
 
 	/* PME on, clear status */
-	writel(np->SavedClkRun | PMEEnable | PMEStatus, (void *)(ioaddr + ClkRun));
+	writel(np->SavedClkRun | PMEEnable | PMEStatus,
+	       (void *)(ioaddr + ClkRun));
 
 	/* and restart the rx process */
 	writel(RxOn, (void *)(ioaddr + ChipCmd));
@@ -1944,13 +1973,13 @@ static int netdev_close(struct rtnet_device *dev)
 
 	if (netif_msg_ifdown(np))
 		rtdm_printk(KERN_DEBUG
-			"%s: Shutting down ethercard, status was %#04x.\n",
-			dev->name, (int)readl((void *)(ioaddr + ChipCmd)));
+			    "%s: Shutting down ethercard, status was %#04x.\n",
+			    dev->name, (int)readl((void *)(ioaddr + ChipCmd)));
 	if (netif_msg_pktdata(np))
 		rtdm_printk(KERN_DEBUG
-			"%s: Queue pointers were Tx %d / %d,  Rx %d / %d.\n",
-			dev->name, np->cur_tx, np->dirty_tx,
-			np->cur_rx, np->dirty_rx);
+			    "%s: Queue pointers were Tx %d / %d,  Rx %d / %d.\n",
+			    dev->name, np->cur_tx, np->dirty_tx,
+			    np->cur_rx, np->dirty_rx);
 
 	/*
 	 * FIXME: what if someone tries to close a device
@@ -1971,7 +2000,7 @@ static int netdev_close(struct rtnet_device *dev)
 	rtdm_lock_put(&np->lock);
 
 /*** RTnet ***/
-	if ( (i=rtdm_irq_free(&np->irq_handle))<0 )
+	if ((i = rtdm_irq_free(&np->irq_handle)) < 0)
 		return i;
 
 	rt_stack_disconnect(dev);
@@ -2023,8 +2052,7 @@ static int netdev_close(struct rtnet_device *dev)
 	return 0;
 }
 
-
-static void natsemi_remove1 (struct pci_dev *pdev)
+static void natsemi_remove1(struct pci_dev *pdev)
 {
 
  /*** RTnet ***/
@@ -2034,8 +2062,8 @@ static void natsemi_remove1 (struct pci_dev *pdev)
 	rt_rtdev_disconnect(dev);
 /*** RTnet ***/
 
-	pci_release_regions (pdev);
-	iounmap ((char *) dev->base_addr);
+	pci_release_regions(pdev);
+	iounmap((char *)dev->base_addr);
 	rtdev_free(dev); /*** RTnet ***/
 	pci_set_drvdata(pdev, NULL);
 }
@@ -2068,26 +2096,26 @@ static void natsemi_remove1 (struct pci_dev *pdev)
 #endif /* CONFIG_PM */
 
 static struct pci_driver natsemi_driver = {
-	.name		= DRV_NAME,
-	.id_table	= natsemi_pci_tbl,
-	.probe		= natsemi_probe1,
-	.remove		= natsemi_remove1,
+	.name = DRV_NAME,
+	.id_table = natsemi_pci_tbl,
+	.probe = natsemi_probe1,
+	.remove = natsemi_remove1,
 /*#ifdef CONFIG_PM*/
 };
 
-static int __init natsemi_init_mod (void)
+static int __init natsemi_init_mod(void)
 {
 /* when a module, this is printed whether or not devices are found in probe */
 #ifdef MODULE
 	rtdm_printk(version);
 #endif
 
-	return pci_register_driver (&natsemi_driver);
+	return pci_register_driver(&natsemi_driver);
 }
 
-static void __exit natsemi_exit_mod (void)
+static void __exit natsemi_exit_mod(void)
 {
-	pci_unregister_driver (&natsemi_driver);
+	pci_unregister_driver(&natsemi_driver);
 }
 
 module_init(natsemi_init_mod);

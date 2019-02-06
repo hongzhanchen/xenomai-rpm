@@ -1,6 +1,5 @@
 /*******************************************************************************
 
-
   Copyright(c) 1999 - 2006 Intel Corporation. All rights reserved.
 
   This program is free software; you can redistribute it and/or modify it
@@ -26,7 +25,6 @@
   Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
 
 *******************************************************************************/
-
 
 /* Linux PRO/1000 Ethernet Driver main header file */
 
@@ -89,7 +87,6 @@
 // RTNET
 #include <rtnet_port.h>
 
-
 #define BAR_0		0
 #define BAR_1		1
 #define BAR_5		5
@@ -130,8 +127,8 @@ struct e1000_adapter;
 #define E1000_MAX_82544_RXD               4096
 
 /* Supported Rx Buffer Sizes */
-#define E1000_RXBUFFER_128   128    /* Used for packet split */
-#define E1000_RXBUFFER_256   256    /* Used for packet split */
+#define E1000_RXBUFFER_128   128	/* Used for packet split */
+#define E1000_RXBUFFER_256   256	/* Used for packet split */
 #define E1000_RXBUFFER_512   512
 #define E1000_RXBUFFER_1024  1024
 #define E1000_RXBUFFER_2048  2048
@@ -149,10 +146,10 @@ struct e1000_adapter;
 #define E1000_PBA_TX_MASK 0xFFFF0000
 
 /* Flow Control Watermarks */
-#define E1000_FC_HIGH_DIFF 0x1638  /* High: 5688 bytes below Rx FIFO size */
-#define E1000_FC_LOW_DIFF 0x1640   /* Low:  5696 bytes below Rx FIFO size */
+#define E1000_FC_HIGH_DIFF 0x1638	/* High: 5688 bytes below Rx FIFO size */
+#define E1000_FC_LOW_DIFF 0x1640	/* Low:  5696 bytes below Rx FIFO size */
 
-#define E1000_FC_PAUSE_TIME 0x0680 /* 858 usec */
+#define E1000_FC_PAUSE_TIME 0x0680	/* 858 usec */
 
 /* How many Tx Descriptors do we need to call netif_wake_queue ? */
 #define E1000_TX_QUEUE_WAKE	16
@@ -188,9 +185,12 @@ struct e1000_buffer {
 	uint16_t next_to_watch;
 };
 
-
-struct e1000_ps_page { struct page *ps_page[PS_PAGE_BUFFERS]; };
-struct e1000_ps_page_dma { uint64_t ps_page_dma[PS_PAGE_BUFFERS]; };
+struct e1000_ps_page {
+	struct page *ps_page[PS_PAGE_BUFFERS];
+};
+struct e1000_ps_page_dma {
+	uint64_t ps_page_dma[PS_PAGE_BUFFERS];
+};
 
 struct e1000_tx_ring {
 	/* pointer to the descriptor ring memory */
@@ -285,7 +285,7 @@ struct e1000_adapter {
 #endif
 
 	/* TX */
-	struct e1000_tx_ring *tx_ring;      /* One per active queue */
+	struct e1000_tx_ring *tx_ring;	/* One per active queue */
 	unsigned long tx_queue_len;
 	uint32_t txd_cmd;
 	uint32_t tx_int_delay;
@@ -298,26 +298,26 @@ struct e1000_adapter {
 	uint32_t tx_fifo_head;
 	uint32_t tx_head_addr;
 	uint32_t tx_fifo_size;
-	uint8_t  tx_timeout_factor;
+	uint8_t tx_timeout_factor;
 	atomic_t tx_fifo_stall;
 	boolean_t pcix_82544;
 	boolean_t detect_tx_hung;
 
 	/* RX */
 #ifdef CONFIG_E1000_NAPI
-	boolean_t (*clean_rx) (struct e1000_adapter *adapter,
-			       struct e1000_rx_ring *rx_ring,
+	 boolean_t(*clean_rx) (struct e1000_adapter * adapter,
+			       struct e1000_rx_ring * rx_ring,
 			       int *work_done, int work_to_do);
 #else
-	boolean_t (*clean_rx) (struct e1000_adapter *adapter,
-			       struct e1000_rx_ring *rx_ring);
+	 boolean_t(*clean_rx) (struct e1000_adapter * adapter,
+			       struct e1000_rx_ring * rx_ring);
 #endif
-	void (*alloc_rx_buf) (struct e1000_adapter *adapter,
-			      struct e1000_rx_ring *rx_ring,
-				int cleaned_count);
-	struct e1000_rx_ring *rx_ring;      /* One per active queue */
+	void (*alloc_rx_buf) (struct e1000_adapter * adapter,
+			      struct e1000_rx_ring * rx_ring,
+			      int cleaned_count);
+	struct e1000_rx_ring *rx_ring;	/* One per active queue */
 #ifdef CONFIG_E1000_NAPI
-	struct net_device *polling_netdev;  /* One per active queue */
+	struct net_device *polling_netdev;	/* One per active queue */
 #endif
 	int num_tx_queues;
 	int num_rx_queues;

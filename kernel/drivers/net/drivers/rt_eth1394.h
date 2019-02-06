@@ -29,7 +29,6 @@
 #include <linux/netdevice.h>
 #include <rtnet_port.h>
 
-
 /* Register for incoming packets. This is 4096 bytes, which supports up to
  * S3200 (per Table 16-3 of IEEE 1394b-2002). */
 #define ETHER1394_REGION_ADDR_LEN	4096
@@ -42,28 +41,29 @@
 #define ETHER1394_GASP_SPECIFIER_ID_LO	(ETHER1394_GASP_SPECIFIER_ID & 0xff)
 #define ETHER1394_GASP_VERSION		1
 
-#define ETHER1394_GASP_OVERHEAD (2 * sizeof(quadlet_t))  /* GASP header overhead */
+#define ETHER1394_GASP_OVERHEAD (2 * sizeof(quadlet_t))	/* GASP header overhead */
 
 #define ETHER1394_GASP_BUFFERS 16
 
 #define ETH1394_BC_CHANNEL 31
 
-#define ALL_NODES	0x003f //stolen from ieee1394_types.h
+#define ALL_NODES	0x003f	//stolen from ieee1394_types.h
 /* Node set == 64 */
 #define NODE_SET			(ALL_NODES + 1)
 
 enum eth1394_bc_states { ETHER1394_BC_CLOSED, ETHER1394_BC_OPENED,
-			 ETHER1394_BC_CHECK, ETHER1394_BC_ERROR,
-			 ETHER1394_BC_RUNNING,
-			 ETHER1394_BC_STOPPED  };
+	ETHER1394_BC_CHECK, ETHER1394_BC_ERROR,
+	ETHER1394_BC_RUNNING,
+	ETHER1394_BC_STOPPED
+};
 
 #define TX_RING_SIZE	32
-#define RX_RING_SIZE	8 /* RX_RING_SIZE*2 rtskbs will be preallocated */
+#define RX_RING_SIZE	8	/* RX_RING_SIZE*2 rtskbs will be preallocated */
 
 struct pdg_list {
-	struct list_head list;		/* partial datagram list per node */
-	unsigned int sz;		/* partial datagram list size per node	*/
-	rtdm_lock_t lock;		/* partial datagram lock		*/
+	struct list_head list;	/* partial datagram list per node */
+	unsigned int sz;	/* partial datagram list size per node  */
+	rtdm_lock_t lock;	/* partial datagram lock                */
 };
 
 /* IP1394 headers */
@@ -75,13 +75,13 @@ struct eth1394_uf_hdr {
 	u16 lf:2;
 	u16 res:14;
 	u16 ether_type;		/* Ethernet packet type */
-} __attribute__((packed));
+} __attribute__ ((packed));
 #elif defined __LITTLE_ENDIAN_BITFIELD
 struct eth1394_uf_hdr {
 	u16 res:14;
 	u16 lf:2;
 	u16 ether_type;
-} __attribute__((packed));
+} __attribute__ ((packed));
 #else
 #error Unknown bit field type
 #endif
@@ -89,29 +89,28 @@ struct eth1394_uf_hdr {
 /* End of IP1394 headers */
 
 /* Fragment types */
-#define ETH1394_HDR_LF_UF	0	/* unfragmented		*/
-#define ETH1394_HDR_LF_FF	1	/* first fragment	*/
-#define ETH1394_HDR_LF_LF	2	/* last fragment	*/
-#define ETH1394_HDR_LF_IF	3	/* interior fragment	*/
+#define ETH1394_HDR_LF_UF	0	/* unfragmented         */
+#define ETH1394_HDR_LF_FF	1	/* first fragment       */
+#define ETH1394_HDR_LF_LF	2	/* last fragment        */
+#define ETH1394_HDR_LF_IF	3	/* interior fragment    */
 
-#define IP1394_HW_ADDR_LEN	2	/* In RFC, the value is 16; here use the value for modified spec		*/
+#define IP1394_HW_ADDR_LEN	2	/* In RFC, the value is 16; here use the value for modified spec                */
 
 /* Our arp packet (ARPHRD_IEEE1394) */
 struct eth1394_arp {
-	u16 hw_type;		/* 0x0018	*/
-	u16 proto_type;		/* 0x0080	*/
-	u8 hw_addr_len;		/* 2		*/
-	u8 ip_addr_len;		/* 4		*/
-	u16 opcode;		/* ARP Opcode: 1 for req, 2 for resp	*/
+	u16 hw_type;		/* 0x0018       */
+	u16 proto_type;		/* 0x0080       */
+	u8 hw_addr_len;		/* 2            */
+	u8 ip_addr_len;		/* 4            */
+	u16 opcode;		/* ARP Opcode: 1 for req, 2 for resp    */
 	/* Above is exactly the same format as struct arphdr */
 
-	unsigned char s_uniq_id[ETH_ALEN];	/* Sender's node id padded with zeros	*/
-	u8 max_rec;		/* Sender's max packet size		*/
-	u8 sspd;		/* Sender's max speed			*/
-	u32 sip;		/* Sender's IP Address			*/
-	u32 tip;		/* IP Address of requested hw addr	*/
+	unsigned char s_uniq_id[ETH_ALEN];	/* Sender's node id padded with zeros   */
+	u8 max_rec;		/* Sender's max packet size             */
+	u8 sspd;		/* Sender's max speed                   */
+	u32 sip;		/* Sender's IP Address                  */
+	u32 tip;		/* IP Address of requested hw addr      */
 };
-
 
 /* Network timeout */
 #define ETHER1394_TIMEOUT	100000
@@ -125,7 +124,7 @@ struct eth1394_ff_hdr {
 	u16 ether_type;		/* Ethernet packet type */
 	u16 dgl;		/* Datagram label */
 	u16 res2;
-} __attribute__((packed));
+} __attribute__ ((packed));
 #elif defined __LITTLE_ENDIAN_BITFIELD
 struct eth1394_ff_hdr {
 	u16 dg_size:12;
@@ -134,7 +133,7 @@ struct eth1394_ff_hdr {
 	u16 ether_type;
 	u16 dgl;
 	u16 res2;
-} __attribute__((packed));
+} __attribute__ ((packed));
 #else
 #error Unknown bit field type
 #endif
@@ -149,7 +148,7 @@ struct eth1394_sf_hdr {
 	u16 fg_off:12;		/* Fragment offset */
 	u16 dgl;		/* Datagram label */
 	u16 res3;
-} __attribute__((packed));
+} __attribute__ ((packed));
 #elif defined __LITTLE_ENDIAN_BITFIELD
 struct eth1394_sf_hdr {
 	u16 dg_size:12;
@@ -159,7 +158,7 @@ struct eth1394_sf_hdr {
 	u16 res2:4;
 	u16 dgl;
 	u16 res3;
-} __attribute__((packed));
+} __attribute__ ((packed));
 #else
 #error Unknown bit field type
 #endif
@@ -168,12 +167,12 @@ struct eth1394_sf_hdr {
 struct eth1394_common_hdr {
 	u16 lf:2;
 	u16 pad1:14;
-} __attribute__((packed));
+} __attribute__ ((packed));
 #elif defined __LITTLE_ENDIAN_BITFIELD
 struct eth1394_common_hdr {
 	u16 pad1:14;
 	u16 lf:2;
-} __attribute__((packed));
+} __attribute__ ((packed));
 #else
 #error Unknown bit field type
 #endif
@@ -193,7 +192,7 @@ union eth1394_hdr {
 	struct eth1394_hdr_words words;
 };
 
-typedef enum {ETH1394_GASP, ETH1394_WRREQ} eth1394_tx_type;
+typedef enum { ETH1394_GASP, ETH1394_WRREQ } eth1394_tx_type;
 
 /* This is our task struct. It's used for the packet complete callback.  */
 struct packet_task {
@@ -207,34 +206,31 @@ struct packet_task {
 	union eth1394_hdr hdr;
 	u64 addr;
 	u16 dest_node;
-	unsigned int priority; //the priority mapped to priority on 1394 transaction
+	unsigned int priority;	//the priority mapped to priority on 1394 transaction
 };
 
 /* Private structure for our ethernet driver */
 struct eth1394_priv {
-	struct net_device_stats stats;	/* Device stats			 */
-	struct hpsb_host *host;		/* The card for this dev	 */
-	u16 maxpayload[NODE_SET];	/* Max payload per node		 */
-	unsigned char sspd[NODE_SET];	/* Max speed per node		 */
-	rtdm_lock_t lock;		/* Private lock			 */
-	int broadcast_channel;		/* Async stream Broadcast Channel */
-	enum eth1394_bc_states bc_state; /* broadcast channel state	 */
-	struct hpsb_iso	*iso;
-	struct pdg_list pdg[ALL_NODES]; /* partial RX datagram lists     */
-	int dgl[NODE_SET];              /* Outgoing datagram label per node */
+	struct net_device_stats stats;	/* Device stats                  */
+	struct hpsb_host *host;	/* The card for this dev         */
+	u16 maxpayload[NODE_SET];	/* Max payload per node          */
+	unsigned char sspd[NODE_SET];	/* Max speed per node            */
+	rtdm_lock_t lock;	/* Private lock                  */
+	int broadcast_channel;	/* Async stream Broadcast Channel */
+	enum eth1394_bc_states bc_state;	/* broadcast channel state      */
+	struct hpsb_iso *iso;
+	struct pdg_list pdg[ALL_NODES];	/* partial RX datagram lists     */
+	int dgl[NODE_SET];	/* Outgoing datagram label per node */
 
 	/* The addresses of a Tx/Rx-in-place packets/buffers. */
 	struct rtskb *tx_skbuff[TX_RING_SIZE];
 	struct rtskb *rx_skbuff[RX_RING_SIZE];
-	struct packet_task ptask_list[20]; //the list of pre-allocated ptask structure
+	struct packet_task ptask_list[20];	//the list of pre-allocated ptask structure
 };
-
-
 
 struct host_info {
 	struct hpsb_host *host;
 	struct rtnet_device *dev;
 };
-
 
 #endif /* __ETH1394_H */

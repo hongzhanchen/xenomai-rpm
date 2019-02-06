@@ -21,31 +21,29 @@
 
 u16 t21142_csr14[] = { 0xFFFF, 0x0705, 0x0705, 0x0000, 0x7F3D, };
 
-
-void t21142_start_nway(/*RTnet*/struct rtnet_device *rtdev)
+void t21142_start_nway( /*RTnet */ struct rtnet_device *rtdev)
 {
 	struct tulip_private *tp = (struct tulip_private *)rtdev->priv;
 	long ioaddr = rtdev->base_addr;
-	int csr14 = ((tp->sym_advertise & 0x0780) << 9)  |
-		((tp->sym_advertise & 0x0020) << 1) | 0xffbf;
+	int csr14 = ((tp->sym_advertise & 0x0780) << 9) |
+	    ((tp->sym_advertise & 0x0020) << 1) | 0xffbf;
 
 	rtdev->if_port = 0;
 	tp->nway = tp->mediasense = 1;
 	tp->nwayset = tp->lpar = 0;
 	if (tulip_debug > 1)
-		printk(KERN_DEBUG "%s: Restarting 21143 autonegotiation, csr14=%8.8x.\n",
-			   rtdev->name, csr14);
+		printk(KERN_DEBUG
+		       "%s: Restarting 21143 autonegotiation, csr14=%8.8x.\n",
+		       rtdev->name, csr14);
 	outl(0x0001, ioaddr + CSR13);
 	udelay(100);
 	outl(csr14, ioaddr + CSR14);
 	tp->csr6 = 0x82420000 | (tp->sym_advertise & 0x0040 ? FullDuplex : 0);
 	outl(tp->csr6, ioaddr + CSR6);
-	if (tp->mtable  &&  tp->mtable->csr15dir) {
+	if (tp->mtable && tp->mtable->csr15dir) {
 		outl(tp->mtable->csr15dir, ioaddr + CSR15);
 		outl(tp->mtable->csr15val, ioaddr + CSR15);
 	} else
 		outw(0x0008, ioaddr + CSR15);
-	outl(0x1301, ioaddr + CSR12); 		/* Trigger NWAY. */
+	outl(0x1301, ioaddr + CSR12);	/* Trigger NWAY. */
 }
-
-

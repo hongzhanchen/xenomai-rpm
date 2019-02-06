@@ -27,11 +27,9 @@
 
 #include <rtnet_chrdev.h>
 
-
 struct nomac_config {
-    struct rtnet_ioctl_head head;
+	struct rtnet_ioctl_head head;
 };
-
 
 #define NOMAC_IOC_ATTACH                _IOW(RTNET_IOC_TYPE_RTMAC_NOMAC, 0, \
                                              struct nomac_config)

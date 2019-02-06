@@ -18,7 +18,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
- 
+
 #ifndef __RTNET_TCP_H_
 #define __RTNET_TCP_H_
 
@@ -47,4 +47,4 @@
 /* rtskb pool for sending socket-less RST|ACK */
 #define RT_TCP_RST_POOL_SIZE 8
 
-#endif  /* __RTNET_TCP_H_ */
+#endif /* __RTNET_TCP_H_ */

@@ -113,13 +113,11 @@ static int at91ether_open(struct rtnet_device *dev)
 		return ret;
 
 	/* Enable MAC interrupts */
-	macb_writel(lp, IER, MACB_BIT(RCOMP)	|
-			     MACB_BIT(RXUBR)	|
-			     MACB_BIT(ISR_TUND)	|
-			     MACB_BIT(ISR_RLE)	|
-			     MACB_BIT(TCOMP)	|
-			     MACB_BIT(ISR_ROVR)	|
-			     MACB_BIT(HRESP));
+	macb_writel(lp, IER, MACB_BIT(RCOMP) |
+		    MACB_BIT(RXUBR) |
+		    MACB_BIT(ISR_TUND) |
+		    MACB_BIT(ISR_RLE) |
+		    MACB_BIT(TCOMP) | MACB_BIT(ISR_ROVR) | MACB_BIT(HRESP));
 
 	/* schedule a link state check */
 	phy_start(lp->phy_dev);
@@ -140,24 +138,22 @@ static int at91ether_close(struct rtnet_device *dev)
 	macb_writel(lp, NCR, ctl & ~(MACB_BIT(TE) | MACB_BIT(RE)));
 
 	/* Disable MAC interrupts */
-	macb_writel(lp, IDR, MACB_BIT(RCOMP)	|
-			     MACB_BIT(RXUBR)	|
-			     MACB_BIT(ISR_TUND)	|
-			     MACB_BIT(ISR_RLE)	|
-			     MACB_BIT(TCOMP)	|
-			     MACB_BIT(ISR_ROVR) |
-			     MACB_BIT(HRESP));
+	macb_writel(lp, IDR, MACB_BIT(RCOMP) |
+		    MACB_BIT(RXUBR) |
+		    MACB_BIT(ISR_TUND) |
+		    MACB_BIT(ISR_RLE) |
+		    MACB_BIT(TCOMP) | MACB_BIT(ISR_ROVR) | MACB_BIT(HRESP));
 
 	rtnetif_stop_queue(dev);
 
 	dma_free_coherent(&lp->pdev->dev,
-				MAX_RX_DESCR * sizeof(struct macb_dma_desc),
-				lp->rx_ring, lp->rx_ring_dma);
+			  MAX_RX_DESCR * sizeof(struct macb_dma_desc),
+			  lp->rx_ring, lp->rx_ring_dma);
 	lp->rx_ring = NULL;
 
 	dma_free_coherent(&lp->pdev->dev,
-				MAX_RX_DESCR * MAX_RBUFF_SZ,
-				lp->rx_buffers, lp->rx_buffers_dma);
+			  MAX_RX_DESCR * MAX_RBUFF_SZ,
+			  lp->rx_buffers, lp->rx_buffers_dma);
 	lp->rx_buffers = NULL;
 
 	rt_stack_disconnect(dev);
@@ -177,7 +173,7 @@ static int at91ether_start_xmit(struct rtskb *skb, struct rtnet_device *dev)
 		lp->skb = skb;
 		lp->skb_length = skb->len;
 		lp->skb_physaddr = dma_map_single(NULL, skb->data, skb->len,
-							DMA_TO_DEVICE);
+						  DMA_TO_DEVICE);
 
 		/* Set address of the data in the Transmit Address register */
 		macb_writel(lp, TAR, lp->skb_physaddr);
@@ -195,7 +191,7 @@ static int at91ether_start_xmit(struct rtskb *skb, struct rtnet_device *dev)
 /* Extract received frame from buffer descriptors and sent to upper layers.
  * (Called from interrupt context)
  */
-static bool at91ether_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp)
+static bool at91ether_rx(struct rtnet_device *dev, nanosecs_abs_t * time_stamp)
 {
 	struct macb *lp = rtnetdev_priv(dev);
 	unsigned char *p_recv;
@@ -238,7 +234,7 @@ static bool at91ether_rx(struct rtnet_device *dev, nanosecs_abs_t *time_stamp)
 }
 
 /* MAC interrupt handler */
-static int at91ether_interrupt(rtdm_irq_t *irq_handle)
+static int at91ether_interrupt(rtdm_irq_t * irq_handle)
 {
 	void *dev_id = rtdm_irq_get_arg(irq_handle, void);
 	nanosecs_abs_t time_stamp = rtdm_clock_read();
@@ -264,7 +260,8 @@ static int at91ether_interrupt(rtdm_irq_t *irq_handle)
 		if (lp->skb) {
 			dev_kfree_rtskb(lp->skb);
 			lp->skb = NULL;
-			dma_unmap_single(NULL, lp->skb_physaddr, lp->skb_length, DMA_TO_DEVICE);
+			dma_unmap_single(NULL, lp->skb_physaddr, lp->skb_length,
+					 DMA_TO_DEVICE);
 			lp->stats.tx_packets++;
 			lp->stats.tx_bytes += lp->skb_length;
 		}
@@ -286,10 +283,11 @@ static int at91ether_interrupt(rtdm_irq_t *irq_handle)
 
 #if defined(CONFIG_OF)
 static const struct of_device_id at91ether_dt_ids[] = {
-	{ .compatible = "cdns,at91rm9200-emac" },
-	{ .compatible = "cdns,emac" },
+	{.compatible = "cdns,at91rm9200-emac"},
+	{.compatible = "cdns,emac"},
 	{ /* sentinel */ }
 };
+
 MODULE_DEVICE_TABLE(of, at91ether_dt_ids);
 #endif
 
@@ -344,7 +342,9 @@ static int __init at91ether_probe(struct platform_device *pdev)
 
 	/* Install the interrupt handler */
 	dev->irq = platform_get_irq(pdev, 0);
-	res = rtdm_irq_request(&lp->irq_handle, dev->irq, at91ether_interrupt, 0, dev->name, dev);
+	res =
+	    rtdm_irq_request(&lp->irq_handle, dev->irq, at91ether_interrupt, 0,
+			     dev->name, dev);
 	if (res)
 		goto err_disable_clock;
 
@@ -393,13 +393,13 @@ static int __init at91ether_probe(struct platform_device *pdev)
 	rtnetif_carrier_off(dev);
 
 	phydev = lp->phy_dev;
-	rtdev_info(dev, "attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)\n",
-				phydev->drv->name, dev_name(&phydev->dev),
-				phydev->irq);
+	rtdev_info(dev,
+		   "attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)\n",
+		   phydev->drv->name, dev_name(&phydev->dev), phydev->irq);
 
 	/* Display ethernet banner */
 	rtdev_info(dev, "AT91 ethernet at 0x%08lx int=%d (%pM)\n",
-				dev->base_addr, dev->irq, dev->dev_addr);
+		   dev->base_addr, dev->irq, dev->dev_addr);
 
 	return 0;
 
@@ -437,12 +437,12 @@ static int at91ether_remove(struct platform_device *pdev)
 }
 
 static struct platform_driver at91ether_driver = {
-	.remove		= at91ether_remove,
-	.driver		= {
-		.name	= "at91_ether",
-		.owner	= THIS_MODULE,
-		.of_match_table	= of_match_ptr(at91ether_dt_ids),
-	},
+	.remove = at91ether_remove,
+	.driver = {
+		   .name = "at91_ether",
+		   .owner = THIS_MODULE,
+		   .of_match_table = of_match_ptr(at91ether_dt_ids),
+		   },
 };
 
 module_platform_driver_probe(at91ether_driver, at91ether_probe);

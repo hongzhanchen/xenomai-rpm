@@ -31,15 +31,15 @@
 
 #include "e1000_api.h"
 
-static s32  e1000_init_phy_params_82542(struct e1000_hw *hw);
-static s32  e1000_init_nvm_params_82542(struct e1000_hw *hw);
-static s32  e1000_init_mac_params_82542(struct e1000_hw *hw);
-static s32  e1000_get_bus_info_82542(struct e1000_hw *hw);
-static s32  e1000_reset_hw_82542(struct e1000_hw *hw);
-static s32  e1000_init_hw_82542(struct e1000_hw *hw);
-static s32  e1000_setup_link_82542(struct e1000_hw *hw);
-static s32  e1000_led_on_82542(struct e1000_hw *hw);
-static s32  e1000_led_off_82542(struct e1000_hw *hw);
+static s32 e1000_init_phy_params_82542(struct e1000_hw *hw);
+static s32 e1000_init_nvm_params_82542(struct e1000_hw *hw);
+static s32 e1000_init_mac_params_82542(struct e1000_hw *hw);
+static s32 e1000_get_bus_info_82542(struct e1000_hw *hw);
+static s32 e1000_reset_hw_82542(struct e1000_hw *hw);
+static s32 e1000_init_hw_82542(struct e1000_hw *hw);
+static s32 e1000_setup_link_82542(struct e1000_hw *hw);
+static s32 e1000_led_on_82542(struct e1000_hw *hw);
+static s32 e1000_led_off_82542(struct e1000_hw *hw);
 static void e1000_clear_hw_cntrs_82542(struct e1000_hw *hw);
 
 struct e1000_dev_spec_82542 {
@@ -59,7 +59,7 @@ static s32 e1000_init_phy_params_82542(struct e1000_hw *hw)
 
 	DEBUGFUNC("e1000_init_phy_params_82542");
 
-	phy->type               = e1000_phy_none;
+	phy->type = e1000_phy_none;
 
 	return ret_val;
 }
@@ -77,18 +77,18 @@ static s32 e1000_init_nvm_params_82542(struct e1000_hw *hw)
 
 	DEBUGFUNC("e1000_init_nvm_params_82542");
 
-	nvm->address_bits       =  6;
-	nvm->delay_usec         = 50;
-	nvm->opcode_bits        =  3;
-	nvm->type               = e1000_nvm_eeprom_microwire;
-	nvm->word_size          = 64;
+	nvm->address_bits = 6;
+	nvm->delay_usec = 50;
+	nvm->opcode_bits = 3;
+	nvm->type = e1000_nvm_eeprom_microwire;
+	nvm->word_size = 64;
 
 	/* Function Pointers */
-	func->read_nvm          = e1000_read_nvm_microwire;
-	func->release_nvm       = e1000_stop_nvm;
-	func->write_nvm         = e1000_write_nvm_microwire;
-	func->update_nvm        = e1000_update_nvm_checksum_generic;
-	func->validate_nvm      = e1000_validate_nvm_checksum_generic;
+	func->read_nvm = e1000_read_nvm_microwire;
+	func->release_nvm = e1000_stop_nvm;
+	func->write_nvm = e1000_write_nvm_microwire;
+	func->update_nvm = e1000_update_nvm_checksum_generic;
+	func->validate_nvm = e1000_validate_nvm_checksum_generic;
 
 	return E1000_SUCCESS;
 }
@@ -145,7 +145,8 @@ static s32 e1000_init_mac_params_82542(struct e1000_hw *hw)
 	/* clear hardware counters */
 	func->clear_hw_cntrs = e1000_clear_hw_cntrs_82542;
 	/* link info */
-	func->get_link_up_info = e1000_get_speed_and_duplex_fiber_serdes_generic;
+	func->get_link_up_info =
+	    e1000_get_speed_and_duplex_fiber_serdes_generic;
 
 	hw->dev_spec_size = sizeof(struct e1000_dev_spec_82542);
 

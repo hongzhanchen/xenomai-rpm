@@ -43,11 +43,11 @@
 #include "rt_macb.h"
 
 #define MACB_RX_BUFFER_SIZE	128
-#define RX_BUFFER_MULTIPLE	64  /* bytes */
-#define RX_RING_SIZE		512 /* must be power of 2 */
+#define RX_BUFFER_MULTIPLE	64	/* bytes */
+#define RX_RING_SIZE		512	/* must be power of 2 */
 #define RX_RING_BYTES		(sizeof(struct macb_dma_desc) * RX_RING_SIZE)
 
-#define TX_RING_SIZE		128 /* must be power of 2 */
+#define TX_RING_SIZE		128	/* must be power of 2 */
 #define TX_RING_BYTES		(sizeof(struct macb_dma_desc) * TX_RING_SIZE)
 
 /* level of occupied TX descriptors under which we wake up TX process */
@@ -102,9 +102,9 @@ void rtmacb_set_hwaddr(struct macb *bp)
 	u32 bottom;
 	u16 top;
 
-	bottom = cpu_to_le32(*((u32 *)bp->dev->dev_addr));
+	bottom = cpu_to_le32(*((u32 *) bp->dev->dev_addr));
 	macb_or_gem_writel(bp, SA1B, bottom);
-	top = cpu_to_le16(*((u16 *)(bp->dev->dev_addr + 4)));
+	top = cpu_to_le16(*((u16 *) (bp->dev->dev_addr + 4)));
 	macb_or_gem_writel(bp, SA1T, top);
 
 	/* Clear unused address register sets */
@@ -115,6 +115,7 @@ void rtmacb_set_hwaddr(struct macb *bp)
 	macb_or_gem_writel(bp, SA4B, 0);
 	macb_or_gem_writel(bp, SA4T, 0);
 }
+
 EXPORT_SYMBOL_GPL(rtmacb_set_hwaddr);
 
 void rtmacb_get_hwaddr(struct macb *bp)
@@ -154,6 +155,7 @@ void rtmacb_get_hwaddr(struct macb *bp)
 		}
 	}
 }
+
 EXPORT_SYMBOL_GPL(rtmacb_get_hwaddr);
 
 static int macb_mdio_read(struct mii_bus *bus, int mii_id, int regnum)
@@ -201,7 +203,8 @@ static int macb_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
  * @rate	New frequency in Hz
  * @dev		Pointer to the struct rtnet_device
  */
-static void macb_set_tx_clk(struct clk *clk, int speed, struct rtnet_device *dev)
+static void macb_set_tx_clk(struct clk *clk, int speed,
+			    struct rtnet_device *dev)
 {
 	long ferr, rate, rate_rounded;
 
@@ -230,7 +233,7 @@ static void macb_set_tx_clk(struct clk *clk, int speed, struct rtnet_device *dev
 	ferr = DIV_ROUND_UP(ferr, rate / 100000);
 	if (ferr > 5)
 		rtdev_warn(dev, "unable to generate target frequency: %ld Hz\n",
-				rate);
+			   rate);
 
 	if (clk_set_rate(clk, rate_rounded))
 		rtdev_err(dev, "adjusting tx_clk failed.\n");
@@ -296,9 +299,9 @@ static void macb_handle_link_change(struct net_device *nrt_dev)
 		if (phydev->link) {
 			rtnetif_carrier_on(dev);
 			rtdev_info(dev, "link up (%d/%s)\n",
-				    phydev->speed,
-				    phydev->duplex == DUPLEX_FULL ?
-				    "Full" : "Half");
+				   phydev->speed,
+				   phydev->duplex == DUPLEX_FULL ?
+				   "Full" : "Half");
 		} else {
 			rtnetif_carrier_off(dev);
 			rtdev_info(dev, "link down\n");
@@ -325,7 +328,9 @@ static int macb_mii_probe(struct rtnet_device *dev)
 
 	pdata = dev_get_platdata(&bp->pdev->dev);
 	if (pdata && gpio_is_valid(pdata->phy_irq_pin)) {
-		ret = devm_gpio_request(&bp->pdev->dev, pdata->phy_irq_pin, "phy int");
+		ret =
+		    devm_gpio_request(&bp->pdev->dev, pdata->phy_irq_pin,
+				      "phy int");
 		if (!ret) {
 			phy_irq = gpio_to_irq(pdata->phy_irq_pin);
 			phydev->irq = (phy_irq < 0) ? PHY_POLL : phy_irq;
@@ -380,12 +385,12 @@ int rtmacb_mii_init(struct macb *bp)
 	bp->mii_bus->read = &macb_mdio_read;
 	bp->mii_bus->write = &macb_mdio_write;
 	snprintf(bp->mii_bus->id, MII_BUS_ID_SIZE, "%s-%x",
-		bp->pdev->name, bp->pdev->id);
+		 bp->pdev->name, bp->pdev->id);
 	bp->mii_bus->priv = bp;
 	bp->mii_bus->parent = &bp->pdev->dev;
 	pdata = dev_get_platdata(&bp->pdev->dev);
 
-	bp->mii_bus->irq = kmalloc(sizeof(int)*PHY_MAX_ADDR, GFP_KERNEL);
+	bp->mii_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!bp->mii_bus->irq) {
 		err = -ENOMEM;
 		goto err_out_free_mdiobus;
@@ -440,6 +445,7 @@ err_out_free_mdiobus:
 err_out:
 	return err;
 }
+
 EXPORT_SYMBOL_GPL(rtmacb_mii_init);
 
 static void macb_update_stats(struct macb *bp)
@@ -450,14 +456,14 @@ static void macb_update_stats(struct macb *bp)
 
 	WARN_ON((unsigned long)(end - p - 1) != (MACB_TPF - MACB_PFR) / 4);
 
-	for(; p < end; p++, reg++)
+	for (; p < end; p++, reg++)
 		*p += __raw_readl(reg);
 }
 
 static int macb_halt_tx(struct macb *bp)
 {
-	unsigned long	halt_time, timeout;
-	u32		status;
+	unsigned long halt_time, timeout;
+	u32 status;
 
 	macb_writel(bp, NCR, macb_readl(bp, NCR) | MACB_BIT(THALT));
 
@@ -476,13 +482,13 @@ static int macb_halt_tx(struct macb *bp)
 
 static void macb_tx_error_task(struct work_struct *work)
 {
-	struct macb	*bp = container_of(work, struct macb, tx_error_task);
-	struct macb_tx_skb	*tx_skb;
-	struct rtskb		*skb;
-	unsigned int		tail;
+	struct macb *bp = container_of(work, struct macb, tx_error_task);
+	struct macb_tx_skb *tx_skb;
+	struct rtskb *skb;
+	unsigned int tail;
 
 	rtdev_vdbg(bp->dev, "macb_tx_error_task: t = %u, h = %u\n",
-		    bp->tx_tail, bp->tx_head);
+		   bp->tx_tail, bp->tx_head);
 
 	/* Make sure nobody is trying to queue up new packets */
 	rtnetif_stop_queue(bp->dev);
@@ -502,8 +508,8 @@ static void macb_tx_error_task(struct work_struct *work)
 	 * Free transmit buffers in upper layer.
 	 */
 	for (tail = bp->tx_tail; tail != bp->tx_head; tail++) {
-		struct macb_dma_desc	*desc;
-		u32			ctrl;
+		struct macb_dma_desc *desc;
+		u32 ctrl;
 
 		desc = macb_tx_desc(bp, tail);
 		ctrl = desc->ctrl;
@@ -511,8 +517,9 @@ static void macb_tx_error_task(struct work_struct *work)
 		skb = tx_skb->skb;
 
 		if (ctrl & MACB_BIT(TX_USED)) {
-			rtdev_vdbg(bp->dev, "txerr skb %u (data %p) TX complete\n",
-				    macb_tx_ring_wrap(tail), skb->data);
+			rtdev_vdbg(bp->dev,
+				   "txerr skb %u (data %p) TX complete\n",
+				   macb_tx_ring_wrap(tail), skb->data);
 			bp->stats.tx_packets++;
 			bp->stats.tx_bytes += skb->len;
 		} else {
@@ -523,7 +530,7 @@ static void macb_tx_error_task(struct work_struct *work)
 			 */
 			if (ctrl & MACB_BIT(TX_BUF_EXHAUSTED))
 				rtdev_err(bp->dev,
-					   "BUG: TX buffers exhausted mid-frame\n");
+					  "BUG: TX buffers exhausted mid-frame\n");
 
 			desc->ctrl = ctrl | MACB_BIT(TX_USED);
 		}
@@ -563,14 +570,14 @@ static void macb_tx_interrupt(struct macb *bp)
 		macb_writel(bp, ISR, MACB_BIT(TCOMP));
 
 	rtdev_vdbg(bp->dev, "macb_tx_interrupt status = 0x%03lx\n",
-		(unsigned long)status);
+		   (unsigned long)status);
 
 	head = bp->tx_head;
 	for (tail = bp->tx_tail; tail != head; tail++) {
-		struct macb_tx_skb	*tx_skb;
-		struct rtskb		*skb;
-		struct macb_dma_desc	*desc;
-		u32			ctrl;
+		struct macb_tx_skb *tx_skb;
+		struct rtskb *skb;
+		struct macb_dma_desc *desc;
+		u32 ctrl;
 
 		desc = macb_tx_desc(bp, tail);
 
@@ -586,7 +593,7 @@ static void macb_tx_interrupt(struct macb *bp)
 		skb = tx_skb->skb;
 
 		rtdev_vdbg(bp->dev, "skb %u (data %p) TX complete\n",
-			macb_tx_ring_wrap(tail), skb->data);
+			   macb_tx_ring_wrap(tail), skb->data);
 		dma_unmap_single(&bp->pdev->dev, tx_skb->mapping, skb->len,
 				 DMA_TO_DEVICE);
 		bp->stats.tx_packets++;
@@ -597,16 +604,16 @@ static void macb_tx_interrupt(struct macb *bp)
 
 	bp->tx_tail = tail;
 	if (rtnetif_queue_stopped(bp->dev)
-			&& CIRC_CNT(bp->tx_head, bp->tx_tail,
-				    TX_RING_SIZE) <= MACB_TX_WAKEUP_THRESH)
+	    && CIRC_CNT(bp->tx_head, bp->tx_tail,
+			TX_RING_SIZE) <= MACB_TX_WAKEUP_THRESH)
 		rtnetif_wake_queue(bp->dev);
 }
 
 static void gem_rx_refill(struct macb *bp)
 {
-	unsigned int		entry;
-	struct rtskb		*skb;
-	dma_addr_t		paddr;
+	unsigned int entry;
+	struct rtskb *skb;
+	dma_addr_t paddr;
 
 	while (CIRC_SPACE(bp->rx_prepared_head, bp->rx_tail, RX_RING_SIZE) > 0) {
 		entry = macb_rx_ring_wrap(bp->rx_prepared_head);
@@ -621,13 +628,14 @@ static void gem_rx_refill(struct macb *bp)
 			skb = rtnetdev_alloc_rtskb(bp->dev, bp->rx_buffer_size);
 			if (unlikely(skb == NULL)) {
 				rtdev_err(bp->dev,
-					   "Unable to allocate sk_buff\n");
+					  "Unable to allocate sk_buff\n");
 				break;
 			}
 
 			/* now fill corresponding descriptor entry */
 			paddr = dma_map_single(&bp->pdev->dev, skb->data,
-					       bp->rx_buffer_size, DMA_FROM_DEVICE);
+					       bp->rx_buffer_size,
+					       DMA_FROM_DEVICE);
 			if (dma_mapping_error(&bp->pdev->dev, paddr)) {
 				dev_kfree_rtskb(skb);
 				break;
@@ -673,13 +681,13 @@ static void discard_partial_frame(struct macb *bp, unsigned int begin,
 	 */
 }
 
-static int gem_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
+static int gem_rx(struct macb *bp, int budget, nanosecs_abs_t * time_stamp)
 {
-	unsigned int		len;
-	unsigned int		entry;
-	struct rtskb		*skb;
-	struct macb_dma_desc	*desc;
-	int			count = 0;
+	unsigned int len;
+	unsigned int entry;
+	struct rtskb *skb;
+	struct macb_dma_desc *desc;
+	int count = 0;
 
 	while (count < budget) {
 		u32 addr, ctrl;
@@ -701,14 +709,14 @@ static int gem_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
 
 		if (!(ctrl & MACB_BIT(RX_SOF) && ctrl & MACB_BIT(RX_EOF))) {
 			rtdev_err(bp->dev,
-				   "not whole frame pointed by descriptor\n");
+				  "not whole frame pointed by descriptor\n");
 			bp->stats.rx_dropped++;
 			break;
 		}
 		skb = bp->rx_skbuff[entry];
 		if (unlikely(!skb)) {
 			rtdev_err(bp->dev,
-				   "inconsistent Rx descriptor chain\n");
+				  "inconsistent Rx descriptor chain\n");
 			bp->stats.rx_dropped++;
 			break;
 		}
@@ -731,7 +739,7 @@ static int gem_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
 
 #if defined(DEBUG) && defined(VERBOSE_DEBUG)
 		rtdev_vdbg(bp->dev, "received skb of length %u, csum: %08x\n",
-			    skb->len, skb->csum);
+			   skb->len, skb->csum);
 		print_hex_dump(KERN_DEBUG, " mac: ", DUMP_PREFIX_ADDRESS, 16, 1,
 			       skb->mac_header, 16, true);
 		print_hex_dump(KERN_DEBUG, "data: ", DUMP_PREFIX_ADDRESS, 16, 1,
@@ -747,7 +755,7 @@ static int gem_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
 }
 
 static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
-			unsigned int last_frag, nanosecs_abs_t *time_stamp)
+			 unsigned int last_frag, nanosecs_abs_t * time_stamp)
 {
 	unsigned int len;
 	unsigned int frag;
@@ -759,8 +767,8 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 	len = MACB_BFEXT(RX_FRMLEN, desc->ctrl);
 
 	rtdev_vdbg(bp->dev, "macb_rx_frame frags %u - %u (len %u)\n",
-		macb_rx_ring_wrap(first_frag),
-		macb_rx_ring_wrap(last_frag), len);
+		   macb_rx_ring_wrap(first_frag),
+		   macb_rx_ring_wrap(last_frag), len);
 
 	/*
 	 * The ethernet header starts NET_IP_ALIGN bytes into the
@@ -775,7 +783,7 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 	if (!skb) {
 		rtdev_notice(bp->dev, "Low memory, packet dropped.\n");
 		bp->stats.rx_dropped++;
-		for (frag = first_frag; ; frag++) {
+		for (frag = first_frag;; frag++) {
 			desc = macb_rx_desc(bp, frag);
 			desc->addr &= ~MACB_BIT(RX_USED);
 			if (frag == last_frag)
@@ -793,7 +801,7 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 	skb->time_stamp = *time_stamp;
 	rtskb_put(skb, len);
 
-	for (frag = first_frag; ; frag++) {
+	for (frag = first_frag;; frag++) {
 		unsigned int frag_len = bp->rx_buffer_size;
 
 		if (offset + frag_len > len) {
@@ -824,7 +832,7 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 	return 0;
 }
 
-static int macb_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
+static int macb_rx(struct macb *bp, int budget, nanosecs_abs_t * time_stamp)
 {
 	int received = 0;
 	unsigned int tail;
@@ -853,7 +861,8 @@ static int macb_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
 			int dropped;
 			BUG_ON(first_frag == -1);
 
-			dropped = macb_rx_frame(bp, first_frag, tail, time_stamp);
+			dropped =
+			    macb_rx_frame(bp, first_frag, tail, time_stamp);
 			first_frag = -1;
 			if (!dropped) {
 				received++;
@@ -870,7 +879,7 @@ static int macb_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
 	return received;
 }
 
-static int macb_interrupt(rtdm_irq_t *irq_handle)
+static int macb_interrupt(rtdm_irq_t * irq_handle)
 {
 	void *dev_id = rtdm_irq_get_arg(irq_handle, void);
 	nanosecs_abs_t time_stamp = rtdm_clock_read();
@@ -897,7 +906,7 @@ static int macb_interrupt(rtdm_irq_t *irq_handle)
 
 		if (status & MACB_RX_INT_FLAGS)
 			received += bp->macbgem_ops.mog_rx(bp, 100 - received,
-							&time_stamp);
+							   &time_stamp);
 
 		if (unlikely(status & (MACB_TX_ERR_FLAGS))) {
 			macb_writel(bp, IDR, MACB_TX_INT_FLAGS);
@@ -979,14 +988,13 @@ static int macb_start_xmit(struct rtskb *skb, struct rtnet_device *dev)
 		rtdm_lock_put_irqrestore(&bp->lock, flags);
 		rtdev_err(bp->dev, "BUG! Tx Ring full when queue awake!\n");
 		rtdev_dbg(bp->dev, "tx_head = %u, tx_tail = %u\n",
-			   bp->tx_head, bp->tx_tail);
+			  bp->tx_head, bp->tx_tail);
 		return RTDEV_TX_BUSY;
 	}
 
 	entry = macb_tx_ring_wrap(bp->tx_head);
 	rtdev_vdbg(bp->dev, "Allocated ring entry %u\n", entry);
-	mapping = dma_map_single(&bp->pdev->dev, skb->data,
-				 len, DMA_TO_DEVICE);
+	mapping = dma_map_single(&bp->pdev->dev, skb->data, len, DMA_TO_DEVICE);
 	if (dma_mapping_error(&bp->pdev->dev, mapping)) {
 		dev_kfree_rtskb(skb);
 		goto unlock;
@@ -1033,22 +1041,22 @@ static void macb_init_rx_buffer_size(struct macb *bp, size_t size)
 
 		if (bp->rx_buffer_size % RX_BUFFER_MULTIPLE) {
 			rtdev_dbg(bp->dev,
-				    "RX buffer must be multiple of %d bytes, expanding\n",
-				    RX_BUFFER_MULTIPLE);
+				  "RX buffer must be multiple of %d bytes, expanding\n",
+				  RX_BUFFER_MULTIPLE);
 			bp->rx_buffer_size =
-				roundup(bp->rx_buffer_size, RX_BUFFER_MULTIPLE);
+			    roundup(bp->rx_buffer_size, RX_BUFFER_MULTIPLE);
 		}
 	}
 
 	rtdev_dbg(bp->dev, "mtu [%u] rx_buffer_size [%Zu]\n",
-		   bp->dev->mtu, bp->rx_buffer_size);
+		  bp->dev->mtu, bp->rx_buffer_size);
 }
 
 static void gem_free_rx_buffers(struct macb *bp)
 {
-	struct rtskb		*skb;
-	struct macb_dma_desc	*desc;
-	dma_addr_t		addr;
+	struct rtskb *skb;
+	struct macb_dma_desc *desc;
+	dma_addr_t addr;
 	int i;
 
 	if (!bp->rx_skbuff)
@@ -1111,8 +1119,8 @@ static int gem_alloc_rx_buffers(struct macb *bp)
 		return -ENOMEM;
 	else
 		rtdev_dbg(bp->dev,
-			   "Allocated %d RX struct rtskb entries at %p\n",
-			   RX_RING_SIZE, bp->rx_skbuff);
+			  "Allocated %d RX struct rtskb entries at %p\n",
+			  RX_RING_SIZE, bp->rx_skbuff);
 	return 0;
 }
 
@@ -1127,8 +1135,9 @@ static int macb_alloc_rx_buffers(struct macb *bp)
 		return -ENOMEM;
 	else
 		rtdev_dbg(bp->dev,
-			   "Allocated RX buffers of %d bytes at %08lx (mapped %p)\n",
-			   size, (unsigned long)bp->rx_buffers_dma, bp->rx_buffers);
+			  "Allocated RX buffers of %d bytes at %08lx (mapped %p)\n",
+			  size, (unsigned long)bp->rx_buffers_dma,
+			  bp->rx_buffers);
 	return 0;
 }
 
@@ -1147,8 +1156,8 @@ static int macb_alloc_consistent(struct macb *bp)
 	if (!bp->rx_ring)
 		goto out_err;
 	rtdev_dbg(bp->dev,
-		   "Allocated RX ring of %d bytes at %08lx (mapped %p)\n",
-		   size, (unsigned long)bp->rx_ring_dma, bp->rx_ring);
+		  "Allocated RX ring of %d bytes at %08lx (mapped %p)\n",
+		  size, (unsigned long)bp->rx_ring_dma, bp->rx_ring);
 
 	size = TX_RING_BYTES;
 	bp->tx_ring = dma_alloc_coherent(&bp->pdev->dev, size,
@@ -1156,8 +1165,8 @@ static int macb_alloc_consistent(struct macb *bp)
 	if (!bp->tx_ring)
 		goto out_err;
 	rtdev_dbg(bp->dev,
-		   "Allocated TX ring of %d bytes at %08lx (mapped %p)\n",
-		   size, (unsigned long)bp->tx_ring_dma, bp->tx_ring);
+		  "Allocated TX ring of %d bytes at %08lx (mapped %p)\n",
+		  size, (unsigned long)bp->tx_ring_dma, bp->tx_ring);
 
 	if (bp->macbgem_ops.mog_alloc_rx_buffers(bp))
 		goto out_err;
@@ -1331,8 +1340,8 @@ static void macb_init_hw(struct macb *bp)
 
 	config = macb_mdc_clk_div(bp);
 	config |= MACB_BF(RBOF, NET_IP_ALIGN);	/* Make eth data aligned */
-	config |= MACB_BIT(PAE);		/* PAuse Enable */
-	config |= MACB_BIT(DRFCS);		/* Discard Rx FCS */
+	config |= MACB_BIT(PAE);	/* PAuse Enable */
+	config |= MACB_BIT(DRFCS);	/* Discard Rx FCS */
 	if (bp->dev->flags & IFF_PROMISC)
 		config |= MACB_BIT(CAF);	/* Copy All Frames */
 	if (!(bp->dev->flags & IFF_BROADCAST))
@@ -1354,8 +1363,7 @@ static void macb_init_hw(struct macb *bp)
 
 	/* Enable interrupts */
 	macb_writel(bp, IER, (MACB_RX_INT_FLAGS
-			      | MACB_TX_INT_FLAGS
-			      | MACB_BIT(HRESP)));
+			      | MACB_TX_INT_FLAGS | MACB_BIT(HRESP)));
 
 }
 
@@ -1372,7 +1380,7 @@ static int macb_open(struct rtnet_device *dev)
 	/* carrier starts down */
 	rtnetif_carrier_off(dev);
 
-	/* if the phy is not yet register, retry later*/
+	/* if the phy is not yet register, retry later */
 	if (!bp->phy_dev)
 		return -EAGAIN;
 
@@ -1382,7 +1390,7 @@ static int macb_open(struct rtnet_device *dev)
 	err = macb_alloc_consistent(bp);
 	if (err) {
 		rtdev_err(dev, "Unable to allocate DMA memory (error %d)\n",
-			   err);
+			  err);
 		return err;
 	}
 
@@ -1491,8 +1499,7 @@ struct net_device_stats *rtmacb_get_stats(struct rtnet_device *dev)
 			    hwstat->rx_length_mismatch);
 	nstat->tx_errors = (hwstat->tx_late_cols +
 			    hwstat->tx_excessive_cols +
-			    hwstat->tx_underruns +
-			    hwstat->tx_carrier_errors);
+			    hwstat->tx_underruns + hwstat->tx_carrier_errors);
 	nstat->collisions = (hwstat->tx_single_cols +
 			     hwstat->tx_multiple_cols +
 			     hwstat->tx_excessive_cols);
@@ -1501,7 +1508,7 @@ struct net_device_stats *rtmacb_get_stats(struct rtnet_device *dev)
 				   hwstat->rx_undersize_pkts +
 				   hwstat->rx_length_mismatch);
 	nstat->rx_over_errors = hwstat->rx_resource_errors +
-				   hwstat->rx_overruns;
+	    hwstat->rx_overruns;
 	nstat->rx_crc_errors = hwstat->rx_fcs_errors;
 	nstat->rx_frame_errors = hwstat->rx_align_errors;
 	nstat->rx_fifo_errors = hwstat->rx_overruns;
@@ -1513,6 +1520,7 @@ struct net_device_stats *rtmacb_get_stats(struct rtnet_device *dev)
 
 	return nstat;
 }
+
 EXPORT_SYMBOL_GPL(rtmacb_get_stats);
 
 int rtmacb_ioctl(struct rtnet_device *dev, unsigned cmd, void *rq)
@@ -1528,18 +1536,20 @@ int rtmacb_ioctl(struct rtnet_device *dev, unsigned cmd, void *rq)
 
 	return phy_mii_ioctl(phydev, rq, cmd);
 }
+
 EXPORT_SYMBOL_GPL(rtmacb_ioctl);
 
 #if defined(CONFIG_OF)
 static const struct of_device_id macb_dt_ids[] = {
-	{ .compatible = "cdns,at32ap7000-macb" },
-	{ .compatible = "cdns,at91sam9260-macb" },
-	{ .compatible = "cdns,macb" },
-	{ .compatible = "cdns,pc302-gem" },
-	{ .compatible = "cdns,gem" },
-	{ .compatible = "atmel,sama5d3-gem" },
+	{.compatible = "cdns,at32ap7000-macb"},
+	{.compatible = "cdns,at91sam9260-macb"},
+	{.compatible = "cdns,macb"},
+	{.compatible = "cdns,pc302-gem"},
+	{.compatible = "cdns,gem"},
+	{.compatible = "atmel,sama5d3-gem"},
 	{ /* sentinel */ }
 };
+
 MODULE_DEVICE_TABLE(of, macb_dt_ids);
 #endif
 
@@ -1622,7 +1632,7 @@ static int __init macb_probe(struct platform_device *pdev)
 		err = clk_prepare_enable(bp->tx_clk);
 		if (err) {
 			dev_err(&pdev->dev, "failed to enable tx_clk (%u)\n",
-					err);
+				err);
 			goto err_out_disable_hclk;
 		}
 	}
@@ -1638,7 +1648,7 @@ static int __init macb_probe(struct platform_device *pdev)
 	rt_stack_connect(dev, &STACK_manager);
 
 	err = rtdm_irq_request(&bp->irq_handle, dev->irq, macb_interrupt, 0,
-			dev->name, dev);
+			       dev->name, dev);
 	if (err) {
 		dev_err(&pdev->dev, "Unable to request IRQ %d (error %d)\n",
 			dev->irq, err);
@@ -1719,12 +1729,13 @@ static int __init macb_probe(struct platform_device *pdev)
 	rtnetif_carrier_off(dev);
 
 	rtdev_info(dev, "Cadence %s at 0x%08lx irq %d (%pM)\n",
-		    macb_is_gem(bp) ? "GEM" : "MACB", dev->base_addr,
-		    dev->irq, dev->dev_addr);
+		   macb_is_gem(bp) ? "GEM" : "MACB", dev->base_addr,
+		   dev->irq, dev->dev_addr);
 
 	phydev = bp->phy_dev;
-	rtdev_info(dev, "attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)\n",
-		    phydev->drv->name, dev_name(&phydev->dev), phydev->irq);
+	rtdev_info(dev,
+		   "attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)\n",
+		   phydev->drv->name, dev_name(&phydev->dev), phydev->irq);
 
 	return 0;
 
@@ -1775,12 +1786,12 @@ static int __exit macb_remove(struct platform_device *pdev)
 }
 
 static struct platform_driver macb_driver = {
-	.remove		= __exit_p(macb_remove),
-	.driver		= {
-		.name		= "macb",
-		.owner	= THIS_MODULE,
-		.of_match_table	= of_match_ptr(macb_dt_ids),
-	},
+	.remove = __exit_p(macb_remove),
+	.driver = {
+		   .name = "macb",
+		   .owner = THIS_MODULE,
+		   .of_match_table = of_match_ptr(macb_dt_ids),
+		   },
 };
 
 static bool found;
@@ -1789,6 +1800,7 @@ static int __init macb_driver_init(void)
 	found = platform_driver_probe(&macb_driver, macb_probe) == 0;
 	return 0;
 }
+
 module_init(macb_driver_init);
 
 static void __exit macb_driver_exit(void)
@@ -1796,6 +1808,7 @@ static void __exit macb_driver_exit(void)
 	if (found)
 		platform_driver_unregister(&macb_driver);
 }
+
 module_exit(macb_driver_exit);
 
 MODULE_LICENSE("GPL");

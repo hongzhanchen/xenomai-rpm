@@ -1,6 +1,5 @@
 /*******************************************************************************
 
-
   Copyright(c) 1999 - 2006 Intel Corporation. All rights reserved.
 
   This program is free software; you can redistribute it and/or modify it
@@ -26,7 +25,6 @@
   Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
 
 *******************************************************************************/
-
 
 /* glue for the OS independent part of e1000
  * includes register access macros
@@ -65,9 +63,9 @@
 
 typedef enum {
 #undef FALSE
-    FALSE = 0,
+	FALSE = 0,
 #undef TRUE
-    TRUE = 1
+	TRUE = 1
 } boolean_t;
 
 #define MSGOUT(S, A, B)	printk(KERN_DEBUG S "\n", A, B)
@@ -143,6 +141,5 @@ typedef enum {
 
 #define E1000_READ_ICH8_REG16(a, reg) ( \
     readw((a)->flash_address + reg))
-
 
 #endif /* _E1000_OSDEP_H_ */

@@ -26,7 +26,6 @@
 
 *******************************************************************************/
 
-
 /* Linux PRO/1000 Ethernet Driver main header file */
 
 #ifndef _E1000_H_
@@ -69,8 +68,8 @@ struct e1000_adapter;
 #define E1000_MIN_RXD                       80
 #define E1000_MAX_82544_RXD               4096
 
-#define E1000_MIN_ITR_USECS                 10 /* 100000 irq/sec */
-#define E1000_MAX_ITR_USECS              10000 /* 100    irq/sec */
+#define E1000_MIN_ITR_USECS                 10	/* 100000 irq/sec */
+#define E1000_MAX_ITR_USECS              10000	/* 100    irq/sec */
 
 #ifdef CONFIG_E1000_MQ
 #define E1000_MAX_TX_QUEUES                  4
@@ -80,8 +79,8 @@ struct e1000_adapter;
 #define MAXIMUM_ETHERNET_VLAN_SIZE 1522
 
 /* Supported Rx Buffer Sizes */
-#define E1000_RXBUFFER_128   128    /* Used for packet split */
-#define E1000_RXBUFFER_256   256    /* Used for packet split */
+#define E1000_RXBUFFER_128   128	/* Used for packet split */
+#define E1000_RXBUFFER_256   256	/* Used for packet split */
 #define E1000_RXBUFFER_512   512
 #define E1000_RXBUFFER_1024  1024
 #define E1000_RXBUFFER_2048  2048
@@ -101,7 +100,7 @@ struct e1000_adapter;
 /* Early Receive defines */
 #define E1000_ERT_2048 0x100
 
-#define E1000_FC_PAUSE_TIME 0x0680 /* 858 usec */
+#define E1000_FC_PAUSE_TIME 0x0680	/* 858 usec */
 
 /* How many Tx Descriptors do we need to call netif_wake_queue ? */
 #define E1000_TX_QUEUE_WAKE	16
@@ -146,8 +145,12 @@ struct e1000_queue_stats {
 };
 #endif
 
-struct e1000_ps_page { struct page *ps_page[PS_PAGE_BUFFERS]; };
-struct e1000_ps_page_dma { u64 ps_page_dma[PS_PAGE_BUFFERS]; };
+struct e1000_ps_page {
+	struct page *ps_page[PS_PAGE_BUFFERS];
+};
+struct e1000_ps_page_dma {
+	u64 ps_page_dma[PS_PAGE_BUFFERS];
+};
 
 struct e1000_tx_ring {
 	/* pointer to the descriptor ring memory */
@@ -179,7 +182,7 @@ struct e1000_tx_ring {
 };
 
 struct e1000_rx_ring {
-	struct e1000_adapter *adapter; /* back link */
+	struct e1000_adapter *adapter;	/* back link */
 	/* pointer to the descriptor ring memory */
 	void *desc;
 	/* physical address of the descriptor ring */
@@ -256,7 +259,7 @@ struct e1000_adapter {
 	u32 en_mng_pt;
 	u16 link_speed;
 	u16 link_duplex;
-	rtdm_lock_t  stats_lock;
+	rtdm_lock_t stats_lock;
 #ifdef CONFIG_E1000_NAPI
 	spinlock_t tx_queue_lock;
 #endif
@@ -281,9 +284,9 @@ struct e1000_adapter {
 #endif
 
 	/* TX */
-	struct e1000_tx_ring *tx_ring;      /* One per active queue */
+	struct e1000_tx_ring *tx_ring;	/* One per active queue */
 #ifdef CONFIG_E1000_MQ
-	struct e1000_tx_ring **cpu_tx_ring; /* per-cpu */
+	struct e1000_tx_ring **cpu_tx_ring;	/* per-cpu */
 #endif
 	unsigned int restart_queue;
 	unsigned long tx_queue_len;
@@ -305,18 +308,18 @@ struct e1000_adapter {
 
 	/* RX */
 #ifdef CONFIG_E1000_NAPI
-	bool (*clean_rx) (struct e1000_adapter *adapter,
-			       struct e1000_rx_ring *rx_ring,
-			       int *work_done, int work_to_do);
+	 bool(*clean_rx) (struct e1000_adapter * adapter,
+			  struct e1000_rx_ring * rx_ring,
+			  int *work_done, int work_to_do);
 #else
-	bool (*clean_rx) (struct e1000_adapter *adapter,
-			       struct e1000_rx_ring *rx_ring,
-			       nanosecs_abs_t *time_stamp);
+	 bool(*clean_rx) (struct e1000_adapter * adapter,
+			  struct e1000_rx_ring * rx_ring,
+			  nanosecs_abs_t * time_stamp);
 #endif
-	void (*alloc_rx_buf) (struct e1000_adapter *adapter,
-			      struct e1000_rx_ring *rx_ring,
-				int cleaned_count);
-	struct e1000_rx_ring *rx_ring;      /* One per active queue */
+	void (*alloc_rx_buf) (struct e1000_adapter * adapter,
+			      struct e1000_rx_ring * rx_ring,
+			      int cleaned_count);
+	struct e1000_rx_ring *rx_ring;	/* One per active queue */
 #ifdef CONFIG_E1000_NAPI
 	//struct napi_struct napi;
 #endif
@@ -337,14 +340,13 @@ struct e1000_adapter {
 	u32 max_frame_size;
 	u32 min_frame_size;
 
-
 	/* OS defined structs */
 	struct rtnet_device *netdev;
 	struct pci_dev *pdev;
 	struct net_device_stats net_stats;
 
 	rtdm_irq_t irq_handle;
-	char  data_received;
+	char data_received;
 
 	/* structs defined in e1000_hw.h */
 	struct e1000_hw hw;
@@ -362,7 +364,6 @@ struct e1000_adapter {
 	struct e1000_tx_ring test_tx_ring;
 	struct e1000_rx_ring test_rx_ring;
 #endif
-
 
 	int msg_enable;
 	/* to not mess up cache alignment, always add to the bottom */

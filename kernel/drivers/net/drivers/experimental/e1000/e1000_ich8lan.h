@@ -58,8 +58,8 @@
 
 #define ICH_FLASH_REG_MAPSIZE            0x00A0
 
-#define E1000_ICH_FWSM_RSPCIPHY          0x00000040 /* Reset PHY on PCI Reset */
-#define E1000_ICH_FWSM_DISSW             0x10000000 /* FW Disables SW Writes */
+#define E1000_ICH_FWSM_RSPCIPHY          0x00000040	/* Reset PHY on PCI Reset */
+#define E1000_ICH_FWSM_DISSW             0x10000000	/* FW Disables SW Writes */
 /* FW established a valid mode */
 #define E1000_ICH_FWSM_FW_VALID          0x00008000
 
@@ -76,7 +76,7 @@
 #define E1000_ICH8_LAN_INIT_TIMEOUT      1500
 
 #define E1000_FEXTNVM_SW_CONFIG        1
-#define E1000_FEXTNVM_SW_CONFIG_ICH8M (1 << 27) /* Bit redefined for ICH8M */
+#define E1000_FEXTNVM_SW_CONFIG_ICH8M (1 << 27)	/* Bit redefined for ICH8M */
 
 #define PCIE_ICH8_SNOOP_ALL   PCIE_NO_SNOOP_ALL
 
@@ -85,10 +85,10 @@
 #define PHY_PAGE_SHIFT 5
 #define PHY_REG(page, reg) (((page) << PHY_PAGE_SHIFT) | \
                            ((reg) & MAX_PHY_REG_ADDRESS))
-#define IGP3_KMRN_DIAG  PHY_REG(770, 19) /* KMRN Diagnostic */
-#define IGP3_VR_CTRL    PHY_REG(776, 18) /* Voltage Regulator Control */
-#define IGP3_CAPABILITY PHY_REG(776, 19) /* Capability */
-#define IGP3_PM_CTRL    PHY_REG(769, 20) /* Power Management Control */
+#define IGP3_KMRN_DIAG  PHY_REG(770, 19)	/* KMRN Diagnostic */
+#define IGP3_VR_CTRL    PHY_REG(776, 18)	/* Voltage Regulator Control */
+#define IGP3_CAPABILITY PHY_REG(776, 19)	/* Capability */
+#define IGP3_PM_CTRL    PHY_REG(769, 20)	/* Power Management Control */
 
 #define IGP3_KMRN_DIAG_PCS_LOCK_LOSS         0x0002
 #define IGP3_VR_CTRL_DEV_POWERDOWN_MODE_MASK 0x0300
@@ -105,6 +105,5 @@
     E1000_IMS_DSW   | \
     E1000_IMS_PHYINT | \
     E1000_IMS_EPRST)
-
 
 #endif

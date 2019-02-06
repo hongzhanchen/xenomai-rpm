@@ -27,128 +27,115 @@
 
 #include <rtnet_socket.h>
 
-
 int rt_ip_setsockopt(struct rtsocket *s, int level, int optname,
 		     const void *optval, socklen_t optlen)
 {
-    int err = 0;
+	int err = 0;
 
+	if (level != SOL_IP)
+		return -ENOPROTOOPT;
 
-    if (level != SOL_IP)
-	return -ENOPROTOOPT;
+	if (optlen < sizeof(unsigned int))
+		return -EINVAL;
 
-    if (optlen < sizeof(unsigned int))
-	return -EINVAL;
-
-    switch (optname) {
+	switch (optname) {
 	case IP_TOS:
-	    s->prot.inet.tos = *(unsigned int *)optval;
-	    break;
+		s->prot.inet.tos = *(unsigned int *)optval;
+		break;
 
 	default:
-	    err = -ENOPROTOOPT;
-	    break;
-    }
+		err = -ENOPROTOOPT;
+		break;
+	}
 
-    return err;
+	return err;
 }
-
-
 
 int rt_ip_getsockopt(struct rtsocket *s, int level, int optname,
-		     void *optval, socklen_t *optlen)
+		     void *optval, socklen_t * optlen)
 {
-    int err = 0;
+	int err = 0;
 
+	if (*optlen < sizeof(unsigned int))
+		return -EINVAL;
 
-    if (*optlen < sizeof(unsigned int))
-	return -EINVAL;
-
-    switch (optname) {
+	switch (optname) {
 	case IP_TOS:
-	    *(unsigned int *)optval = s->prot.inet.tos;
-	    *optlen = sizeof(unsigned int);
-	    break;
+		*(unsigned int *)optval = s->prot.inet.tos;
+		*optlen = sizeof(unsigned int);
+		break;
 
 	default:
-	    err = -ENOPROTOOPT;
-	    break;
-    }
+		err = -ENOPROTOOPT;
+		break;
+	}
 
-    return err;
+	return err;
 }
-
-
 
 int rt_ip_getsockname(struct rtsocket *s, struct sockaddr *addr,
-		      socklen_t *addrlen)
+		      socklen_t * addrlen)
 {
-    struct sockaddr_in *usin = (struct sockaddr_in *)addr;
+	struct sockaddr_in *usin = (struct sockaddr_in *)addr;
 
+	if (*addrlen < sizeof(struct sockaddr_in))
+		return -EINVAL;
 
-    if (*addrlen < sizeof(struct sockaddr_in))
-	return -EINVAL;
+	usin->sin_family = AF_INET;
+	usin->sin_addr.s_addr = s->prot.inet.saddr;
+	usin->sin_port = s->prot.inet.sport;
 
-    usin->sin_family      = AF_INET;
-    usin->sin_addr.s_addr = s->prot.inet.saddr;
-    usin->sin_port        = s->prot.inet.sport;
+	memset(usin->sin_zero, 0, sizeof(usin->sin_zero));
 
-    memset(usin->sin_zero, 0, sizeof(usin->sin_zero));
+	*addrlen = sizeof(struct sockaddr_in);
 
-    *addrlen = sizeof(struct sockaddr_in);
-
-    return 0;
+	return 0;
 }
-
-
 
 int rt_ip_getpeername(struct rtsocket *s, struct sockaddr *addr,
-		      socklen_t *addrlen)
+		      socklen_t * addrlen)
 {
-    struct sockaddr_in *usin = (struct sockaddr_in *)addr;
+	struct sockaddr_in *usin = (struct sockaddr_in *)addr;
 
+	if (*addrlen < sizeof(struct sockaddr_in))
+		return -EINVAL;
 
-    if (*addrlen < sizeof(struct sockaddr_in))
-	return -EINVAL;
+	usin->sin_family = AF_INET;
+	usin->sin_addr.s_addr = s->prot.inet.daddr;
+	usin->sin_port = s->prot.inet.dport;
 
-    usin->sin_family      = AF_INET;
-    usin->sin_addr.s_addr = s->prot.inet.daddr;
-    usin->sin_port        = s->prot.inet.dport;
+	memset(usin->sin_zero, 0, sizeof(usin->sin_zero));
 
-    memset(usin->sin_zero, 0, sizeof(usin->sin_zero));
+	*addrlen = sizeof(struct sockaddr_in);
 
-    *addrlen = sizeof(struct sockaddr_in);
-
-    return 0;
+	return 0;
 }
-
-
 
 int rt_ip_ioctl(struct rtdm_fd *fd, int request, void *arg)
 {
-    struct rtsocket *sock = rtdm_fd_to_private(fd);
-    struct _rtdm_getsockaddr_args   *getaddr = arg;
-    struct _rtdm_getsockopt_args    *getopt  = arg;
-    struct _rtdm_setsockopt_args    *setopt  = arg;
+	struct rtsocket *sock = rtdm_fd_to_private(fd);
+	struct _rtdm_getsockaddr_args *getaddr = arg;
+	struct _rtdm_getsockopt_args *getopt = arg;
+	struct _rtdm_setsockopt_args *setopt = arg;
 
-
-    switch (request) {
+	switch (request) {
 	case _RTIOC_SETSOCKOPT:
-	    return rt_ip_setsockopt(sock, setopt->level, setopt->optname,
-				    setopt->optval, setopt->optlen);
+		return rt_ip_setsockopt(sock, setopt->level, setopt->optname,
+					setopt->optval, setopt->optlen);
 
 	case _RTIOC_GETSOCKOPT:
-	    return rt_ip_getsockopt(sock, getopt->level, getopt->optname,
-				    getopt->optval, getopt->optlen);
+		return rt_ip_getsockopt(sock, getopt->level, getopt->optname,
+					getopt->optval, getopt->optlen);
 
 	case _RTIOC_GETSOCKNAME:
-	    return rt_ip_getsockname(sock, getaddr->addr, getaddr->addrlen);
+		return rt_ip_getsockname(sock, getaddr->addr, getaddr->addrlen);
 
 	case _RTIOC_GETPEERNAME:
-	    return rt_ip_getpeername(sock, getaddr->addr, getaddr->addrlen);
+		return rt_ip_getpeername(sock, getaddr->addr, getaddr->addrlen);
 
 	default:
-	    return rt_socket_if_ioctl(fd, request, arg);
-    }
+		return rt_socket_if_ioctl(fd, request, arg);
+	}
 }
+
 EXPORT_SYMBOL_GPL(rt_ip_ioctl);

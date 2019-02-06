@@ -16,7 +16,6 @@
 */
 /* Ported to RTnet by Wittawat Yamwong <wittawat@web.de> */
 
-
 /* Understanding the PNIC_II - everything is this file is based
  * on the PNIC_II_PDF datasheet which is sorely lacking in detail
  *
@@ -75,84 +74,83 @@
  *
  */
 
-
-
 #include "tulip.h"
 #include <linux/pci.h>
 #include <linux/delay.h>
 
-
-void pnic2_start_nway(/*RTnet*/struct rtnet_device *rtdev)
+void pnic2_start_nway( /*RTnet */ struct rtnet_device *rtdev)
 {
 	struct tulip_private *tp = (struct tulip_private *)rtdev->priv;
 	long ioaddr = rtdev->base_addr;
-        int csr14;
-        int csr12;
+	int csr14;
+	int csr12;
 
-        /* set up what to advertise during the negotiation */
+	/* set up what to advertise during the negotiation */
 
-        /* load in csr14  and mask off bits not to touch
-         * comment at top of file explains mask value
-         */
+	/* load in csr14  and mask off bits not to touch
+	 * comment at top of file explains mask value
+	 */
 	csr14 = (inl(ioaddr + CSR14) & 0xfff0ee39);
 
-        /* bit 17 - advetise 100baseTx-FD */
-        if (tp->sym_advertise & 0x0100) csr14 |= 0x00020000;
+	/* bit 17 - advetise 100baseTx-FD */
+	if (tp->sym_advertise & 0x0100)
+		csr14 |= 0x00020000;
 
-        /* bit 16 - advertise 100baseTx-HD */
-        if (tp->sym_advertise & 0x0080) csr14 |= 0x00010000;
+	/* bit 16 - advertise 100baseTx-HD */
+	if (tp->sym_advertise & 0x0080)
+		csr14 |= 0x00010000;
 
-        /* bit 6 - advertise 10baseT-HD */
-        if (tp->sym_advertise & 0x0020) csr14 |= 0x00000040;
+	/* bit 6 - advertise 10baseT-HD */
+	if (tp->sym_advertise & 0x0020)
+		csr14 |= 0x00000040;
 
-        /* Now set bit 12 Link Test Enable, Bit 7 Autonegotiation Enable
-         * and bit 0 Don't PowerDown 10baseT
-         */
-        csr14 |= 0x00001184;
+	/* Now set bit 12 Link Test Enable, Bit 7 Autonegotiation Enable
+	 * and bit 0 Don't PowerDown 10baseT
+	 */
+	csr14 |= 0x00001184;
 
 	if (tulip_debug > 1)
 		printk(KERN_DEBUG "%s: Restarting PNIC2 autonegotiation, "
-                      "csr14=%8.8x.\n", rtdev->name, csr14);
+		       "csr14=%8.8x.\n", rtdev->name, csr14);
 
-        /* tell pnic2_lnk_change we are doing an nway negotiation */
+	/* tell pnic2_lnk_change we are doing an nway negotiation */
 	rtdev->if_port = 0;
 	tp->nway = tp->mediasense = 1;
 	tp->nwayset = tp->lpar = 0;
 
-        /* now we have to set up csr6 for NWAY state */
+	/* now we have to set up csr6 for NWAY state */
 
 	tp->csr6 = inl(ioaddr + CSR6);
 	if (tulip_debug > 1)
 		printk(KERN_DEBUG "%s: On Entry to Nway, "
-                      "csr6=%8.8x.\n", rtdev->name, tp->csr6);
+		       "csr6=%8.8x.\n", rtdev->name, tp->csr6);
 
-        /* mask off any bits not to touch
-         * comment at top of file explains mask value
-         */
+	/* mask off any bits not to touch
+	 * comment at top of file explains mask value
+	 */
 	tp->csr6 = tp->csr6 & 0xfe3bd1fd;
 
-        /* don't forget that bit 9 is also used for advertising */
-        /* advertise 10baseT-FD for the negotiation (bit 9) */
-        if (tp->sym_advertise & 0x0040) tp->csr6 |= 0x00000200;
+	/* don't forget that bit 9 is also used for advertising */
+	/* advertise 10baseT-FD for the negotiation (bit 9) */
+	if (tp->sym_advertise & 0x0040)
+		tp->csr6 |= 0x00000200;
 
-        /* set bit 24 for nway negotiation mode ...
-         * see Data Port Selection comment at top of file
-         * and "Stop" - reset both Transmit (bit 13) and Receive (bit 1)
-         */
-        tp->csr6 |= 0x01000000;
+	/* set bit 24 for nway negotiation mode ...
+	 * see Data Port Selection comment at top of file
+	 * and "Stop" - reset both Transmit (bit 13) and Receive (bit 1)
+	 */
+	tp->csr6 |= 0x01000000;
 	outl(csr14, ioaddr + CSR14);
 	outl(tp->csr6, ioaddr + CSR6);
-        udelay(100);
+	udelay(100);
 
-        /* all set up so now force the negotiation to begin */
+	/* all set up so now force the negotiation to begin */
 
-        /* read in current values and mask off all but the
+	/* read in current values and mask off all but the
 	 * Autonegotiation bits 14:12.  Writing a 001 to those bits
-         * should start the autonegotiation
-         */
-        csr12 = (inl(ioaddr + CSR12) & 0xffff8fff);
-        csr12 |= 0x1000;
+	 * should start the autonegotiation
+	 */
+	csr12 = (inl(ioaddr + CSR12) & 0xffff8fff);
+	csr12 |= 0x1000;
 	outl(csr12, ioaddr + CSR12);
 }
-
-
