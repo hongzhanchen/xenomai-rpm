@@ -203,6 +203,8 @@ TRACE_EVENT(cobalt_switch_context,
 		  __get_str(next_name), __entry->next_pid, __entry->next_prio)
 );
 
+struct xnsched_quota_group;
+
 TRACE_EVENT(cobalt_schedquota_refill,
 	TP_PROTO(int dummy),
 	TP_ARGS(dummy),
