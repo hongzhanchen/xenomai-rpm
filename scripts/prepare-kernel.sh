@@ -414,7 +414,7 @@ esac
 
 patch_kernelversion_specific="n"
 patch_architecture_specific="y"
-patch_link r m kernel/cobalt/arch/$linux_arch arch/$linux_arch/xenomai
+patch_link r m kernel/cobalt/arch/ipipe/$linux_arch arch/$linux_arch/xenomai
 patch_link n n kernel/cobalt/include/ipipe arch/$linux_arch/include/ipipe
 patch_architecture_specific="n"
 patch_link n m kernel/cobalt kernel/xenomai
