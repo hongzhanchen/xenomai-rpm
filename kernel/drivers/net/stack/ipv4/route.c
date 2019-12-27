@@ -745,7 +745,7 @@ static inline void rt_free_net_route(struct net_route *rt)
 {
 	rt->next = free_net_route;
 	free_net_route = rt;
-	allocated_host_routes--;
+	allocated_net_routes--;
 }
 
 /***
