@@ -51,7 +51,7 @@ struct net_route {
 	u32 gw_ip;
 };
 
-#if (CONFIG_XENO_DRIVERS_NET_RTIPV4_HOST_ROUTES &                              \
+#if (CONFIG_XENO_DRIVERS_NET_RTIPV4_HOST_ROUTES &	\
      (CONFIG_XENO_DRIVERS_NET_RTIPV4_HOST_ROUTES - 1))
 #error CONFIG_XENO_DRIVERS_NET_RTIPV4_HOST_ROUTES must be power of 2
 #endif
@@ -88,6 +88,7 @@ static struct net_route *free_net_route;
 static int allocated_net_routes;
 static struct net_route *net_hash_tbl[NET_HASH_TBL_SIZE + 1];
 static unsigned int net_hash_key_shift = NET_HASH_KEY_SHIFT;
+static u32 default_gw_ip;
 static DEFINE_RTDM_LOCK(net_table_lock);
 
 module_param(net_hash_key_shift, uint, 0444);
@@ -376,7 +377,15 @@ static int rtnet_ipv4_net_route_next(struct xnvfile_snapshot_iterator *it,
 	struct rtnet_ipv4_net_route_data *p = data;
 
 	if (priv->entry_ptr == NULL) {
-		if (++priv->key >= NET_HASH_TBL_SIZE + 1)
+		if (++priv->key == 0 && default_gw_ip != INADDR_ANY) {
+			p->key = NET_HASH_TBL_SIZE;
+			p->dest_net_ip = INADDR_ANY;
+			p->dest_net_mask = INADDR_ANY;
+			p->gw_ip = default_gw_ip;
+			return 1;
+		}
+
+		if (priv->key >= NET_HASH_TBL_SIZE + 1)
 			return 0;
 
 		priv->entry_ptr = net_hash_tbl[priv->key];
@@ -410,12 +419,16 @@ static int rtnet_ipv4_net_route_show(struct xnvfile_snapshot_iterator *it,
 			       "\t\t%u.%u.%u.%-3u\n",
 			       p->key, NIPQUAD(p->dest_net_ip),
 			       NIPQUAD(p->dest_net_mask), NIPQUAD(p->gw_ip));
-	else
+	else if (p->dest_net_ip != INADDR_ANY)
 		xnvfile_printf(it,
 			       "*\t%u.%u.%u.%-3u\t%u.%u.%u.%-3u\t\t"
 			       "%u.%u.%u.%-3u\n",
 			       NIPQUAD(p->dest_net_ip),
 			       NIPQUAD(p->dest_net_mask), NIPQUAD(p->gw_ip));
+	else
+		xnvfile_printf(it,
+			"*\t%-11s\t0.0.0.0\t\t\t%u.%u.%u.%-3u\n",
+			"default", NIPQUAD(p->gw_ip));
 
 	return 0;
 }
@@ -760,6 +773,17 @@ int rt_ip_route_add_net(u32 addr, u32 mask, u32 gw_addr)
 	unsigned int key;
 	u32 shifted_mask;
 
+	rtdm_lock_get_irqsave(&net_table_lock, context);
+
+	if (addr == INADDR_ANY) {
+		default_gw_ip = gw_addr;
+		allocated_net_routes++;
+		rtdm_lock_put_irqrestore(&net_table_lock, context);
+		return 0;
+	}
+
+	rtdm_lock_put_irqrestore(&net_table_lock, context);
+
 	addr &= mask;
 
 	if ((new_route = rt_alloc_net_route()) != NULL) {
@@ -823,6 +847,17 @@ int rt_ip_route_del_net(u32 addr, u32 mask)
 	unsigned int key;
 	u32 shifted_mask;
 
+	rtdm_lock_get_irqsave(&net_table_lock, context);
+
+	if (addr == INADDR_ANY) {
+		default_gw_ip = INADDR_ANY;
+		allocated_net_routes--;
+		rtdm_lock_put_irqrestore(&net_table_lock, context);
+		return 0;
+	}
+
+	rtdm_lock_put_irqrestore(&net_table_lock, context);
+
 	addr &= mask;
 
 	shifted_mask = NET_HASH_KEY_MASK << net_hash_key_shift;
@@ -856,6 +891,7 @@ int rt_ip_route_del_net(u32 addr, u32 mask)
 
 	return -ENOENT;
 }
+
 #endif /* CONFIG_XENO_DRIVERS_NET_RTIPV4_NETROUTING */
 
 /***
@@ -915,8 +951,9 @@ restart:
 	else
 		while (host_rt != NULL) {
 			if ((host_rt->dest_host.ip == daddr) &&
-			    (host_rt->dest_host.rtdev->local_ip == saddr))
+				(host_rt->dest_host.rtdev->local_ip == saddr)) {
 				goto host_route_found;
+			}
 			host_rt = host_rt->next;
 		}
 
@@ -947,7 +984,7 @@ restart:
 
 		rtdm_lock_put_irqrestore(&net_table_lock, context);
 
-		/* last try: no hash key */
+		/* no hash key */
 		rtdm_lock_get_irqsave(&net_table_lock, context);
 
 		net_rt = net_hash_tbl[NET_HASH_TBL_SIZE];
@@ -964,6 +1001,13 @@ restart:
 			}
 
 			net_rt = net_rt->next;
+		}
+
+		/* last try: use default route if any. */
+		if (default_gw_ip != INADDR_ANY) {
+			daddr = default_gw_ip;
+			rtdm_lock_put_irqrestore(&net_table_lock, context);
+			goto restart;
 		}
 
 		rtdm_lock_put_irqrestore(&net_table_lock, context);

@@ -115,3 +115,25 @@ the hash-key-based lookup and a potential query of the key-less list of routes.
 RTnet provides by default a pool of 16 network routes. This number can be
 modified in the source code (see ipv4/route.c). Network routes are only
 manually added or removed via rtroute.
+
+4. Default gateway address
+--------------------------
+
+In some cases, it is desirable for the RTnet routing system to fall
+back to a default gateway address for otherwise unresolved
+routes. Typically, such a gateway comes in handy when a rtnetproxy
+device is required for sharing a single physical interface (NIC)
+between the real-time and regular traffic (accepting the implications
+this may have with respect to real-time performance). Both the regular
+and the RTnet routing configurations can define their respective
+default gateway, first to route regular traffic to the proxy, next to
+route such traffic via the gateway assigned to the default RTnet
+route.
+
+A default gateway can be defined by the rtroute command as follows:
+
+# rtroute add default gw <IP_ADDRESS>
+
+Support for the default gateway is available when
+CONFIG_XENO_DRIVERS_NET_RTIPV4_NETROUTING is enabled. A single default
+gateway address is supported.

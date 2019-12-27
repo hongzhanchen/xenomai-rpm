@@ -14,8 +14,10 @@ the network device is "rtproxy".
 
 Setup:
 --------
-Get your RTnet working first! All IP addresses you are interested in have
-to be set via "rtifconfig ethX route solicit IP_ADDRESS"!
+Get your RTnet working first! All IP addresses you are interested in
+have to be set via "rtifconfig ethX route solicit IP_ADDRESS", or a
+default gateway machine should have been set via "rtroute add default
+gw IP_ADDRESS".
 
      insmod rtnetproxy.o
 
