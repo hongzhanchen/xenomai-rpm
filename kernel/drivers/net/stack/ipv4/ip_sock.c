@@ -35,6 +35,9 @@ int rt_ip_setsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
 	int err = 0;
 	unsigned int _tos, *tos;
 
+	if (level == SOL_SOCKET && optname == SO_REUSEADDR)
+		return 0;
+
 	if (level != SOL_IP)
 		return -ENOPROTOOPT;
 
