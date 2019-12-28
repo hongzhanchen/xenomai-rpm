@@ -342,9 +342,17 @@ void rt_ip_mc_dec_group(struct rtnet_device *rtdev, u32 addr)
 static struct rtnet_device *rt_ip_mc_find_dev(const struct ip_mreq *imr)
 {
     struct rtnet_device *rtdev = NULL;
+    struct dest_route rt;
+    int ret;
 
-    if (imr->imr_interface.s_addr)
-	rtdev = rt_ip_dev_find(imr->imr_interface.s_addr);
+    if (imr->imr_interface.s_addr != INADDR_ANY) {
+	    rtdev = rt_ip_dev_find(imr->imr_interface.s_addr);
+    } else {
+	    ret = rt_ip_route_output(&rt, imr->imr_multiaddr.s_addr,
+				    INADDR_ANY);
+	    if (!ret)
+		    rtdev = rt.rtdev;
+    }
 
     return rtdev;
 }
