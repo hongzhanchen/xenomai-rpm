@@ -22,6 +22,7 @@
 #define _COBALT_ARM64_ASM_UAPI_FEATURES_H
 
 /* The ABI revision level we use on this arch. */
+// TODO: Reminder: Remove __xn_feat_time64 feature flag on next ABI_REV bump
 #define XENOMAI_ABI_REV   1UL
 
 #define XENOMAI_FEAT_DEP (__xn_feat_generic_mask)

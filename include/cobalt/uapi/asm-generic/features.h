@@ -51,6 +51,7 @@ struct cobalt_featinfo {
 #define __xn_feat_nofastsynch 0x10000000
 #define __xn_feat_control     0x08000000
 #define __xn_feat_prioceiling 0x04000000
+#define __xn_feat_time64      0x02000000
 
 #ifdef CONFIG_SMP
 #define __xn_feat_smp_mask __xn_feat_smp
@@ -70,7 +71,8 @@ struct cobalt_featinfo {
 #define __xn_feat_generic_mask			\
 	(__xn_feat_smp_mask		|	\
 	 __xn_feat_fastsynch_mask 	|	\
-	 __xn_feat_prioceiling)
+	 __xn_feat_prioceiling		|	\
+	 __xn_feat_time64)
 
 /*
  * List of features both sides have to agree on: If userland supports
@@ -101,6 +103,8 @@ const char *get_generic_feature_label(unsigned int feature)
 		return "control";
 	case __xn_feat_prioceiling:
 		return "prioceiling";
+	case __xn_feat_time64:
+		return "time64";
 	default:
 		return 0;
 	}
