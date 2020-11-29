@@ -640,7 +640,7 @@ int cobalt_map_user(struct xnthread *thread, __u32 __user *u_winoff)
 	 * it.
 	 */
 	xnthread_run_handler(thread, map_thread);
-	pipeline_enable_kevents(current);
+	pipeline_enable_kevents();
 
 	attr.mode = 0;
 	attr.entry = NULL;
