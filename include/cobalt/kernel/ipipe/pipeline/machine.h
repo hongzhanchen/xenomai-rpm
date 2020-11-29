@@ -42,8 +42,6 @@ struct cobalt_pipeline {
 	struct ipipe_domain domain;
 	unsigned long timer_freq;
 	unsigned long clock_freq;
-	unsigned int apc_virq;
-	unsigned long apc_map;
 	unsigned int escalate_virq;
 	struct {
 		void (*handler)(void *cookie);
