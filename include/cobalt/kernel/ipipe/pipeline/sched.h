@@ -22,13 +22,7 @@ bool pipeline_switch_to(struct xnthread *prev,
 
 int pipeline_leave_inband(void);
 
-static inline void pipeline_leave_oob_prepare(void)
-{
-	/*
-	 * We have no prep code in the in-band->oob transition code
-	 * path (prep -> xnsched_suspend() -> finish).
-	 */
-}
+int pipeline_leave_oob_prepare(void);
 
 void pipeline_leave_oob_finish(void);
 
