@@ -15,6 +15,7 @@
 #include <pipeline/kevents.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/thread.h>
+#include <cobalt/kernel/clock.h>
 #include <cobalt/kernel/vdso.h>
 #include <rtdm/driver.h>
 #include <trace/events/cobalt-core.h>
@@ -674,7 +675,7 @@ static inline int handle_clockfreq_event(unsigned int *p)
 {
 	unsigned int newfreq = *p;
 
-	xnclock_update_freq(newfreq);
+	pipeline_update_clock_freq(newfreq);
 
 	return KEVENT_PROPAGATE;
 }
