@@ -895,11 +895,12 @@ static inline void do_lazy_user_work(struct xnthread *curr)
 	xnthread_commit_ceiling(curr);
 }
 
-int ___xnsched_run(struct xnsched *sched)
+int ___xnsched_run(void *vsched)
 {
 	bool switched = false, leaving_inband;
 	struct xnthread *prev, *next, *curr;
 	spl_t s;
+	struct xnsched *sched = (struct xnsched *)vsched;
 
 	XENO_WARN_ON_ONCE(COBALT,
 			  !hard_irqs_disabled() && is_secondary_domain());

@@ -47,6 +47,11 @@
 #define XNINIRQ		0x00004000	/* In IRQ handling context */
 #define XNHDEFER	0x00002000	/* Host tick deferred */
 
+/*
+ * Hardware timer is stopped.
+ */
+#define XNTSTOP		0x00000800
+
 struct xnsched_rt {
 	xnsched_queue_t runnable;	/*!< Runnable thread queue. */
 };
@@ -286,7 +291,7 @@ static inline int xnsched_threading_cpu(int cpu)
 	for_each_online_cpu(cpu)		\
 		if (xnsched_supported_cpu(cpu))	\
 
-int ___xnsched_run(struct xnsched *sched);
+int ___xnsched_run(void *vsched);
 
 void __xnsched_run_handler(void);
 
@@ -300,26 +305,35 @@ static inline int __xnsched_run(struct xnsched *sched)
 	     (XNINIRQ|XNINSW|XNRESCHED)) != XNRESCHED)
 		return 0;
 
-	return ___xnsched_run(sched);
+	return ___xnsched_run((void *)sched);
 }
 
 static inline int xnsched_run(void)
 {
 	struct xnsched *sched = xnsched_current();
-	/*
-	 * sched->curr is shared locklessly with ___xnsched_run().
-	 * READ_ONCE() makes sure the compiler never uses load tearing
-	 * for reading this pointer piecemeal, so that multiple stores
-	 * occurring concurrently on remote CPUs never yield a
-	 * spurious merged value on the local one.
+		/*
+	 * If we race here reading the rq state locklessly because of
+	 * a CPU migration, we must be running over the in-band stage,
+	 * in which case the call to __xnsched_run() will be
+	 * escalated to the oob stage where migration cannot happen,
+	 * ensuring safe access to the runqueue state.
+	 *
+	 * Remote XNRESCHED requests are paired with out-of-band IPIs
+	 * running on the oob stage by definition, so we can't miss
+	 * them here.
+	 *
+	 * Finally, XNINIRQ is always tested from the CPU which handled
+	 * an out-of-band interrupt, there is no coherence issue.
 	 */
-	struct xnthread *curr = READ_ONCE(sched->curr);
+	if (((sched->status|sched->lflags) &
+		(XNINIRQ|XNINSW|XNRESCHED)) != XNRESCHED)
+		return 0;
 
-	/*
-	 * If running over the root thread, hard irqs must be off
-	 * (asserted out of line in ___xnsched_run()).
-	 */
-	return curr->lock_count > 0 ? 0 : __xnsched_run(sched);
+	if (likely(running_oob())) {
+		return ___xnsched_run((void *)sched);
+	}
+
+	return run_oob_call((int (*)(void *))___xnsched_run, (void *)sched);
 }
 
 void xnsched_lock(void);

@@ -148,7 +148,7 @@ void xnclock_core_local_shot(struct xnsched *sched)
 	 * or a timer with an earlier timeout date is scheduled,
 	 * whichever comes first.
 	 */
-	sched->lflags &= ~(XNHDEFER|XNIDLE);
+	sched->lflags &= ~(XNHDEFER|XNIDLE|XNTSTOP);
 	timer = container_of(h, struct xntimer, aplink);
 	if (unlikely(timer == &sched->htimer)) {
 		if (xnsched_resched_p(sched) ||
@@ -169,7 +169,7 @@ void xnclock_core_local_shot(struct xnsched *sched)
 
 	xntrace_tick((unsigned)delay);
 
-	pipeline_set_timer_shot(delay);
+	pipeline_set_timer_shot(delay, xntimerh_date(&timer->aplink));
 }
 
 #ifdef CONFIG_SMP

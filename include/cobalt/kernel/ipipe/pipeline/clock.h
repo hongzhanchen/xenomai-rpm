@@ -16,7 +16,8 @@ static inline u64 pipeline_read_cycle_counter(void)
 	return t;
 }
 
-static inline void pipeline_set_timer_shot(unsigned long cycles)
+static inline void pipeline_set_timer_shot(unsigned long cycles,
+		ktime_t tdata)
 {
 	ipipe_timer_set(cycles);
 }

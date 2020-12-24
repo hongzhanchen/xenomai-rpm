@@ -163,7 +163,6 @@ static __init int sys_init(void)
 	xnsched_init_all();
 
 	xnregistry_init();
-
 	/*
 	 * If starting in stopped mode, do all initializations, but do
 	 * not enable the core timer.
@@ -242,6 +241,8 @@ static int __init xenomai_init(void)
 		goto cleanup_rtdm;
 
 	rtdm_fd_init();
+
+	dovetail_start();
 
 	printk(XENO_INFO "Cobalt v%s %s%s%s%s\n",
 	       XENO_VERSION_STRING,

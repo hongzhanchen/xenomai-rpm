@@ -51,7 +51,7 @@ DECLARE_BITMAP(cobalt_clock_extids, COBALT_MAX_EXTCLOCKS);
 	__val;							\
 })
 
-int __cobalt_clock_getres(clockid_t clock_id, struct timespec *ts)
+int __cobalt_clock_getres(clockid_t clock_id, struct timespec64 *ts)
 {
 	xnticks_t ns;
 	int ret;
@@ -75,9 +75,9 @@ int __cobalt_clock_getres(clockid_t clock_id, struct timespec *ts)
 }
 
 COBALT_SYSCALL(clock_getres, current,
-	       (clockid_t clock_id, struct timespec __user *u_ts))
+	       (clockid_t clock_id, struct timespec64 __user *u_ts))
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	int ret;
 
 	ret = __cobalt_clock_getres(clock_id, &ts);
@@ -92,7 +92,7 @@ COBALT_SYSCALL(clock_getres, current,
 	return 0;
 }
 
-int __cobalt_clock_gettime(clockid_t clock_id, struct timespec *ts)
+int __cobalt_clock_gettime(clockid_t clock_id, struct timespec64 *ts)
 {
 	xnticks_t ns;
 	int ret;
@@ -122,9 +122,9 @@ int __cobalt_clock_gettime(clockid_t clock_id, struct timespec *ts)
 }
 
 COBALT_SYSCALL(clock_gettime, current,
-	       (clockid_t clock_id, struct timespec __user *u_ts))
+	       (clockid_t clock_id, struct timespec64 __user *u_ts))
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	int ret;
 
 	ret = __cobalt_clock_gettime(clock_id, &ts);
@@ -139,7 +139,7 @@ COBALT_SYSCALL(clock_gettime, current,
 	return 0;
 }
 
-int __cobalt_clock_settime(clockid_t clock_id, const struct timespec *ts)
+int __cobalt_clock_settime(clockid_t clock_id, const struct timespec64 *ts)
 {
 	int _ret, ret = 0;
 	xnticks_t now;
@@ -166,7 +166,7 @@ int __cobalt_clock_settime(clockid_t clock_id, const struct timespec *ts)
 	return 0;
 }
 
-int __cobalt_clock_adjtime(clockid_t clock_id, struct timex *tx)
+int __cobalt_clock_adjtime(clockid_t clock_id, struct __kernel_timex *tx)
 {
 	int _ret, ret = 0;
 
@@ -188,9 +188,9 @@ int __cobalt_clock_adjtime(clockid_t clock_id, struct timex *tx)
 }
 
 COBALT_SYSCALL(clock_settime, current,
-	       (clockid_t clock_id, const struct timespec __user *u_ts))
+	       (clockid_t clock_id, const struct timespec64 __user *u_ts))
 {
-	struct timespec ts;
+	struct timespec64 ts;
 
 	if (cobalt_copy_from_user(&ts, u_ts, sizeof(ts)))
 		return -EFAULT;
@@ -199,9 +199,9 @@ COBALT_SYSCALL(clock_settime, current,
 }
 
 COBALT_SYSCALL(clock_adjtime, current,
-	       (clockid_t clock_id, struct timex __user *u_tx))
+	       (clockid_t clock_id, struct __kernel_timex __user *u_tx))
 {
-	struct timex tx;
+	struct __kernel_timex tx;
 	int ret;
 
 	if (cobalt_copy_from_user(&tx, u_tx, sizeof(tx)))
@@ -215,8 +215,8 @@ COBALT_SYSCALL(clock_adjtime, current,
 }
 
 int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
-			     const struct timespec *rqt,
-			     struct timespec *rmt)
+			     const struct timespec64 *rqt,
+			     struct timespec64 *rmt)
 {
 	struct restart_block *restart;
 	struct xnthread *cur;
@@ -296,10 +296,10 @@ int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 
 COBALT_SYSCALL(clock_nanosleep, primary,
 	       (clockid_t clock_id, int flags,
-		const struct timespec __user *u_rqt,
-		struct timespec __user *u_rmt))
+		const struct timespec64 __user *u_rqt,
+		struct timespec64 __user *u_rmt))
 {
-	struct timespec rqt, rmt, *rmtp = NULL;
+	struct timespec64 rqt, rmt, *rmtp = NULL;
 	int ret;
 
 	if (u_rmt)

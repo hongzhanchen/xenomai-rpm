@@ -63,7 +63,13 @@ int xntimer_heading_p(struct xntimer *timer)
 
 void xntimer_enqueue_and_program(struct xntimer *timer, xntimerq_t *q)
 {
+	struct xnsched *sched;
+
 	xntimer_enqueue(timer, q);
+
+	sched = xntimer_sched(timer);
+	if (!(sched->lflags & XNTSTOP) && !xntimer_heading_p(timer))
+		return;
 	if (xntimer_heading_p(timer)) {
 		struct xnsched *sched = xntimer_sched(timer);
 		struct xnclock *clock = xntimer_clock(timer);

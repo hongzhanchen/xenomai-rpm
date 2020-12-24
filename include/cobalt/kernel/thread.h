@@ -199,6 +199,7 @@ struct xnthread {
 	const char *exe_path;	/* Executable path */
 	u32 proghash;		/* Hash value for exe_path */
 #endif
+	struct dovetail_altsched_context altsched;
 };
 
 static inline int xnthread_get_state(const struct xnthread *thread)
