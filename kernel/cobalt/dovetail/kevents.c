@@ -657,7 +657,7 @@ static void detach_current(void)
 
 int pipeline_trap_kevents(void)
 {
-	//chz NTD
+	dovetail_start();
 	return 0;
 }
 
