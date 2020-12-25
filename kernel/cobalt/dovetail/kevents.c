@@ -64,6 +64,91 @@ static void unregister_debugged_thread(struct xnthread *thread)
 		resume_debugged_process(process);
 }
 
+static inline int handle_exception(struct xnarch_fault_data *d)
+{
+	struct xnthread *thread;
+	struct xnsched *sched;
+
+	sched = xnsched_current();
+	thread = sched->curr;
+
+//	trace_cobalt_thread_fault(xnarch_fault_pc(d),
+//				  xnarch_fault_trap(d));
+
+	if (xnthread_test_state(thread, XNROOT))
+		return 0;
+
+#ifdef IPIPE_KEVT_USERINTRET
+	if (xnarch_fault_bp_p(d) && user_mode(d->regs)) {
+		spl_t s;
+
+		XENO_WARN_ON(CORE, xnthread_test_state(thread, XNRELAX));
+		xnlock_get_irqsave(&nklock, s);
+		xnthread_set_info(thread, XNCONTHI);
+		ipipe_enable_user_intret_notifier();
+		stop_debugged_process(thread);
+		xnlock_put_irqrestore(&nklock, s);
+		xnsched_run();
+	}
+#endif
+
+	if (xnarch_fault_fpu_p(d)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
+		printk("invalid use of FPU in Xenomai context at %pS\n",
+		       (void *)xnarch_fault_pc(d));
+#else
+		print_symbol("invalid use of FPU in Xenomai context at %s\n",
+			     xnarch_fault_pc(d));
+#endif
+	}
+
+	/*
+	 * If we experienced a trap on behalf of a shadow thread
+	 * running in primary mode, move it to the Linux domain,
+	 * leaving the kernel process the exception.
+	 */
+#if defined(CONFIG_XENO_OPT_DEBUG_COBALT) || defined(CONFIG_XENO_OPT_DEBUG_USER)
+	if (!user_mode(d->regs)) {
+		xntrace_panic_freeze();
+		printk(XENO_WARNING
+		       "switching %s to secondary mode after exception #%u in "
+		       "kernel-space at 0x%lx (pid %d)\n", thread->name,
+		       xnarch_fault_trap(d),
+		       xnarch_fault_pc(d),
+		       xnthread_host_pid(thread));
+		xntrace_panic_dump();
+	} else if (xnarch_fault_notify(d)) /* Don't report debug traps */
+		printk(XENO_WARNING
+		       "switching %s to secondary mode after exception #%u from "
+		       "user-space at 0x%lx (pid %d)\n", thread->name,
+		       xnarch_fault_trap(d),
+		       xnarch_fault_pc(d),
+		       xnthread_host_pid(thread));
+#endif
+
+	if (xnarch_fault_pf_p(d))
+		/*
+		 * The page fault counter is not SMP-safe, but it's a
+		 * simple indicator that something went wrong wrt
+		 * memory locking anyway.
+		 */
+		xnstat_counter_inc(&thread->stat.pf);
+
+	xnthread_relax(xnarch_fault_notify(d), SIGDEBUG_MIGRATE_FAULT);
+
+	return 0;
+}
+
+void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
+{
+	struct xnarch_fault_data data = {
+		.exception = trapnr,
+		.regs = regs,
+	};
+
+	handle_exception(&data);
+}
+
 #ifdef CONFIG_SMP
 
 static int handle_setaffinity_event(struct dovetail_migration_data *d)
@@ -358,20 +443,6 @@ void handle_oob_mayday(struct pt_regs *regs)
 	xnthread_relax(0, 0);
 }
 
-
-void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
-{
-	/*
-	struct xnarch_fault_data data = {
-		.exception = trapnr,
-		.regs = regs,
-	};
-
-	handle_exception(&data);
-	*/
-
-}
-
 static int handle_sigwake_event(struct task_struct *p)
 {
 	struct xnthread *thread;
@@ -519,11 +590,26 @@ void handle_inband_event(enum inband_event_type event, void *data)
 }
 
 #ifdef CONFIG_MMU
+static inline int disable_ondemand_memory(void)
+{
+	struct task_struct *p = current;
+	kernel_siginfo_t si;
+
+	if ((p->mm->def_flags & VM_LOCKED) == 0) {
+		memset(&si, 0, sizeof(si));
+		si.si_signo = SIGDEBUG;
+		si.si_code = SI_QUEUE;
+		si.si_int = SIGDEBUG_NOMLOCK | sigdebug_marker;
+		send_sig_info(SIGDEBUG, &si, p);
+		return 0;
+	}
+
+	return force_commit_memory();
+}
 
 int pipeline_prepare_current(void)
 {
-//chz NTD dovetail_init_altsched?
-	return 0;
+	return disable_ondemand_memory();
 }
 
 static inline int get_mayday_prot(void)

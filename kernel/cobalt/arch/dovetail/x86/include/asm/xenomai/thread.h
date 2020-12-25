@@ -54,6 +54,11 @@ struct xnarchtcb {
 */
 };
 
+struct xnarch_fault_data {
+	int exception;
+	struct pt_regs *regs;
+};
+
 #define xnarch_fpu_ptr(tcb)     ((tcb)->fpup)
 
 #define xnarch_fault_regs(d)	((d)->regs)

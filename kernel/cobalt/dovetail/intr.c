@@ -39,8 +39,8 @@ EXPORT_SYMBOL_GPL(xnintr_init);
 
 int xnintr_attach(struct xnintr *intr, void *cookie)
 {
-	int ret;
-	return ret;
+//chz NTD
+	return 0;
 }
 
 EXPORT_SYMBOL_GPL(xnintr_attach);
@@ -70,6 +70,7 @@ void xnintr_core_clock_handler(void)
 {
 	struct xnsched *sched = xnsched_current();
 	int cpu  __maybe_unused = xnsched_cpu(sched);
+	//xnstat_exectime_t *prev;
 
 	if (XENO_WARN_ON_ONCE(CORE, !hard_irqs_disabled()))
 		hard_local_irq_disable();
@@ -79,9 +80,17 @@ void xnintr_core_clock_handler(void)
 		return;
 	}
 
+	//prev = switch_core_irqstats(sched);
+
+	//trace_cobalt_clock_entry(per_cpu(ipipe_percpu.hrtimer_irq, cpu));
+
 	xnlock_get(&nklock);
 	xnclock_tick(&nkclock);
 	xnlock_put(&nklock);
+
+	//trace_cobalt_clock_exit(per_cpu(ipipe_percpu.hrtimer_irq, cpu));
+
+	//switch_from_irqstats(sched, prev);
 
 	/*
 	 * If the core clock interrupt preempted a real-time thread,
