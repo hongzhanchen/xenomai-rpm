@@ -50,7 +50,8 @@ static int proxy_set_next_ktime(ktime_t expires,
 {
 	struct xnsched *sched;
 	ktime_t delta;
-	spl_t s;
+	//spl_t s;
+	unsigned long flags;
 	int ret;
 
 	/*
@@ -59,10 +60,12 @@ static int proxy_set_next_ktime(ktime_t expires,
 	 */
 	delta = ktime_sub(expires, ktime_get_mono_fast_ns());
 
-	xnlock_get_irqsave(&nklock, s);
+	//xnlock_get_irqsave(&nklock, s);
+	flags = hard_local_irq_save(); /* Prevent CPU migration. */
 	sched = xnsched_current();
 	ret = xntimer_start(&sched->htimer, delta, XN_INFINITE, XN_RELATIVE);
-	xnlock_put_irqrestore(&nklock, s);
+	//xnlock_put_irqrestore(&nklock, s);
+	hard_local_irq_restore(flags);
 
 	return ret ? -ETIME : 0;
 }
