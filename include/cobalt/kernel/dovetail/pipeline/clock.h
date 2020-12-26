@@ -13,7 +13,7 @@ static inline u64 pipeline_read_cycle_counter(void)
 	return  ktime_get_mono_fast_ns();
 }
 
-void xnproxy_timer_set(unsigned long delta, ktime_t tdata);
+inline void xnproxy_timer_set(unsigned long delta, ktime_t tdata);
 
 static inline void pipeline_set_timer_shot(unsigned long cycles,
 		ktime_t tdata)
