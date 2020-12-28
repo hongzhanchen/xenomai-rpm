@@ -58,8 +58,8 @@
 	do { } while (0)
 #endif
 
-#define primary_mode_only()	XENO_BUG_ON(CONTEXT, is_secondary_domain())
-#define secondary_mode_only()	XENO_BUG_ON(CONTEXT, !is_secondary_domain())
+#define primary_mode_only()	XENO_BUG_ON(CONTEXT, running_inband())
+#define secondary_mode_only()	XENO_BUG_ON(CONTEXT, running_oob())
 #define interrupt_only()	XENO_BUG_ON(CONTEXT, !xnsched_interrupt_p())
 #define realtime_cpu_only()	XENO_BUG_ON(CONTEXT, !xnsched_supported_cpu(raw_smp_processor_id()))
 #define thread_only()		XENO_BUG_ON(CONTEXT, xnsched_interrupt_p())

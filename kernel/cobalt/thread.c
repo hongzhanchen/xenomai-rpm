@@ -2012,7 +2012,8 @@ void xnthread_relax(int notify, int reason)
 	 * dropped by xnthread_suspend().
 	 */
 	xnlock_get(&nklock);
-	set_current_state(p->state & ~TASK_NOWAKEUP);
+//chz: NTD set_current_state(p->state & ~TASK_NOWAKEUP);
+	//set_current_state(p->state & ~TASK_NOWAKEUP);
 	xnthread_run_handler_stack(thread, relax_thread);
 	suspension = pipeline_leave_oob_prepare();
 	xnthread_suspend(thread, suspension, XN_INFINITE, XN_RELATIVE, NULL);

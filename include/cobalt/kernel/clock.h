@@ -53,7 +53,7 @@ struct xnclock {
 		xnticks_t (*read_raw)(struct xnclock *clock);
 		xnticks_t (*read_monotonic)(struct xnclock *clock);
 		int (*set_time)(struct xnclock *clock,
-				const struct timespec *ts);
+				const struct timespec64 *ts);
 		xnsticks_t (*ns_to_ticks)(struct xnclock *clock,
 					  xnsticks_t ns);
 		xnsticks_t (*ticks_to_ns)(struct xnclock *clock,
@@ -66,7 +66,7 @@ struct xnclock {
 					    struct xnsched *sched);
 #endif
 		int (*adjust_time)(struct xnclock *clock,
-				   struct timex *tx);
+				   struct __kernel_timex *tx);
 		int (*set_gravity)(struct xnclock *clock,
 				   const struct xnclock_gravity *p);
 		void (*reset_gravity)(struct xnclock *clock);
@@ -212,7 +212,7 @@ static inline xnticks_t xnclock_read_monotonic(struct xnclock *clock)
 }
 
 static inline int xnclock_set_time(struct xnclock *clock,
-				   const struct timespec *ts)
+				   const struct timespec64 *ts)
 {
 	if (likely(clock == &nkclock))
 		return -EINVAL;
@@ -265,7 +265,7 @@ static inline xnticks_t xnclock_read_monotonic(struct xnclock *clock)
 }
 
 static inline int xnclock_set_time(struct xnclock *clock,
-				   const struct timespec *ts)
+				   const struct timespec64 *ts)
 {
 	/*
 	 * There is no way to change the core clock's idea of time.
@@ -276,7 +276,7 @@ static inline int xnclock_set_time(struct xnclock *clock,
 #endif /* !CONFIG_XENO_OPT_EXTCLOCK */
 
 static inline int xnclock_adjust_time(struct xnclock *clock,
-				      struct timex *tx)
+				      struct __kernel_timex *tx)
 {
 	if (clock->ops.adjust_time == NULL)
 		return -EOPNOTSUPP;

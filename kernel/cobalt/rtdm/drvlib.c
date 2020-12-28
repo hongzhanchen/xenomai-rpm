@@ -1692,9 +1692,11 @@ static int mmap_kmem_helper(struct vm_area_struct *vma, void *va)
 			len -= PAGE_SIZE;
 		}
 	}
-
+//chz NTD
+/*
 	if (cobalt_machine.prefault)
 		cobalt_machine.prefault(vma);
+*/
 #endif
 
 	return ret;

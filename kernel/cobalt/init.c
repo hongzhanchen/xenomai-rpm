@@ -163,7 +163,6 @@ static __init int sys_init(void)
 	xnsched_init_all();
 
 	xnregistry_init();
-
 	/*
 	 * If starting in stopped mode, do all initializations, but do
 	 * not enable the core timer.
