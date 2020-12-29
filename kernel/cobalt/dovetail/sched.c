@@ -90,8 +90,7 @@ int pipeline_leave_inband(void)
 int pipeline_leave_oob_prepare(void)
 {
 	dovetail_leave_oob();
-//chz: NTD double check what should return
-	return 0;
+	return XNRELAX;
 }
 
 void pipeline_leave_oob_finish(void)
