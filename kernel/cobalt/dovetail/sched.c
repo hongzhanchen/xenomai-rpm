@@ -4,10 +4,25 @@
  * Copyright (C) 2001-2020 Philippe Gerum <rpm@xenomai.org>.
  */
 
+#include <linux/cpuidle.h>
 #include <cobalt/kernel/thread.h>
 #include <cobalt/kernel/sched.h>
 #include <pipeline/sched.h>
 #include <trace/events/cobalt-core.h>
+
+/* in-band stage, hard_irqs_disabled() */
+bool irq_cpuidle_control(struct cpuidle_device *dev,
+			struct cpuidle_state *state)
+{
+	/*
+	 * Deny entering sleep state if this entails stopping the
+	 * timer (i.e. C3STOP misfeature).
+	 */
+	if (state && (state->flags & CPUIDLE_FLAG_TIMER_STOP))
+		return false;
+
+	return true;
+}
 
 void pipeline_prep_switch_oob(struct xnthread *root)
 {
