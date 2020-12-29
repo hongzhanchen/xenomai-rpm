@@ -638,6 +638,31 @@ static inline int get_mayday_prot(void)
 
 #endif /* !CONFIG_MMU */
 
+void resume_oob_task(struct task_struct *p) /* inband, oob stage stalled */
+{
+	struct xnthread *thread = xnthread_from_task(p);
+
+	xnlock_get(&nklock);
+
+	/*
+	 * We fire the handler before the thread is migrated, so that
+	 * thread->sched does not change between paired invocations of
+	 * relax_thread/harden_thread handlers.
+	 */
+	xnthread_run_handler_stack(thread, harden_thread);
+	if (affinity_ok(p))
+		xnthread_resume(thread, XNRELAX);
+
+	/* Unregister as debugged thread in case we postponed this. */
+	if (unlikely(xnthread_test_state(thread, XNSSTEP)))
+		unregister_debugged_thread(thread);
+
+	xnlock_put(&nklock);
+
+	xnsched_run();
+
+}
+
 void pipeline_attach_current(struct xnthread *thread)
 {
 	struct cobalt_threadinfo *p;
