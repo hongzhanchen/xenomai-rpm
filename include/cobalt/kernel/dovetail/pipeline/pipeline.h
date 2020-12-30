@@ -69,18 +69,26 @@ static inline void pipeline_send_resched_ipi(const struct cpumask *dest)
 
 static inline int pipeline_request_timer_ipi(void (*handler)(void))
 {
+#ifdef CONFIG_SMP
 	timer_ipi_handler = handler;
 
 	return __request_percpu_irq(TIMER_OOB_IPI,
 			timer_ipi_interrupt,
 			IRQF_OOB, "Xenomai timer IPI",
 			&cobalt_machine_cpudata);
+#else
+	return 0;
+#endif
 }
 
 static inline void pipeline_free_timer_ipi(void)
 {
+#ifdef CONFIG_SMP
 	return free_percpu_irq(TIMER_OOB_IPI,
 			&cobalt_machine_cpudata);
+#else
+	return;
+#endif
 }
 
 static inline void pipeline_send_timer_ipi(const struct cpumask *dest)
