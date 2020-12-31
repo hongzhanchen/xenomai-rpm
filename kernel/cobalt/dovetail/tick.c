@@ -35,6 +35,8 @@ inline void xnproxy_timer_set(unsigned long delta, ktime_t tdata)
 			delta = max_t(int64_t, delta,
 					(int64_t)real_dev->min_delta_ns);
 		}
+		//if (delta == real_dev->min_delta_ns)
+		//	delta *= 2;
 		cycles = ((u64)delta * real_dev->mult) >> real_dev->shift;
 
 		ret = real_dev->set_next_event(cycles, real_dev);
@@ -59,12 +61,12 @@ static int proxy_set_next_ktime(ktime_t expires,
 	 * will trigger an immediate shot in such an event.
 	 */
 	delta = ktime_sub(expires, ktime_get_mono_fast_ns());
+	if (delta < 0)
+		delta = 0;
 
-	//xnlock_get_irqsave(&nklock, s);
 	flags = hard_local_irq_save(); /* Prevent CPU migration. */
 	sched = xnsched_current();
 	ret = xntimer_start(&sched->htimer, delta, XN_INFINITE, XN_RELATIVE);
-	//xnlock_put_irqrestore(&nklock, s);
 	hard_local_irq_restore(flags);
 
 	return ret ? -ETIME : 0;
@@ -162,7 +164,6 @@ int pipeline_install_tick_proxy(void)
 	ret = tick_install_proxy(setup_proxy, &xnsched_realtime_cpus);
 	if (ret)
 		goto fail_proxy;
-
 
 	return 0;
 

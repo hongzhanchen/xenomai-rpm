@@ -13,20 +13,17 @@ static unsigned long long clockfreq;
 
 long long xnclock_core_ns_to_ticks(long long ns)
 {
-//chz NTD
-	return 0;
+	return ns;
 }
 
 xnsticks_t xnclock_core_ticks_to_ns_rounded(xnsticks_t ticks)
 {
-//chz NTD
-	return 0;
+	return ticks;
 }
 
 xnsticks_t xnclock_core_ticks_to_ns(xnsticks_t ticks)
 {
-//chz NTD
-	return 0;
+	return ticks;
 }
 EXPORT_SYMBOL_GPL(xnclock_core_ticks_to_ns);
 EXPORT_SYMBOL_GPL(xnclock_core_ticks_to_ns_rounded);
